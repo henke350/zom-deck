@@ -2,6 +2,7 @@ import { texts } from '../../data/texts.en'
 import type { CardId, Content, GameState } from '../../game'
 import { isFollowUpActive, modeNoise, noisePreview } from '../../game'
 import { cardText } from '../names'
+import { CardArt } from './CardArt'
 
 interface CardFaceProps {
   readonly card: CardId
@@ -33,6 +34,7 @@ export function CardFace({ card, state, content, showFollowUp = false }: CardFac
           </span>
         )}
       </div>
+      <CardArt card={card} />
       <p className="card-text">{info.text}</p>
       <p className="card-tags">
         {def?.tags.map((t) => texts.tags[t]).join(' · ')}

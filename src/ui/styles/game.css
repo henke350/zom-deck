@@ -352,6 +352,53 @@
   color: var(--amber-ink);
   white-space: nowrap;
 }
+.card-art {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  border: 1.5px solid var(--ink-2);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.card-art path,
+.card-art circle {
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.card-art .art-ground {
+  stroke: var(--line);
+}
+.card-art .art-fill,
+.card-art .art-head {
+  fill: var(--bg);
+}
+.card-art .art-lid,
+.card-art .art-glass {
+  fill: var(--amber);
+  fill-opacity: 0.35;
+  stroke: var(--amber-ink);
+}
+.card-art .art-line,
+.card-art .art-shine,
+.card-art .art-nail {
+  stroke-width: 2;
+}
+.card-art .art-handle,
+.card-art .art-bar,
+.card-art .art-body {
+  stroke-width: 5;
+}
+.card-art .art-bar {
+  stroke: var(--amber-ink);
+}
+.card-art .art-speed {
+  stroke: var(--muted);
+  stroke-width: 2.5;
+}
 .card-text {
   margin: 0.4rem 0 0;
   font-size: 0.85rem;
