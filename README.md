@@ -6,7 +6,7 @@ Al tekst i spillet er på engelsk; "One More Building" er en arbejdstitel.
 
 - **Plan og beslutninger:** [docs/plan.md](docs/plan.md)
 - **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z (privat, indtil det deles)
-- **Status:** M0 (projektopsætning) er færdig. Næste milepæl er M1: dæk og ture.
+- **Status:** M0 (projektopsætning) og M1 (regler for dæk og ture) er færdige. Næste milepæl er M2: bykort, bevægelse og første skærm.
 
 ## Sådan kører du spillet lokalt
 

@@ -5,7 +5,7 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
-- **Current milestone:** M0 done. Next: **M1 – rules core: deck and turns** (no UI).
+- **Current milestone:** M0 and M1 done. Next: **M2 – city map, movement and first screen**.
   Work one milestone at a time and meet its "done" criteria before moving on.
 
 ## Talking to the user
@@ -39,6 +39,12 @@ src/sim/   bots and balance reports (from M6), run in Node
   returned reason on disabled controls.
 - The engine accepts an optional `ExpeditionSetup` and can return an
   `ExpeditionResult`, so the version-2 campaign can be layered on later.
+- Content (cards, later locations and zombies) is plain data in `src/data/`. Engine
+  functions take an optional `content` argument so tests can use their own.
+- Effects the engine cannot resolve yet are left out of `implementedEffects` in
+  `src/game/rules.ts`; `validate` refuses them with a reason. Add an effect there
+  when its milestone implements it.
+- `src/game/testkit.ts` builds exact game states for tests (`makeState`).
 - No backend, accounts, database, API keys or LLM calls in the game.
 
 ## Checks before every push
