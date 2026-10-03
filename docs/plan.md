@@ -552,3 +552,89 @@ Regelbudget: Selv med alle ændringer skal reglerne kunne stå på én side.
 | Forsyningspakke, støj, skumring, handlingspoint | Supply pack, noise, dusk, AP |
 
 Forslag til engelsk titel: **One More Building** (navngiver spillets kernebeslutning). Ikke besluttet.
+
+---
+
+## 11. Runde 3: godt deckbuilding – research og forslag
+
+**Ønske:** Spillet skal have interessante valg, og deckbuilding skal være interessant med synergi mellem kort og en reel grund til at tynde ud i dækket ("trash").
+
+### Hvad kendetegner et godt deckbuilding-spil (research)
+
+| Princip | Eksempel fra andre spil | Hos os |
+|---|---|---|
+| Helheden er større end delene | Slay the Spire bygger løkken på synergier; i Monster Train slår 10 kort med synergi 30 løse kort | Tags + "Follow-up" |
+| Dækket er en pose, man trækker blindt fra | Hvert nyt kort fortynder de bedste kort | Skip/skrot ved søgning; Travel Light belønner et tyndt dæk |
+| Udtynding skal koste noget | Dominion: en tur brugt på at fjerne kort er en tur uden fremgang. Uden sen fortynding bliver udtynding for stærk | Hver måde har en pris; Heavy Load kan ikke fjernes |
+| Der skal være noget at fjerne | Svage startkort, sår, træthed og forbandelser (Thornwatch, Nightfall, Signs of the Sojourner) | Nerves i startdækket, Heavy Load fra pakker, Wound som variant |
+| "Brug op"-valg | Star Realms: kort fjerner sig selv for en engangsbonus | "Use up" |
+| Flere veje til sejr | Dominion: engine mod big money; klare spillestile i Slay the Spire og Monster Train | Fire spillestile; en enkel "stærke kort"-strategi skal stadig virke |
+| Presset skal stige | Clank!: dragens vrede vokser gennem spillet | Skumring, støj, Heavy Load |
+| Interessante valg | Sid Meier: ingen mulighed altid bedst; oplyst valg; ligegyldige valg koster tankekraft | Tjekliste pr. beslutning |
+| Plads til at udtrykke sig | Det sjoveste er at finde på sin egen strategi | Bots i M6 skal vise, at flere veje virker |
+
+Nærmeste slægtning er Clank! (deckbuilding, push your luck, larm, "kom levende hjem"). Vi låner ingen regler, navne eller tekst.
+
+### Egen analyse: hvornår gør skrammel ondt?
+
+Med 5 kort på hånden og 3 AP koster et dødt kort sjældent en handling; det koster valgmuligheder. Udtynding bliver først rigtig vigtig, når to bestemte kort skal mødes på samme hånd:
+
+| Dæk | Ét bestemt kort (5/N) | To bestemte kort (20/(N·(N−1))) |
+|---|---|---|
+| 8 kort | 63 % | 36 % |
+| 12 kort | 42 % | 15 % |
+| 16 kort | 31 % | 8 % |
+
+Derfor både "Follow-up"-kombinationer og Heavy Load, der gør den gratis bevægelse dyrere, mens den er på hånden.
+
+### Forslag 6–10 (afventer godkendelse)
+
+| # | Forslag | Regel |
+|---|---|---|
+| 6 | Tags og Follow-up | Tags: Quiet, Weapon, Move, Tool, Med. "Follow-up X: …" virker kun, hvis et kort med tag X allerede er spillet i denne tur. Rækkefølgen bliver et valg. |
+| 7 | Use up | Udvalgte kort har en stærkere engangseffekt; derefter fjernes kortet. |
+| 8 | Skrammelkort | Nerves ×2 i startdækket (unplayable). Hver pakke giver et Heavy Load (unplayable, kan ikke fjernes, gør den gratis bevægelse til 1 AP, mens det er på hånden). **Ændrer oplæggets "pakker fylder ikke i dækket".** Wound testes som variant (fås ved 2+ skade i én zombiefase). |
+| 9 | Fem måder at tynde ud på | Skrot ved søgning (koster fundet) · Use up (koster kortets faste værdi) · Toolbox/Painkillers (koster et fundvalg og AP) · Workshop "Dismantle" (1 AP + omvej) · Pharmacy "Patch up" (1 AP + omvej; kun Nerves/Wound). |
+| 10 | Nyt kortsæt | Startdæk: Search ×3, Crowbar ×2, Run ×2, Sneak ×1, Nerves ×2. 16 fundkort i fire spillestile (se nedenfor). |
+
+### Kortsæt (spiltekst på engelsk)
+
+| Kort | AP | Tags | Effekt | Findes i |
+|---|---|---|---|---|
+| Soft Soles | 1 | Move, Quiet | Move 1. Zombies where you arrive don't notice you this turn. | Houses |
+| Lockpick | 1 | Tool, Quiet | Search here with no noise. Follow-up Quiet: reveal +1 find. | Workshop |
+| Flashlight | 0 | Tool, Quiet | Your next search this turn reveals +1 find. Follow-up Tool: draw 1 card. | Workshop, houses |
+| Alarm Clock | 1 | Quiet | Use up: zombies here don't attack this turn and lose track of you. | Supermarket, houses |
+| Baseball Bat | 1 | Weapon | Deal 1 damage. Draw 1 card. | Houses, police |
+| Axe | 1 | Weapon | Deal 2 damage. Follow-up Weapon: +1 damage. | Workshop |
+| Pistol | 1 | Weapon | Deal 3 damage. +2 noise. | Police |
+| Molotov | 1 | Weapon | Use up: deal 2 damage to every zombie here. +2 noise. This building can't be searched again. | Workshop |
+| Kevlar Vest | 1 | – | Prevent up to 2 damage this turn. Follow-up Weapon: prevent 3 instead. | Police |
+| Running Shoes | 1 | Move | Move up to 2. Follow-up Move: draw 1 card. | Supermarket, houses |
+| Adrenaline | 0 | Move | Gain 2 AP. Lose 1 health. | Pharmacy |
+| Travel Light | 0 | Move | If you own 10 or fewer cards: gain 1 AP and draw 1 card. | Supermarket, houses |
+| Toolbox | 1 | Tool | Trash a card from your hand. Follow-up Tool: draw 1 card. | Workshop |
+| District Map | 0 | Tool | See the exact zombies in a building within 2 steps, and whether it has a pack. Use up: see all buildings. | Police, houses |
+| Bandage | 1 | Med | Heal 1. Use up: heal 3 instead. | Pharmacy, houses, supermarket |
+| Painkillers | 0 | Med | Trash a Nerves or Wound from your hand. Draw 1 card. | Pharmacy, supermarket |
+
+Erstatter fundkortene i afsnit 3.4 (First Aid, Energy Drink, Backpack, Shotgun og Binoculars udgår), hvis forslagene godkendes.
+
+**Fire spillestile:** Stille (Flashlight → Lockpick, Soft Soles, søg i fred) · Kæmper (Baseball Bat → Axe, Kevlar Vest) · Løber (Travel Light → Running Shoes, Adrenaline) · Let bagage (Toolbox, Workshop, Travel Light).
+
+**Datamodel:** `CardDef` får `tags: Tag[]`, og `Effect` får `{ kind: 'trash'; filter?: 'junk' }`. Follow-up og Use up modelleres som `modes` med betingelse (`requiresTagPlayed`) og flaget `trashAfter`. `GameState` tæller spillede tags pr. tur.
+
+### Kilder
+
+- Game Maker's Toolkit: Why Synergies are the Secret to Slay the Spire's Fun – https://amara.org/v/C3BET
+- PC Gamer: Monster Train review – https://www.pcgamer.com/monster-train-review/
+- Deck Thinning in Slay the Spire 2 – https://metabot.gg/en/slay-the-spire-2/guides/deck-thinning-and-deck-size
+- Deck Building – a Modern Card Mechanism – https://tabletopgamesblog.com/2023/05/23/deck-building-a-modern-card-mechanism-topic-discussion
+- Wikipedia: Roguelike deck-building game – https://en.wikipedia.org/wiki/Roguelike_deck-building_game
+- Dominion Strategy: The Five Fundamental Deck Types – The Engine – https://dominionstrategy.com/2013/01/23/the-five-fundamental-deck-types-the-engine/
+- Star Realms rulebook (ally and scrap abilities) – https://rulespal.com/star-realms/rulebook
+- Casual Game Revolution: Clank! review – https://casualgamerevolution.com/node/1898
+- Opinionated Gamers: First impressions of Nightfall – https://opinionatedgamers.com/2011/02/12/first-impressions-of-nightfall-aeg/
+- Innovating Junk Cards in Signs of the Sojourner – https://saturshot.substack.com/p/innovating-junk-cards-in-signs-of
+- Game Developer: Designing interesting decisions in games – https://www.gamedeveloper.com/design/designing-interesting-decisions-in-games-and-when-not-to-
+- Bugnet: How to design a deck building game – https://bugnet.io/blog/how-to-design-a-deck-building-game
