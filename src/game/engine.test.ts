@@ -68,12 +68,12 @@ describe('playing cards', () => {
     )
   })
 
-  it('refuses effects that are not built yet (zombies)', () => {
+  it('refuses combat cards when there are no zombies here', () => {
     const state = makeState({ hand: ['sneak', 'crowbar'] })
     for (const uid of ['h1', 'h2']) {
-      expect(reasonFor(state, { type: 'playCard', uid })).toBe(texts.reasons.notBuiltYet)
+      expect(reasonFor(state, { type: 'playCard', uid })).toBe(texts.reasons.noZombiesHere)
     }
-    // Crowbar's second mode (pry open) works already.
+    // Crowbar's second mode (pry open) needs no zombie.
     expect(reasonFor(state, { type: 'playCard', uid: 'h2', mode: 1 })).toBeUndefined()
   })
 

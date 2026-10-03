@@ -8,9 +8,13 @@ import {
   freeMoveCost,
   implementedEffects,
   moveStepsOf,
+  needsZombiesHere,
+  needsZombieTarget,
+  scoutRangeOf,
   trashFilterOf,
 } from './rules'
 import { checkSearchHere } from './search'
+import { zombiesAt } from './zombies'
 import type {
   Action,
   Content,
@@ -97,6 +101,26 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
     const targetDef = content.cards[target.card]
     if (!targetDef?.trashable) return no(texts.reasons.notTrashable)
     if (filter === 'junk' && targetDef.kind !== 'junk') return no(texts.reasons.trashJunkOnly)
+  }
+
+  const here = zombiesAt(state, state.player.location)
+  if ((needsZombieTarget(effects) || needsZombiesHere(effects)) && here.length === 0) {
+    return no(texts.reasons.noZombiesHere)
+  }
+  if (needsZombieTarget(effects)) {
+    const uid = action.target?.zombie
+    if (!uid) return no(texts.reasons.chooseZombie)
+    if (!here.some((z) => z.uid === uid)) return no(texts.reasons.zombieNotHere)
+  }
+
+  const scoutRange = scoutRangeOf(effects)
+  if (scoutRange !== undefined) {
+    const to = action.target?.location
+    if (!to) return no(texts.reasons.chooseBuildingToScout)
+    if (content.locations[to]?.kind !== 'building') return no(texts.reasons.notABuildingToScout)
+    if (distance(content, state.player.location, to) > scoutRange) {
+      return no(texts.reasons.tooFarToScout(scoutRange))
+    }
   }
 
   const maxSteps = moveStepsOf(effects)

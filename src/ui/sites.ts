@@ -23,15 +23,20 @@ export function siteSummary(
   const status = texts.ui.packStatus
   const pack = site.packTaken
     ? status.found
-    : searched
-      ? status.none
-      : def.alwaysHasPack
-        ? status.always
-        : status.unknown
+    : site.burned
+      ? status.burned
+      : site.scouted
+        ? texts.ui.packScouted(site.hasPack)
+        : searched
+          ? status.none
+          : def.alwaysHasPack
+            ? status.always
+            : status.unknown
   return {
     searches: texts.ui.searchesLeft(site.searchesLeft, max),
-    short:
-      site.searchesLeft > 0
+    short: site.burned
+      ? texts.ui.burnedShort
+      : site.searchesLeft > 0
         ? texts.ui.mapSearches(site.searchesLeft, max)
         : texts.ui.searchedOutShort,
     pack,

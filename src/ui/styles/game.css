@@ -443,6 +443,74 @@
   gap: 0.4rem;
 }
 
+/* Zombies and noise */
+.zdot {
+  fill: var(--red);
+}
+.zdot-alert {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.zrange,
+.zmore {
+  fill: var(--red);
+  font-size: 12px;
+  font-weight: 700;
+}
+.zombie-info {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--red);
+}
+.zombie-info.muted {
+  color: var(--muted);
+}
+.zombies {
+  margin-top: 0.6rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.5rem;
+}
+.zombies ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+.zombies li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--ink-2);
+}
+.zombies li b {
+  color: var(--red);
+}
+.preview {
+  margin: 0;
+  font-size: 0.85rem;
+  flex: 1 1 16rem;
+  text-align: right;
+}
+.preview-safe {
+  color: var(--muted);
+}
+.preview-warn {
+  color: var(--amber-ink);
+  font-weight: 600;
+}
+.preview-danger {
+  color: var(--red);
+  font-weight: 700;
+}
+.find-noise {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--amber-ink);
+}
+
 @media (max-width: 900px) {
   .board {
     grid-template-columns: minmax(0, 1fr);

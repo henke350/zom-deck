@@ -6,6 +6,7 @@ import { applyAction } from './engine'
 import { nextInt } from './rng'
 import { newGame } from './setup'
 import type { Action, GameState } from './types'
+import { previewEndTurn } from './zombies'
 
 /** A mixed deck with junk and every card the engine can already play. */
 const fuzzDeck = [
@@ -27,6 +28,13 @@ const fuzzDeck = [
   'kevlarVest',
   'runningShoes',
   'softSoles',
+  'axe',
+  'pistol',
+  'molotov',
+  'alarmClock',
+  'baseballBat',
+  'districtMap',
+  'lockpick',
 ]
 
 interface Playthrough {
@@ -47,7 +55,14 @@ function playRandomly(seed: number, check: (state: GameState) => void): Playthro
     chooser = next
     const action = options[index] as Action
     actions.push(action)
+    const preview = action.type === 'endTurn' ? previewEndTurn(state, defaultContent) : undefined
+    const hpBefore = state.player.hp
     state = applyAction(state, action).state
+    if (preview) {
+      // The end-turn preview must match what really happened.
+      expect(state.outcome?.cause === 'killed').toBe(preview.lethal)
+      if (!preview.lethal) expect(state.player.hp).toBe(hpBefore - preview.damage)
+    }
     check(state)
   }
   return { final: state, actions }
@@ -65,6 +80,14 @@ function invariants(start: number) {
       expect(site.searchesLeft).toBeLessThanOrEqual(balance.searchesPerBuilding)
     }
     expect(state.phase === 'chooseFind').toBe(state.pendingFind !== undefined)
+    expect(state.noise).toBeGreaterThanOrEqual(0)
+    expect(state.noise).toBeLessThan(balance.noiseThreshold)
+    const zombieUids = state.zombies.map((z) => z.uid)
+    expect(new Set(zombieUids).size).toBe(zombieUids.length)
+    for (const z of state.zombies) {
+      expect(z.hp).toBeGreaterThan(0)
+      expect(defaultContent.locations[z.location]?.kind).not.toBe('shelter')
+    }
     const uids = [piles.draw, piles.hand, piles.inPlay, piles.discard, piles.removed]
       .flat()
       .map((c) => c.uid)

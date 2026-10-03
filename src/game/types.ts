@@ -20,7 +20,7 @@ export type Effect =
   | { readonly kind: 'gainAp'; readonly amount: number }
   | { readonly kind: 'draw'; readonly amount: number }
   | { readonly kind: 'trashFromHand'; readonly filter: 'any' | 'junk' }
-  | { readonly kind: 'scout'; readonly scope: 'one' | 'all' }
+  | { readonly kind: 'scout'; readonly scope: 'one' | 'all'; readonly range?: number }
   | { readonly kind: 'burnBuilding' }
 
 export type EffectKind = Effect['kind']
@@ -63,6 +63,8 @@ export interface LocationDef {
   readonly lootPool?: readonly LootEntry[]
   /** This building always holds a supply pack (the Supermarket). */
   readonly alwaysHasPack?: boolean
+  /** Zombies here at the start, rolled between min and max. Shown as a range until you visit. */
+  readonly startZombies?: { readonly min: number; readonly max: number }
 }
 
 export interface LootEntry {
@@ -77,6 +79,20 @@ export interface SiteState {
   readonly hasPack: boolean
   /** A supply pack was found here this expedition. */
   readonly packTaken: boolean
+  /** District Map showed the exact zombies and whether a pack is hidden here. */
+  readonly scouted: boolean
+  /** A Molotov burned it: it can't be searched again. */
+  readonly burned: boolean
+}
+
+export interface Zombie {
+  readonly uid: string
+  readonly location: LocationId
+  readonly hp: number
+  /** It has seen the player and will follow one step. */
+  readonly alerted: boolean
+  /** Sneak, Alarm Clock or Soft Soles: it won't attack or notice you this turn. */
+  readonly neutralized: boolean
 }
 
 /** A search waiting for the player to choose. */
@@ -84,6 +100,8 @@ export interface PendingFind {
   readonly location: LocationId
   readonly options: readonly CardId[]
   readonly packFound: boolean
+  /** Noise from the search, added once the player has chosen. */
+  readonly noise: number
 }
 
 export interface Content {
@@ -148,6 +166,12 @@ export interface GameState {
   readonly pendingFind?: PendingFind
   readonly tagsPlayedThisTurn: readonly Tag[]
   readonly nextUid: number
+  readonly zombies: readonly Zombie[]
+  readonly nextZombieUid: number
+  /** The noise meter. A zombie arrives every time it reaches the balance threshold. */
+  readonly noise: number
+  /** Places the player has been this expedition (hidden danger is revealed there). */
+  readonly visited: readonly LocationId[]
   readonly outcome?: Outcome
 }
 
@@ -162,7 +186,12 @@ export interface PlayCardAction {
   readonly uid: string
   /** Index into the card's modes. Defaults to 0. */
   readonly mode?: number
-  readonly target?: { readonly trash?: string; readonly location?: LocationId }
+  readonly target?: {
+    readonly trash?: string
+    readonly location?: LocationId
+    /** uid of a zombie at your location. */
+    readonly zombie?: string
+  }
 }
 
 export interface FreeMoveAction {
@@ -240,6 +269,32 @@ export type GameEvent =
     }
   | { readonly type: 'cardScrapped'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'findDeclined' }
+  | { readonly type: 'noiseAdded'; readonly amount: number; readonly total: number }
+  | {
+      readonly type: 'zombieArrived'
+      readonly uid: string
+      readonly location: LocationId
+      readonly reason: 'noise' | 'dusk'
+    }
+  | {
+      readonly type: 'zombieFollowed'
+      readonly uid: string
+      readonly from: LocationId
+      readonly to: LocationId
+    }
+  | { readonly type: 'zombieLostTrack'; readonly uid: string }
+  | { readonly type: 'zombieAttacked'; readonly uid: string; readonly damage: number }
+  | { readonly type: 'damageBlocked'; readonly amount: number }
+  | {
+      readonly type: 'zombieHit'
+      readonly uid: string
+      readonly damage: number
+      readonly hpLeft: number
+    }
+  | { readonly type: 'zombieKilled'; readonly uid: string }
+  | { readonly type: 'zombieNeutralized'; readonly uid: string }
+  | { readonly type: 'scouted'; readonly locations: readonly LocationId[] }
+  | { readonly type: 'buildingBurned'; readonly location: LocationId }
   | { readonly type: 'apGained'; readonly amount: number }
   | { readonly type: 'healed'; readonly amount: number }
   | { readonly type: 'hpLost'; readonly amount: number }

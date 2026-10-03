@@ -6,10 +6,10 @@ export const texts = {
   title: 'One More Building',
   workingTitleNote: 'Working title',
   tagline: 'Head home with what you have, or risk one more building?',
-  statusLine: 'Prototype in progress · milestone M3 (search, finds and supply packs)',
+  statusLine: 'Prototype in progress · milestone M4 (zombies, combat and noise)',
   startExpedition: 'Start expedition',
   prototypeNote:
-    'Early prototype: walk the city, search buildings and bring supply packs home. Zombies arrive in M4.',
+    'Early prototype: search the city for supply packs, keep the noise down, and get home before dark.',
   factsHeading: 'Starting values',
   facts: {
     turns: 'turns before dark',
@@ -59,11 +59,43 @@ export const texts = {
     searchesLeft: (left: number, max: number) => `Searches left: ${left} of ${max}`,
     searchedOutShort: 'Searched out',
     mapSearches: (left: number, max: number) => `${left}/${max} searches`,
+    burnedShort: 'Burned',
+    noiseLabel: 'Noise',
+    noiseBadge: (n: number, arrivals: number) =>
+      arrivals > 0 ? `+${n} noise · zombie!` : `+${n} noise`,
+    zombiesRange: (min: number, max: number) => (min === max ? `${min}?` : `${min}–${max}?`),
+    zombiesHeading: 'Zombies here',
+    zombiesUnknown: (min: number, max: number) =>
+      `Zombies: ${min === max ? min : `${min}–${max}`} (exact number unknown until you go in)`,
+    zombiesNone: 'No zombies here.',
+    zombieLabel: (n: number) => `Zombie ${n}`,
+    zombieHealth: (hp: number, max: number) => `${hp}/${max} health`,
+    zombieSeenYou: 'has seen you',
+    zombieDistracted: 'distracted this turn',
+    target: 'Target',
+    chooseZombieTarget: 'Choose a zombie to target in the side panel.',
+    chooseOnMap: 'Choose a place on the map.',
+    packScouted: (hasPack: boolean) =>
+      hasPack ? 'Supply pack: yes (scouted)' : 'Supply pack: none here (scouted)',
+    preview: {
+      safe: 'No zombie will attack when you end the turn.',
+      attack: (n: number, damage: number, blocked: number) =>
+        `${n} zombie${n === 1 ? '' : 's'} will attack: −${damage} health${blocked > 0 ? ` (${blocked} blocked)` : ''}.`,
+      lethal: 'Ending the turn here will kill you!',
+      followers: (n: number) => `${n} zombie${n === 1 ? '' : 's'} will follow you.`,
+      dusk: (noise: number, arrivals: number) =>
+        `Dusk: +${noise} noise${arrivals > 0 ? ', and a zombie arrives' : ''}.`,
+    },
+    findNoise: (noise: number, arrivals: number) =>
+      noise === 0
+        ? 'This search was silent.'
+        : `Choosing ends the search: +${noise} noise${arrivals > 0 ? ', and a zombie arrives!' : '.'}`,
     packStatus: {
       always: 'Supply pack: always one here',
       unknown: 'Supply pack: unknown until you search',
       found: 'Supply pack: found',
       none: 'Supply pack: none here',
+      burned: 'Supply pack: lost in the fire, if there was one',
     },
     findTitle: 'Choose a find',
     findIntro: (place: string) => `You searched ${place}. Take one find, or scrap a card instead.`,
@@ -128,6 +160,21 @@ export const texts = {
     findTaken: (name: string) => `You take ${name}. It goes into your discard pile.`,
     cardScrapped: (name: string) => `You scrap ${name} for good.`,
     findDeclined: 'You leave the finds behind.',
+    noiseAdded: (amount: number) => `Noise +${amount}.`,
+    zombieArrived: (place: string, dusk: boolean) =>
+      dusk ? `Dusk falls: a zombie arrives at ${place}.` : `The noise draws a zombie to ${place}!`,
+    zombieFollowed: (place: string) => `A zombie follows you to ${place}.`,
+    zombieLostTrack: 'A zombie loses track of you.',
+    zombieAttacked: (damage: number) => `A zombie attacks you (${damage} damage).`,
+    damageBlocked: (n: number) => `You block ${n} damage.`,
+    zombieHit: (damage: number, hpLeft: number) =>
+      hpLeft > 0
+        ? `You hit a zombie for ${damage}. It has ${hpLeft} health left.`
+        : `You hit a zombie for ${damage}.`,
+    zombieKilled: 'The zombie goes down.',
+    zombieNeutralized: 'A zombie loses track of you this turn.',
+    scouted: (places: string) => `You scout ${places}.`,
+    buildingBurned: (place: string) => `${place} burns. It can't be searched again.`,
     turnEnded: (turn: number) => `Turn ${turn} ends.`,
   },
 
@@ -234,6 +281,13 @@ export const texts = {
     chooseFindFirst: 'Choose a find first: take one, scrap a card, or take nothing.',
     noFindToChoose: 'There is no find to choose right now.',
     notAFind: 'That card is not one of the finds.',
+    burned: 'This building has burned. It cannot be searched again.',
+    noZombiesHere: 'There are no zombies here.',
+    chooseZombie: 'Choose a zombie here.',
+    zombieNotHere: 'That zombie is not here.',
+    chooseBuildingToScout: 'Choose a building to scout.',
+    notABuildingToScout: 'Only buildings can be scouted.',
+    tooFarToScout: (range: number) => `Too far. You can scout buildings up to ${range} steps away.`,
     unknownLocation: 'Unknown location.',
     alreadyHere: 'You are already here.',
     notAdjacent: 'Not next to where you are. The free move is one step.',

@@ -1,6 +1,6 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
 import { defaultContent } from '../data/content'
-import type { CardId, CardInstance, GameState, LocationId, SiteState, Tag } from './types'
+import type { CardId, CardInstance, GameState, LocationId, SiteState, Tag, Zombie } from './types'
 
 /** Builds a game state with exact piles, for tests. Uids show the pile: h1 (hand), d1 (draw), x1 (discard). */
 export interface StateSpec {
@@ -22,6 +22,16 @@ export interface StateSpec {
   readonly packsAt?: readonly LocationId[]
   /** Override searches left per building. */
   readonly searchesLeft?: Readonly<Record<LocationId, number>>
+  /** Zombies, with uids z1, z2, … in this order. Default: none. */
+  readonly zombies?: readonly {
+    readonly at: LocationId
+    readonly hp?: number
+    readonly alerted?: boolean
+    readonly neutralized?: boolean
+  }[]
+  readonly noise?: number
+  /** Places already visited. Default: the shelter and the player's location. */
+  readonly visited?: readonly LocationId[]
 }
 
 function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] {
@@ -30,6 +40,14 @@ function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] 
 
 export function makeState(spec: StateSpec = {}): GameState {
   const balance = spec.balance ?? defaultBalance
+  const location = spec.location ?? 'shelter'
+  const zombies: Zombie[] = (spec.zombies ?? []).map((z, i) => ({
+    uid: `z${i + 1}`,
+    location: z.at,
+    hp: z.hp ?? balance.zombie.hp,
+    alerted: z.alerted ?? z.at === location,
+    neutralized: z.neutralized ?? false,
+  }))
   const sites: Record<LocationId, SiteState> = {}
   for (const loc of Object.values(defaultContent.locations)) {
     if (loc.kind !== 'building') continue
@@ -37,6 +55,8 @@ export function makeState(spec: StateSpec = {}): GameState {
       searchesLeft: spec.searchesLeft?.[loc.id] ?? balance.searchesPerBuilding,
       hasPack: spec.packsAt?.includes(loc.id) ?? false,
       packTaken: false,
+      scouted: false,
+      burned: false,
     }
   }
   const piles = {
@@ -53,7 +73,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     turn: spec.turn ?? 1,
     phase: 'action',
     player: {
-      location: spec.location ?? 'shelter',
+      location,
       hp: spec.hp ?? balance.maxHp,
       ap: spec.ap ?? balance.apPerTurn,
       freeMoveUsed: spec.freeMoveUsed ?? false,
@@ -63,6 +83,10 @@ export function makeState(spec: StateSpec = {}): GameState {
     },
     piles,
     sites,
+    zombies,
+    nextZombieUid: zombies.length + 1,
+    noise: spec.noise ?? 0,
+    visited: spec.visited ?? [...new Set(['shelter', location])],
     tagsPlayedThisTurn: spec.tags ?? [],
     nextUid: 1000,
   }

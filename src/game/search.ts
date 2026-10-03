@@ -2,6 +2,7 @@ import { texts } from '../data/texts.en'
 import type { Balance } from '../data/balance'
 import { withoutCard } from './deck'
 import { nextInt, shuffle } from './rng'
+import { addNoise, zombiesAt } from './zombies'
 import type {
   CardId,
   CardInstance,
@@ -36,6 +37,8 @@ export function placePacks(
       searchesLeft: balance.searchesPerBuilding,
       hasPack: withPack.has(building.id),
       packTaken: false,
+      scouted: false,
+      burned: false,
     }
   }
   return [sites, next]
@@ -48,6 +51,7 @@ export function checkSearchHere(state: GameState, content: Content): Validation 
   if (content.locations[here]?.kind !== 'building' || !site) {
     return { ok: false, reason: texts.reasons.nothingToSearch }
   }
+  if (site.burned) return { ok: false, reason: texts.reasons.burned }
   if (site.searchesLeft <= 0) return { ok: false, reason: texts.reasons.searchedOut }
   return { ok: true }
 }
@@ -80,12 +84,15 @@ interface SearchSpec {
   /** Extra finds from the card itself (Lockpick Follow-up). */
   readonly extra: number
   readonly quick: boolean
+  /** Noise added after the player has chosen. */
+  readonly noise: number
 }
 
 /**
  * Searches the current building: uses up a search, spends the search bonus,
- * reveals finds and, on the first search, hands over a hidden pack (with its
- * Heavy Load). The game then waits for the player to choose a find.
+ * adds the "search in peace" bonus when no zombies are here, reveals finds and,
+ * on the first search, hands over a hidden pack (with its Heavy Load). The game
+ * then waits for the player to choose a find; the noise comes after the choice.
  */
 export function performSearch(
   state: GameState,
@@ -98,7 +105,12 @@ export function performSearch(
   const pool = content.locations[location]?.lootPool ?? []
   if (!site) throw new Error(`performSearch: ${location} cannot be searched`)
 
-  const count = spec.base + spec.extra + state.player.searchBonus
+  const peaceful = zombiesAt(state, location).length === 0
+  const count =
+    spec.base +
+    spec.extra +
+    state.player.searchBonus +
+    (peaceful ? state.balance.peacefulSearchBonus : 0)
   const [options, rng] = drawFinds(pool, count, state.rng)
   events.push({ type: 'searched', location, options, quick: spec.quick })
 
@@ -108,7 +120,7 @@ export function performSearch(
     phase: 'chooseFind',
     player: { ...state.player, searchBonus: 0 },
     sites: { ...state.sites, [location]: { ...site, searchesLeft: site.searchesLeft - 1 } },
-    pendingFind: { location, options, packFound: site.hasPack },
+    pendingFind: { location, options, packFound: site.hasPack, noise: spec.noise },
   }
 
   if (site.hasPack) {
@@ -118,7 +130,12 @@ export function performSearch(
       player: { ...next.player, packs },
       sites: {
         ...next.sites,
-        [location]: { searchesLeft: site.searchesLeft - 1, hasPack: false, packTaken: true },
+        [location]: {
+          ...site,
+          searchesLeft: site.searchesLeft - 1,
+          hasPack: false,
+          packTaken: true,
+        },
       },
     }
     events.push({ type: 'packFound', location, packs })
@@ -145,12 +162,14 @@ export function gainCard(
   }
 }
 
-/** Ends the find choice: take a find, scrap a card from hand, or take nothing. */
+/** Ends the find choice: take a find, scrap a card from hand, or take nothing. Then the search makes its noise. */
 export function chooseFind(
   state: GameState,
   choice: { take: CardId } | { scrap: string } | 'decline',
+  content: Content,
   events: GameEvent[],
 ): GameState {
+  const noise = state.pendingFind?.noise ?? 0
   let next: GameState = { ...state, phase: 'action', pendingFind: undefined }
   if (choice === 'decline') {
     events.push({ type: 'findDeclined' })
@@ -169,5 +188,5 @@ export function chooseFind(
       },
     }
   }
-  return next
+  return addNoise(next, noise, content, 'noise', events)
 }

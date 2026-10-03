@@ -6,7 +6,7 @@ Al tekst i spillet er på engelsk; "One More Building" er en arbejdstitel.
 
 - **Plan og beslutninger:** [docs/plan.md](docs/plan.md)
 - **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z (privat, indtil det deles)
-- **Status:** M0–M3 er færdige. Du kan gennemsøge bygninger, bygge dit dæk, finde forsyningspakker og vinde ved at komme hjem. Næste milepæl er M4: zombier, kamp og støj.
+- **Status:** M0–M4 er færdige. Byen har nu zombier, støj og kamp. Næste milepæl er M5: den første hele ekspedition med slutskærm og regelskærm.
 
 ## Sådan kører du spillet lokalt
 
@@ -17,7 +17,7 @@ npm install      # henter værktøjer og biblioteker (kun første gang)
 npm run dev      # starter spillet på http://localhost:5173
 ```
 
-## Sådan prøver du spillet (M3)
+## Sådan prøver du spillet (M4)
 
 1. Klik **Start expedition**.
 2. Klik på et af de stiplede nabosteder på kortet for at gå dertil gratis (én gang pr. tur).
@@ -26,7 +26,10 @@ npm run dev      # starter spillet på http://localhost:5173
 5. Stå i en bygning og spil **Search**, eller brug **Quick search** i sidepanelet (2 AP, ingen kort). Vælg ét fund, skrot et kort fra hånden, eller tag ingenting.
 6. Supermarket har altid en forsyningspakke; tre andre ligger tilfældigt. Hver pakke lægger et Heavy Load i dit dæk.
 7. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★).
-8. Grå knapper viser, hvorfor de ikke kan bruges endnu. Zombier og støj kommer i M4.
+8. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger ét skridt efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol).
+9. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
+10. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
+11. Grå knapper viser altid, hvorfor de ikke kan bruges.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 

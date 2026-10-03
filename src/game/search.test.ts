@@ -88,7 +88,10 @@ describe('searching', () => {
     const result = applyAction(atWorkshop(), { type: 'playCard', uid: 'h1' })
     const { state } = result
     expect(state.phase).toBe('chooseFind')
-    expect(state.pendingFind?.options).toHaveLength(balance.searchOptions)
+    // No zombies here, so the search is "in peace": +1 find.
+    expect(state.pendingFind?.options).toHaveLength(
+      balance.searchOptions + balance.peacefulSearchBonus,
+    )
     expect(state.sites.workshop?.searchesLeft).toBe(balance.searchesPerBuilding - 1)
     expect(state.player.ap).toBe(balance.apPerTurn - 1)
     expect(result.events).toContainEqual(
@@ -130,7 +133,9 @@ describe('searching', () => {
   it('Lockpick reveals one more as a Follow-up to a Quiet card', () => {
     let state = makeState({ location: 'workshop', hand: ['sneak', 'lockpick'], tags: ['quiet'] })
     state = play(state, { type: 'playCard', uid: 'h2' })
-    expect(state.pendingFind?.options).toHaveLength(balance.searchOptions + 1)
+    expect(state.pendingFind?.options).toHaveLength(
+      balance.searchOptions + 1 + balance.peacefulSearchBonus,
+    )
   })
 
   it('shows fewer finds when the pool runs out', () => {
@@ -150,7 +155,9 @@ describe('quick search', () => {
   it('costs 2 AP, needs no card and shows 2 finds', () => {
     const state = play(makeState({ location: 'pharmacy' }), { type: 'quickSearch' })
     expect(state.player.ap).toBe(balance.apPerTurn - balance.quickSearch.cost)
-    expect(state.pendingFind?.options).toHaveLength(balance.quickSearch.options)
+    expect(state.pendingFind?.options).toHaveLength(
+      balance.quickSearch.options + balance.peacefulSearchBonus,
+    )
     expect(state.sites.pharmacy?.searchesLeft).toBe(balance.searchesPerBuilding - 1)
   })
 
@@ -200,7 +207,10 @@ describe('choosing a find', () => {
   it('can take nothing', () => {
     const state = searched()
     const next = applyAction(state, { type: 'declineFind' })
-    expect(next.events).toEqual([{ type: 'findDeclined' }])
+    expect(next.events).toEqual([
+      { type: 'findDeclined' },
+      { type: 'noiseAdded', amount: balance.searchNoise, total: balance.searchNoise },
+    ])
     expect(ownedCount(next.state.piles)).toBe(ownedCount(state.piles))
   })
 

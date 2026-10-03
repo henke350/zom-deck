@@ -1,8 +1,16 @@
 import { defaultContent } from '../data/content'
 import { drawCards, withoutCard } from './deck'
-import { activeEffects, freeMoveCost, isFollowUpActive, starsFor } from './rules'
+import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
 import { chooseFind, performSearch } from './search'
 import { validate } from './validate'
+import {
+  addNoise,
+  damageZombies,
+  neutralizeZombies,
+  noticeHere,
+  zombiePhase,
+  zombiesAt,
+} from './zombies'
 import type {
   Action,
   Content,
@@ -38,22 +46,17 @@ export function applyAction(
     case 'quickSearch': {
       const { cost, options } = state.balance.quickSearch
       const paid = { ...state, player: { ...state.player, ap: state.player.ap - cost } }
-      const searched = performSearch(
-        paid,
-        content,
-        { base: options, extra: 0, quick: true },
-        events,
-      )
-      return { state: searched, events }
+      const spec = { base: options, extra: 0, quick: true, noise: state.balance.searchNoise }
+      return { state: performSearch(paid, content, spec, events), events }
     }
     case 'takeFind':
-      return { state: chooseFind(state, { take: action.card }, events), events }
+      return { state: chooseFind(state, { take: action.card }, content, events), events }
     case 'scrapCard':
-      return { state: chooseFind(state, { scrap: action.uid }, events), events }
+      return { state: chooseFind(state, { scrap: action.uid }, content, events), events }
     case 'declineFind':
-      return { state: chooseFind(state, 'decline', events), events }
+      return { state: chooseFind(state, 'decline', content, events), events }
     case 'endTurn':
-      return { state: endTurn(state, action, events), events }
+      return { state: endTurn(state, action, content, events), events }
   }
 }
 
@@ -68,7 +71,8 @@ export function startTurn(state: GameState, events: GameEvent[]): GameState {
     player: { ...state.player, ap: state.balance.apPerTurn, freeMoveUsed: false },
     tagsPlayedThisTurn: [],
   }
-  return drawCards(started, state.balance.handSize - started.piles.hand.length, events)
+  const drawn = drawCards(started, state.balance.handSize - started.piles.hand.length, events)
+  return noticeHere(drawn)
 }
 
 function playCard(
@@ -85,6 +89,7 @@ function playCard(
 
   const followUp = isFollowUpActive(state, mode)
   const effects = activeEffects(state, mode)
+  const noise = modeNoise(state, mode)
   const usedUp = mode.useUp === true
 
   // Pay, then move the card out of the hand before its effects run, so a
@@ -115,7 +120,13 @@ function playCard(
   }
 
   const tags = new Set([...next.tagsPlayedThisTurn, ...def.tags])
-  return { ...next, tagsPlayedThisTurn: [...tags] }
+  next = { ...next, tagsPlayedThisTurn: [...tags] }
+
+  // Noise comes last. A search makes its noise after the player has chosen a find.
+  if (next.phase === 'chooseFind' && next.pendingFind) {
+    return { ...next, pendingFind: { ...next.pendingFind, noise } }
+  }
+  return addNoise(next, noise, content, 'noise', events)
 }
 
 function resolveEffect(
@@ -127,6 +138,7 @@ function resolveEffect(
   events: GameEvent[],
 ): GameState {
   const { player, piles } = state
+  const here = player.location
   switch (effect.kind) {
     case 'gainAp':
       events.push({ type: 'apGained', amount: effect.amount })
@@ -164,17 +176,48 @@ function resolveEffect(
       return performSearch(
         state,
         content,
-        { base: state.balance.searchOptions, extra: effect.bonus ?? 0, quick: false },
+        { base: state.balance.searchOptions, extra: effect.bonus ?? 0, quick: false, noise: 0 },
         events,
       )
     case 'move': {
       const to = action.target?.location
       if (!to) throw new Error('move: validated destination is missing')
-      // `unnoticed` (Soft Soles) is applied by the zombie rules when zombies arrive in M4.
-      return arrive(state, to, card, 0, content, events)
+      return arrive(state, to, card, 0, content, events, effect.unnoticed === true)
     }
-    default:
-      throw new Error(`Effect "${effect.kind}" is not implemented yet`)
+    case 'damage': {
+      const targets =
+        effect.target === 'one'
+          ? [action.target?.zombie ?? '']
+          : zombiesAt(state, here).map((z) => z.uid)
+      return damageZombies(state, targets, effect.amount, events)
+    }
+    case 'neutralize': {
+      const targets =
+        effect.target === 'one'
+          ? [action.target?.zombie ?? '']
+          : zombiesAt(state, here).map((z) => z.uid)
+      return neutralizeZombies(state, targets, events)
+    }
+    case 'scout': {
+      const locations =
+        effect.scope === 'one' ? [action.target?.location ?? ''] : Object.keys(state.sites)
+      const sites = { ...state.sites }
+      for (const id of locations) {
+        const site = sites[id]
+        if (site) sites[id] = { ...site, scouted: true }
+      }
+      events.push({ type: 'scouted', locations })
+      return { ...state, sites }
+    }
+    case 'burnBuilding': {
+      const site = state.sites[here]
+      if (!site) return state
+      events.push({ type: 'buildingBurned', location: here })
+      return {
+        ...state,
+        sites: { ...state.sites, [here]: { ...site, searchesLeft: 0, burned: true } },
+      }
+    }
   }
 }
 
@@ -192,7 +235,10 @@ function freeMove(
   return arrive(paid, action.to, 'free', cost, content, events)
 }
 
-/** Moves the player. Entering the shelter with enough packs wins at once. */
+/**
+ * Moves the player. Entering the shelter with enough packs wins at once.
+ * Otherwise zombies there notice you, unless you arrive unnoticed (Soft Soles).
+ */
 function arrive(
   state: GameState,
   to: LocationId,
@@ -200,33 +246,55 @@ function arrive(
   apCost: number,
   content: Content,
   events: GameEvent[],
+  unnoticed = false,
 ): GameState {
   events.push({ type: 'moved', from: state.player.location, to, by, apCost })
-  const moved: GameState = { ...state, player: { ...state.player, location: to } }
+  let moved: GameState = {
+    ...state,
+    player: { ...state.player, location: to },
+    visited: state.visited.includes(to) ? state.visited : [...state.visited, to],
+  }
   const atShelter = content.locations[to]?.kind === 'shelter'
   if (atShelter && moved.player.packs >= state.balance.packsToWin) {
     const stars = starsFor(moved, moved.player.packs)
     return gameOver(moved, { result: 'won', cause: 'home', stars }, events)
   }
-  return moved
+  if (unnoticed) {
+    const there = zombiesAt(moved, to).map((z) => z.uid)
+    moved = neutralizeZombies(moved, there, events)
+  }
+  return noticeHere(moved)
 }
 
-function endTurn(state: GameState, action: EndTurnAction, events: GameEvent[]): GameState {
+function endTurn(
+  state: GameState,
+  action: EndTurnAction,
+  content: Content,
+  events: GameEvent[],
+): GameState {
+  // Zombies first: they follow, then attack. Then dusk noise may bring more.
+  let next = zombiePhase(state, content, events)
+  if (next.player.hp <= 0) return gameOver(next, { result: 'lost', cause: 'killed' }, events)
+  if (state.turn >= state.balance.duskFromTurn) {
+    next = addNoise(next, state.balance.duskNoise, content, 'dusk', events)
+  }
+
   const keep = new Set(action.keep ?? [])
-  const kept = state.piles.hand.filter((c) => keep.has(c.uid))
-  const discarded = state.piles.hand.filter((c) => !keep.has(c.uid))
+  const kept = next.piles.hand.filter((c) => keep.has(c.uid))
+  const discarded = next.piles.hand.filter((c) => !keep.has(c.uid))
   if (kept.length > 0) events.push({ type: 'cardsKept', uids: kept.map((c) => c.uid) })
 
   const cleaned: GameState = {
-    ...state,
-    player: { ...state.player, searchBonus: 0, block: 0 },
+    ...next,
+    player: { ...next.player, searchBonus: 0, block: 0 },
     piles: {
-      ...state.piles,
+      ...next.piles,
       hand: kept,
       inPlay: [],
-      discard: [...state.piles.discard, ...discarded, ...state.piles.inPlay],
+      discard: [...next.piles.discard, ...discarded, ...next.piles.inPlay],
     },
     tagsPlayedThisTurn: [],
+    zombies: next.zombies.map((z) => (z.neutralized ? { ...z, neutralized: false } : z)),
   }
   events.push({ type: 'turnEnded', turn: state.turn })
 

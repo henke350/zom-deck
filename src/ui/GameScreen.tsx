@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
-import { cardOptions, freeMoveTargets, validate } from '../game'
+import { cardOptions, freeMoveTargets, previewEndTurn, validate } from '../game'
 import type { Action, ExpeditionSetup, LocationId, ModeOption, Validation } from '../game'
 import { CityMap } from './components/CityMap'
 import { EventLog } from './components/EventLog'
@@ -10,6 +10,7 @@ import { GameOverPanel } from './components/GameOverPanel'
 import { Hand, type PendingPlay } from './components/Hand'
 import { LocationPanel } from './components/LocationPanel'
 import { TopBar } from './components/TopBar'
+import { EndTurnPreview } from './components/EndTurnPreview'
 import { cardText } from './names'
 import { useGame } from './useGame'
 
@@ -62,7 +63,9 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
 
   const onPlay = (uid: string, option: ModeOption) => {
     const [only] = option.actions
-    if (option.target === undefined && only) {
+    // No choice needed, or only one zombie to hit: play it straight away.
+    const single = option.target === 'zombie' && option.actions.length === 1
+    if ((option.target === undefined || single) && only) {
       if (keepUid === uid) setKeepUid(null)
       act(only)
       return
@@ -83,7 +86,15 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
     setKeepUid(null)
   }
 
-  const shown = hovered ?? selected ?? state.player.location
+  const shown =
+    pending?.kind === 'zombie'
+      ? state.player.location
+      : (hovered ?? selected ?? state.player.location)
+  const zombieTargets =
+    pending?.kind === 'zombie'
+      ? new Map(pending.options.actions.map((a) => [a.target?.zombie ?? '', a as Action]))
+      : null
+  const preview = state.phase === 'action' ? previewEndTurn(state, content) : null
   const moveCheck = moveCheckFor(shown)
 
   function moveCheckFor(id: LocationId): Validation | null {
@@ -126,6 +137,8 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
             moveCheck={moveCheck}
             quickSearch={validate(state, { type: 'quickSearch' }, content)}
             onQuickSearch={() => act({ type: 'quickSearch' })}
+            zombieTargets={zombieTargets}
+            onTarget={act}
           />
           <EventLog entries={log} />
         </aside>
@@ -136,9 +149,13 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
           {pending ? (
             <p className="prompt" role="status">
               <b>{pendingName}:</b>{' '}
-              {pending.kind === 'location'
-                ? texts.ui.chooseDestination
-                : texts.ui.chooseTrashTarget}{' '}
+              {
+                {
+                  location: texts.ui.chooseOnMap,
+                  trash: texts.ui.chooseTrashTarget,
+                  zombie: texts.ui.chooseZombieTarget,
+                }[pending.kind]
+              }{' '}
               <button type="button" className="btn btn-quiet" onClick={() => setPending(null)}>
                 {texts.ui.cancel}
               </button>
@@ -146,9 +163,11 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
           ) : (
             <p className="prompt muted">{texts.ui.keepHint(state.balance.keepCards)}</p>
           )}
+          {preview && <EndTurnPreview preview={preview} />}
           <button
             type="button"
             className="btn btn-primary"
+            aria-describedby="end-turn-preview"
             disabled={pending !== null || !validate(state, { type: 'endTurn' }, content).ok}
             onClick={endTurn}
           >

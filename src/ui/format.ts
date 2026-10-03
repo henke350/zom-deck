@@ -32,6 +32,28 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.cardScrapped(cardText(event.card).name)
     case 'findDeclined':
       return log.findDeclined
+    case 'noiseAdded':
+      return log.noiseAdded(event.amount)
+    case 'zombieArrived':
+      return log.zombieArrived(locationText(event.location).name, event.reason === 'dusk')
+    case 'zombieFollowed':
+      return log.zombieFollowed(locationText(event.to).name)
+    case 'zombieLostTrack':
+      return log.zombieLostTrack
+    case 'zombieAttacked':
+      return log.zombieAttacked(event.damage)
+    case 'damageBlocked':
+      return log.damageBlocked(event.amount)
+    case 'zombieHit':
+      return log.zombieHit(event.damage, event.hpLeft)
+    case 'zombieKilled':
+      return log.zombieKilled
+    case 'zombieNeutralized':
+      return log.zombieNeutralized
+    case 'scouted':
+      return log.scouted(event.locations.map((id) => locationText(id).name).join(', '))
+    case 'buildingBurned':
+      return log.buildingBurned(locationText(event.location).name)
     case 'apGained':
       return log.apGained(event.amount)
     case 'healed':

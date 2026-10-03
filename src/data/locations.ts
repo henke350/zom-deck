@@ -21,6 +21,7 @@ export const locations = {
     id: 'workshop',
     kind: 'building',
     mapPos: { x: 120, y: 70 },
+    startZombies: { min: 0, max: 1 },
     lootPool: [
       { card: 'toolbox', weight: 3 },
       { card: 'axe', weight: 3 },
@@ -33,6 +34,7 @@ export const locations = {
     id: 'police',
     kind: 'building',
     mapPos: { x: 520, y: 70 },
+    startZombies: { min: 2, max: 3 },
     lootPool: [
       { card: 'pistol', weight: 3 },
       { card: 'kevlarVest', weight: 3 },
@@ -41,12 +43,19 @@ export const locations = {
       { card: 'flashlight', weight: 1 },
     ],
   },
-  houseA: { id: 'houseA', kind: 'building', mapPos: { x: 120, y: 200 }, lootPool: houseLoot },
+  houseA: {
+    id: 'houseA',
+    kind: 'building',
+    mapPos: { x: 120, y: 200 },
+    startZombies: { min: 0, max: 1 },
+    lootPool: houseLoot,
+  },
   street: { id: 'street', kind: 'street', mapPos: { x: 320, y: 200 } },
   supermarket: {
     id: 'supermarket',
     kind: 'building',
     mapPos: { x: 520, y: 200 },
+    startZombies: { min: 1, max: 1 },
     alwaysHasPack: true,
     lootPool: [
       { card: 'runningShoes', weight: 2 },
@@ -61,6 +70,7 @@ export const locations = {
     id: 'pharmacy',
     kind: 'building',
     mapPos: { x: 320, y: 330 },
+    startZombies: { min: 1, max: 2 },
     lootPool: [
       { card: 'bandage', weight: 3 },
       { card: 'painkillers', weight: 3 },
@@ -69,7 +79,13 @@ export const locations = {
       { card: 'alarmClock', weight: 1 },
     ],
   },
-  houseB: { id: 'houseB', kind: 'building', mapPos: { x: 520, y: 330 }, lootPool: houseLoot },
+  houseB: {
+    id: 'houseB',
+    kind: 'building',
+    mapPos: { x: 520, y: 330 },
+    startZombies: { min: 0, max: 1 },
+    lootPool: houseLoot,
+  },
 } as const satisfies Record<string, LocationDef>
 
 export type KnownLocationId = keyof typeof locations

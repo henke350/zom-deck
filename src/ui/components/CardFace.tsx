@@ -1,6 +1,6 @@
 import { texts } from '../../data/texts.en'
 import type { CardId, Content, GameState } from '../../game'
-import { isFollowUpActive, modeNoise } from '../../game'
+import { isFollowUpActive, modeNoise, noisePreview } from '../../game'
 import { cardText } from '../names'
 
 interface CardFaceProps {
@@ -27,7 +27,11 @@ export function CardFace({ card, state, content, showFollowUp = false }: CardFac
           {def?.kind === 'junk' ? '–' : (def?.cost ?? 0)}
         </span>
         <h3>{info.name}</h3>
-        {noise > 0 && <span className="noise">{texts.ui.noise(noise)}</span>}
+        {noise > 0 && (
+          <span className="noise">
+            {texts.ui.noiseBadge(noise, noisePreview(state, noise).arrivals)}
+          </span>
+        )}
       </div>
       <p className="card-text">{info.text}</p>
       <p className="card-tags">

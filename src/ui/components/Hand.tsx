@@ -6,7 +6,7 @@ import { CardFace } from './CardFace'
 export interface PendingPlay {
   readonly uid: string
   readonly mode: number
-  readonly kind: 'location' | 'trash'
+  readonly kind: 'location' | 'trash' | 'zombie'
   readonly options: ModeOption
 }
 

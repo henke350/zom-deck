@@ -32,6 +32,11 @@ export function TopBar({ state }: { state: GameState }) {
       />
       <Stat label={ui.ap} value={`${player.ap}/${balance.apPerTurn}`} />
       <Stat
+        label={ui.noiseLabel}
+        value={`${state.noise}/${balance.noiseThreshold}`}
+        tone={state.noise >= balance.noiseThreshold - 1 ? 'warn' : undefined}
+      />
+      <Stat
         label={dusk ? `${ui.turn} · ${ui.dusk}` : ui.turn}
         value={`${turn}/${balance.turnLimit}`}
         tone={dusk ? 'warn' : undefined}

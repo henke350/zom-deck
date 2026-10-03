@@ -3,6 +3,7 @@ import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
 import { normalizeSeed, shuffle } from './rng'
 import { placePacks } from './search'
+import { setupZombies } from './zombies'
 import type { CardId, CardInstance, Content, ExpeditionSetup, GameEvent, GameState } from './types'
 
 export interface NewGameOptions {
@@ -34,7 +35,8 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   const instances: CardInstance[] = deckIds.map((card, i) => ({ uid: `c${i + 1}`, card }))
   const normalized = normalizeSeed(seed)
   const [draw, afterDeck] = shuffle(instances, normalized)
-  const [sites, rng] = placePacks(content, balance, afterDeck)
+  const [sites, afterPacks] = placePacks(content, balance, afterDeck)
+  const [zombies, nextZombieUid, rng] = setupZombies(content, balance, afterPacks)
 
   const initial: GameState = {
     seed: normalized,
@@ -55,6 +57,10 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     sites,
     tagsPlayedThisTurn: [],
     nextUid: instances.length + 1,
+    zombies,
+    nextZombieUid,
+    noise: 0,
+    visited: [content.startLocation],
   }
   const events: GameEvent[] = []
   return startTurn(initial, events)

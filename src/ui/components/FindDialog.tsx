@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Action, Content, GameState, PendingFind } from '../../game'
-import { validate } from '../../game'
+import { noisePreview, validate } from '../../game'
 import { cardText, locationText } from '../names'
 import { CardFace } from './CardFace'
 
@@ -78,6 +78,10 @@ export function FindDialog({ state, content, find, onChoose }: FindDialogProps) 
             </div>
           </section>
         )}
+
+        <p className="find-noise">
+          {ui.findNoise(find.noise, noisePreview(state, find.noise).arrivals)}
+        </p>
 
         <div className="dialog-actions">
           <button

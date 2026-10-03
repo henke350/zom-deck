@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Content, GameState, LocationId } from '../../game'
+import { zombieInfo, zombiesAt } from '../../game'
 import { locationText } from '../names'
 import { siteSummary } from '../sites'
 
@@ -15,7 +16,52 @@ interface CityMapProps {
 }
 
 const NODE_W = 128
-const NODE_H = 50
+const NODE_H = 58
+const MAX_DOTS = 5
+
+/** Red dots for known zombies (ringed when they have seen you), or the range if unknown. */
+function ZombieMarks({
+  state,
+  content,
+  id,
+}: {
+  state: GameState
+  content: Content
+  id: LocationId
+}) {
+  const pos = content.locations[id]?.mapPos
+  if (!pos) return null
+  const info = zombieInfo(state, content, id)
+  const y = pos.y + 20
+  if (!info.known) {
+    return (
+      <text className="zrange" x={pos.x} y={y + 4} textAnchor="middle">
+        {texts.ui.zombiesRange(info.min, info.max)}
+      </text>
+    )
+  }
+  const zombies = zombiesAt(state, id)
+  const shown = zombies.slice(0, MAX_DOTS)
+  const startX = pos.x - ((shown.length - 1) * 11) / 2
+  return (
+    <g>
+      {shown.map((z, i) => (
+        <circle
+          key={z.uid}
+          className={z.alerted ? 'zdot zdot-alert' : 'zdot'}
+          cx={startX + i * 11}
+          cy={y}
+          r={4.5}
+        />
+      ))}
+      {zombies.length > MAX_DOTS && (
+        <text className="zmore" x={startX + MAX_DOTS * 11} y={y + 4}>
+          +{zombies.length - MAX_DOTS}
+        </text>
+      )}
+    </g>
+  )
+}
 
 export function CityMap({
   state,
@@ -81,10 +127,11 @@ export function CityMap({
               onBlur={() => onFocusLocation(null)}
             >
               <rect x={x - NODE_W / 2} y={y - NODE_H / 2} width={NODE_W} height={NODE_H} rx={6} />
-              <text className="node-name" x={x} y={y - 2} textAnchor="middle">
+              <text className="node-name" x={x} y={y - 8} textAnchor="middle">
                 {name}
               </text>
-              <text className="node-kind" x={x} y={y + 15} textAnchor="middle">
+              <ZombieMarks state={state} content={content} id={loc.id} />
+              <text className="node-kind" x={x} y={y + 8} textAnchor="middle">
                 {siteSummary(state, content, loc.id)?.short ?? texts.locationKinds[loc.kind]}
               </text>
             </g>

@@ -1,16 +1,18 @@
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
-import { activeEffects, moveStepsOf, trashFilterOf } from './rules'
+import { activeEffects, moveStepsOf, needsZombieTarget, scoutRangeOf, trashFilterOf } from './rules'
+import { zombiesAt } from './zombies'
 import { validate } from './validate'
 import type { Action, CardMode, Content, GameState, LocationId, PlayCardAction } from './types'
 
 /** What a card mode needs the player to pick before it can be played. */
-export type TargetKind = 'location' | 'trash' | undefined
+export type TargetKind = 'location' | 'trash' | 'zombie' | undefined
 
 export function targetKindOf(state: GameState, mode: CardMode): TargetKind {
   const effects = activeEffects(state, mode)
   if (trashFilterOf(effects)) return 'trash'
-  if (moveStepsOf(effects) !== undefined) return 'location'
+  if (needsZombieTarget(effects)) return 'zombie'
+  if (moveStepsOf(effects) !== undefined || scoutRangeOf(effects) !== undefined) return 'location'
   return undefined
 }
 
@@ -30,6 +32,11 @@ function candidatesFor(
         .map((target) => ({ ...base, target: { trash: target.uid } }))
     case 'location':
       return Object.keys(content.locations).map((location) => ({ ...base, target: { location } }))
+    case 'zombie':
+      return zombiesAt(state, state.player.location).map((z) => ({
+        ...base,
+        target: { zombie: z.uid },
+      }))
     default:
       return [base]
   }

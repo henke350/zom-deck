@@ -1,7 +1,7 @@
 import { ownedCount } from './deck'
 import type { CardDef, CardMode, Content, Effect, EffectKind, GameState } from './types'
 
-/** Effects the engine can resolve so far. Zombie effects arrive in M4. */
+/** Effects the engine can resolve. A card with any other effect is refused with a reason. */
 export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'gainAp',
   'draw',
@@ -12,6 +12,10 @@ export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'block',
   'move',
   'search',
+  'damage',
+  'neutralize',
+  'scout',
+  'burnBuilding',
 ])
 
 export function isFollowUpActive(state: GameState, mode: CardMode): boolean {
@@ -34,6 +38,26 @@ export function conditionMet(state: GameState, def: CardDef): boolean {
 export function trashFilterOf(effects: readonly Effect[]): 'any' | 'junk' | undefined {
   for (const effect of effects) {
     if (effect.kind === 'trashFromHand') return effect.filter
+  }
+  return undefined
+}
+
+/** True if the effects need the player to pick one zombie at their location. */
+export function needsZombieTarget(effects: readonly Effect[]): boolean {
+  return effects.some((e) => (e.kind === 'damage' || e.kind === 'neutralize') && e.target === 'one')
+}
+
+/** True if the effects only make sense with at least one zombie at the player's location. */
+export function needsZombiesHere(effects: readonly Effect[]): boolean {
+  return effects.some(
+    (e) => (e.kind === 'damage' || e.kind === 'neutralize') && e.target === 'allHere',
+  )
+}
+
+/** Range of a single-building scout effect, or undefined if the effects don't scout one building. */
+export function scoutRangeOf(effects: readonly Effect[]): number | undefined {
+  for (const effect of effects) {
+    if (effect.kind === 'scout' && effect.scope === 'one') return effect.range ?? 0
   }
   return undefined
 }

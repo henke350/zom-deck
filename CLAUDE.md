@@ -5,7 +5,7 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
-- **Current milestone:** M0–M3 done. Next: **M4 – zombies, combat and noise**.
+- **Current milestone:** M0–M4 done. Next: **M5 – first complete expedition** (end screen with explanation, rules screen, `ExpeditionResult`).
   Work one milestone at a time and meet its "done" criteria before moving on.
 
 ## Talking to the user
@@ -48,6 +48,9 @@ src/sim/   bots and balance reports (from M6), run in Node
 - Search lives in `src/game/search.ts`: pack placement, weighted finds, the
   `chooseFind` phase (take / scrap / decline). A search is always the last effect
   of a card mode, because the game then waits for the player.
+- Zombies live in `src/game/zombies.ts`: start zombies, noticing, noise and arrivals,
+  the zombie phase (follow → attack), `previewEndTurn` and `zombieInfo` (hidden
+  danger). Previews must reuse the real rules, never re-implement them.
 - UI: `src/ui/GameScreen.tsx` composes `src/ui/components/*`; `useGame` holds the
   engine state and a readable log. The UI gets choices and reasons from
   `cardOptions`, `freeMoveTargets` and `validate`, never from its own rules.

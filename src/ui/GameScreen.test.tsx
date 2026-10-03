@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
-import { newGame } from '../game'
+import { newGame, zombiesAt } from '../game'
 import { GameScreen } from './GameScreen'
 
 afterEach(cleanup)
@@ -51,7 +51,7 @@ describe('GameScreen', () => {
   it('plays Run by picking a destination on the map', async () => {
     const { card, node, log, user } = renderGame()
     await user.click(card('run').getByRole('button', { name: texts.ui.play }))
-    expect(screen.getByRole('status').textContent).toContain(texts.ui.chooseDestination)
+    expect(screen.getByRole('status').textContent).toContain(texts.ui.chooseOnMap)
     await user.click(node('House A'))
     expect(log().getByText(texts.log.moved('House A', 'Run', 0))).toBeTruthy()
     expect(screen.getByText(`${balance.apPerTurn - 1}/${balance.apPerTurn}`)).toBeTruthy()
@@ -96,21 +96,24 @@ describe('GameScreen: searching', () => {
   const takeFindButton = new RegExp(`^${texts.ui.take} (?!nothing)`)
   const deck = ['search', 'search', 'nerves', 'bandage', 'run']
 
-  /** First seed where House A hides a supply pack (or does not). */
-  function seedWhere(houseAHasPack: boolean) {
+  /** First seed where House A has (or lacks) a pack and holds this many zombies. */
+  function seedWhere(houseAHasPack: boolean, zombies: number, startDeck: string[]) {
     for (let seed = 1; seed < 500; seed++) {
-      if (newGame(seed, { setup: { startDeck: deck } }).sites.houseA?.hasPack === houseAHasPack) {
+      const game = newGame(seed, { setup: { startDeck } })
+      if (
+        game.sites.houseA?.hasPack === houseAHasPack &&
+        zombiesAt(game, 'houseA').length === zombies
+      ) {
         return seed
       }
     }
     throw new Error('no matching seed')
   }
 
-  function renderAt(houseAHasPack: boolean) {
+  function renderAt(houseAHasPack: boolean, zombies = 0, startDeck = deck) {
     const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
-    const view = render(
-      <GameScreen seed={seedWhere(houseAHasPack)} setup={{ startDeck: deck }} {...handlers} />,
-    )
+    const seed = seedWhere(houseAHasPack, zombies, startDeck)
+    const view = render(<GameScreen seed={seed} setup={{ startDeck }} {...handlers} />)
     const log = () => within(screen.getByRole('region', { name: texts.ui.log }))
     const houseA = () => screen.getByRole('button', { name: /^House A/ })
     return { view, log, houseA, user: userEvent.setup() }
@@ -123,7 +126,8 @@ describe('GameScreen: searching', () => {
     await user.click(within(searchCard!).getByRole('button', { name: texts.ui.play }))
     const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
     const takes = within(dialog).getAllByRole('button', { name: takeFindButton })
-    expect(takes).toHaveLength(3)
+    // No zombies in House A, so the search is "in peace": +1 find.
+    expect(takes).toHaveLength(balance.searchOptions + balance.peacefulSearchBonus)
     await user.click(takes[0]!)
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(log().getByText(/^You take .+ It goes into your discard pile\.$/)).toBeTruthy()
@@ -135,7 +139,9 @@ describe('GameScreen: searching', () => {
     await user.click(houseA())
     await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
     const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
-    expect(within(dialog).getAllByRole('button', { name: takeFindButton })).toHaveLength(2)
+    expect(within(dialog).getAllByRole('button', { name: takeFindButton })).toHaveLength(
+      balance.quickSearch.options + balance.peacefulSearchBonus,
+    )
     await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
     expect(log().getByText(texts.log.findDeclined)).toBeTruthy()
   })
@@ -157,5 +163,34 @@ describe('GameScreen: searching', () => {
     expect(within(dialog).getByText(texts.ui.packBanner(1))).toBeTruthy()
     await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
     expect(screen.getByText(`1/${balance.packsToWin}`)).toBeTruthy()
+  })
+
+  it('shows the zombie range until you go in, then the exact zombies', async () => {
+    const { houseA, user } = renderAt(false, 1)
+    expect(houseA().textContent).toContain(texts.ui.zombiesRange(0, 1))
+    await user.click(houseA())
+    expect(houseA().textContent).not.toContain('?')
+    expect(screen.getByText(texts.ui.zombieLabel(1))).toBeTruthy()
+  })
+
+  it('previews the attack and lets you hit the zombie', async () => {
+    const startDeck = ['crowbar', 'search', 'nerves', 'bandage', 'run']
+    const { view, log, houseA, user } = renderAt(false, 1, startDeck)
+    expect(screen.getByText(texts.ui.preview.safe)).toBeTruthy()
+    await user.click(houseA())
+    expect(screen.getByText(texts.ui.preview.attack(1, 1, 0))).toBeTruthy()
+    const crowbar = view.container.querySelector<HTMLElement>('[data-card="crowbar"]')
+    await user.click(within(crowbar!).getByRole('button', { name: 'Hit' }))
+    expect(log().getByText(texts.log.zombieHit(1, 1))).toBeTruthy()
+  })
+
+  it('raises the noise meter after a search', async () => {
+    const { houseA, user } = renderAt(false)
+    await user.click(houseA())
+    await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
+    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    expect(within(dialog).getByText(texts.ui.findNoise(1, 0))).toBeTruthy()
+    await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
+    expect(screen.getByText(`1/${balance.noiseThreshold}`)).toBeTruthy()
   })
 })

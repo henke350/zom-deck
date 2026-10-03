@@ -249,7 +249,7 @@ export const cards = {
     tags: ['tool'],
     trashable: true,
     modes: [
-      { effects: [{ kind: 'scout', scope: 'one' }] },
+      { effects: [{ kind: 'scout', scope: 'one', range: 2 }] },
       { useUp: true, effects: [{ kind: 'scout', scope: 'all' }] },
     ],
   },
