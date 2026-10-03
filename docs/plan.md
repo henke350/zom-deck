@@ -1,6 +1,8 @@
 # Sidste tur ud – udviklingsplan (udkast 1)
 
-**Status:** Plan til godkendelse. Der er ikke skrevet kode endnu.
+**Status:** Plan til godkendelse (runde 2). Der er ikke skrevet kode endnu.
+**Besluttet:** stjerner for ekstra pakker (★/★★/★★★) og al tekst i spillet på engelsk.
+**Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z
 Repoet var tomt, så der er ingen eksisterende teknologi eller instruktioner at følge.
 
 **Sådan læses planen**
@@ -106,7 +108,7 @@ Koben får to anvendelser, så det sjældnere er et dødt kort. Snig dig får en
 
 **Lokal lagring:** Kun indstillinger og bedste resultat i browserens `localStorage`.
 
-**Navngivning:** Kode og id'er på engelsk (fx `crowbar`), al tekst til spilleren på dansk i én tekstfil. Så kan en engelsk version tilføjes senere uden at røre reglerne.
+**Navngivning:** Kode, id'er og al tekst til spilleren på engelsk (besluttet). Teksten samles i én fil (`texts.en.ts`), så en dansk version kan tilføjes senere uden at røre reglerne. Se navneoversigten i afsnit 10.
 
 ---
 
@@ -116,7 +118,7 @@ Koben får to anvendelser, så det sjældnere er et dødt kort. Snig dig får en
 
 - **Mål:** Find mindst 2 forsyningspakker, og gå ind i tilflugtsstedet inden udgangen af tur 12.
 - **Sejr** sker i det øjeblik, du træder ind i tilflugtsstedet med mindst 2 pakker. Spillet spørger først: "Afslut ekspeditionen nu? Du får ★★."
-- ⚑ **Stjerner:** ★ 2 pakker · ★★ 3 pakker · ★★★ 4 pakker.
+- **Stjerner (besluttet):** ★ 2 pakker · ★★ 3 pakker · ★★★ 4 pakker.
 - **Tab:** liv når 0 (straks), eller du er ikke hjemme, når tur 12 slutter.
 - **Slutskærm:** resultat, årsag, statistik (skade fordelt på kilder, støj, ankomne zombier, fundne kort, brugte ture) og seed.
   Knapper: "Ny ekspedition" og "Prøv samme by igen".
@@ -297,7 +299,7 @@ zom-deck/
    │  ├─ cards.ts
    │  ├─ locations.ts        # steder, forbindelser, fundpuljer, startzombier
    │  ├─ zombies.ts
-   │  └─ texts.da.ts         # tekster til spilleren
+   │  └─ texts.en.ts         # tekster til spilleren (engelsk)
    ├─ ui/                    # VISNING OG INPUT
    │  ├─ App.tsx
    │  ├─ useGame.ts          # forbinder regelmotor og skærm
@@ -492,7 +494,61 @@ previewEndTurn(state): { followers, attackers, damage, losesToDarkness }
 
 ---
 
-## 9. Åbne spørgsmål
+## 9. Spørgsmål fra runde 1 (besvaret)
 
-1. **Stjerner for 3 og 4 pakker:** Må vi indføre dem i prototypen? (Anbefaling: ja – ellers mangler spillets centrale beslutning.)
-2. **Sprog i spillet:** Dansk eller engelsk? (Anbefaling: dansk først. Al tekst ligger i én fil, så engelsk kan tilføjes senere.)
+1. **Stjerner for 3 og 4 pakker:** Ja.
+2. **Sprog i spillet:** Engelsk.
+
+---
+
+## 10. Kritisk gennemgang, runde 2
+
+**Spørgsmål:** Er spilmekanikkerne interessante nok?
+
+**Svar:** Skelettet holder. Men i oplæggets form er spillet for let og for forudsigeligt, og den vigtigste beslutning ("hjem eller én bygning mere?") opstår aldrig. Med stjernerne og fem små regelændringer bliver hver tur et reelt valg. Det skal bekræftes med bot-simulering (M6) og playtest (M7).
+
+### Vurdering pr. mekanik (min vurdering, 1–5)
+
+| Mekanik | Oplæg | Med ændringer | Problem → løsning |
+|---|---|---|---|
+| Hjem eller videre | 1 | 4 | Med 2 pakker går man bare hjem. → Stjerner, skumring, skjult fare. |
+| Rutevalg | 2 | 4 | En enkel rute når alle seks bygninger og er hjemme i tur 8 (10 skridt: 8 gratis + 2 Run). → 10 ture, skumring fra tur 8. |
+| Kamp og flugt | 1 | 4 | Flugt er gratis; at dræbe koster 2 kort for at spare 1 skade. → Forfølgelse + "søg i fred". |
+| Valg i hver tur | 2 | 4 | 3 AP til 5 kort: to kort spildes, og stedet afgør oftest valget. → Gem ét kort; Crowbar med to anvendelser. |
+| Deckbuilding | 2 | 3 | Kortene virker hver for sig. → Tre spillestile; hvert fundkort får en synergi eller en ulempe. |
+| Søgning, 1 af 3 | 4 | 4 | Allerede godt. → Behold; "skrot et kort" som alternativ. |
+| Støj | 3 | 4 | En fast pris, der ikke vokser. → Skumring. |
+
+### Tre indsigter
+
+1. **Push your luck kræver usikkerhed, man kan se.** Er alt synligt og fast, og er vejen hjem garanteret af den gratis bevægelse, bliver "én bygning mere" et regnestykke. Skjult fare og tilfældige pakker giver en risiko, man kan vurdere, men ikke beregne.
+2. **Knaphed skaber valg.** Kan man nå alle bygninger, er rækkefølgen ligegyldig.
+3. **Kamp skal give noget, ikke kun forhindre noget.** Ellers flygter alle.
+
+### Fem nye forslag (afventer godkendelse)
+
+| # | Forslag | Regel | Ændrede startværdier |
+|---|---|---|---|
+| 1 | Strammere ur | 10 ture; skumring (+1 støj pr. tur) fra tur 8. Kun en perfekt tur når alle bygninger. | `turnLimit: 10`, `duskFromTurn: 8` |
+| 2 | Skjult fare | Ubesøgte bygninger viser kun et spænd, fx "1–2 zombier". Det præcise antal afsløres ved ankomst. | `startZombies` bliver et spænd pr. sted |
+| 3 | Søg i fred | Er der ingen zombier på stedet, viser søgningen +1 fund. Giver kamp og Sneak en gevinst. | `peacefulSearchBonus: 1` |
+| 4 | Gem ét kort | Ét ubrugt kort må blive på hånden til næste tur. Færre spildte kort, mere planlægning. | `keepCards: 1` |
+| 5 | Tre spillestile | Stille plyndrer, kæmper og løber (+ støttekort). Hvert fundkort får en synergi eller en ulempe. | Nye kort: Soft Soles, Shopping Cart, Molotov, Adrenaline |
+
+Regelbudget: Selv med alle ændringer skal reglerne kunne stå på én side.
+
+**Eksempel, der tester mekanikken:** Tur 8 af 10, skumring, 5 liv, støj 3/4, 2 pakker (★ sikret). Pharmacy er ét skridt væk med "1–2 zombier" og 2/3 chance for en pakke. Valgene er A) gå hjem (★, ingen risiko), B) søg og løb tilbage (★★ med 67 %, −2 til −3 liv) eller C) søg og ryd op (★★ med 67 %, færre skader, men hjemme først i tur 9–10). Ingen af svarene er oplagte. Med oplæggets regler var svaret altid A.
+
+### Navneoversigt (spiltekst på engelsk)
+
+| Dansk (plan) | Engelsk (spil) |
+|---|---|
+| Tilflugtssted, Gade, Bolig A/B | Shelter, Street, House A/B |
+| Supermarked, Apotek, Værksted, Politistation | Supermarket, Pharmacy, Workshop, Police Station |
+| Søg, Koben, Løb, Snig dig | Search, Crowbar, Run, Sneak |
+| Økse, Pistol, Løbesko, Førstehjælp, Bandage | Axe, Pistol, Running Shoes, First Aid, Bandage |
+| Lommelygte, Vækkeur, Energidrik, Rygsæk, Kampvest | Flashlight, Alarm Clock, Energy Drink, Backpack, Kevlar Vest |
+| Haglgevær, Kikkert | Shotgun, Binoculars |
+| Forsyningspakke, støj, skumring, handlingspoint | Supply pack, noise, dusk, AP |
+
+Forslag til engelsk titel: **One More Building** (navngiver spillets kernebeslutning). Ikke besluttet.
