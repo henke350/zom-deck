@@ -27,6 +27,7 @@ export function RulesDialog({ balance, onClose }: { balance: Balance; onClose: (
           </section>
         ))}
       </div>
+      <p className="muted credits">{rules.credits}</p>
       <div className="dialog-actions">
         <button type="button" className="btn btn-primary" onClick={onClose}>
           {rules.close}

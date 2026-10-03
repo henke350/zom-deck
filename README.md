@@ -45,6 +45,13 @@ npm run check    # alt det, den automatiske kontrol på GitHub tjekker
 Den automatiske kontrol (GitHub Actions) kører lint, formatering, typekontrol, tests og
 build ved hvert push.
 
+## Kunstnere og licenser
+
+Kortillustrationerne er ikoner fra [game-icons.net](https://game-icons.net) af Lorc og
+Delapouite, brugt under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Licensen
+kræver, at kunstnerne krediteres. Det sker i spillets regelskærm og her. Hvilket ikon
+der kommer fra hvem, står i `src/ui/cardIcons.ts`.
+
 ## Teknik
 
 TypeScript, React og Vite. Vitest til tests, oxlint og Prettier til kodekvalitet.
