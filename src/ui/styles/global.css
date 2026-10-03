@@ -1,0 +1,145 @@
+/* Colour tokens: concrete neutrals, hazard amber, danger red, safe teal. */
+:root {
+  --bg: #e8e9e4;
+  --surface: #f5f5f1;
+  --ink: #1b201e;
+  --ink-2: #424a46;
+  --muted: #5f6763;
+  --line: #c3c7c0;
+  --amber: #b87800;
+  --amber-ink: #744b00;
+  --red: #a5312a;
+  --teal: #2a7462;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121514;
+    --surface: #1a1e1c;
+    --ink: #e4e7e2;
+    --ink-2: #b9c0bb;
+    --muted: #8f9792;
+    --line: #323835;
+    --amber: #e3a33a;
+    --amber-ink: #f2be62;
+    --red: #e36b60;
+    --teal: #55b89e;
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.title-screen {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 4rem 1.25rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.eyebrow,
+.status {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.tagline {
+  font-size: 1.25rem;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.facts h2 {
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+.facts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.5rem;
+}
+
+.facts li {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: var(--ink-2);
+}
+
+.facts strong {
+  display: block;
+  font-size: 1.75rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+}
+
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.7rem 1.4rem;
+  border-radius: 6px;
+  border: 2px solid var(--amber);
+  background: var(--amber);
+  color: var(--bg);
+  cursor: pointer;
+}
+
+button:disabled {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+
+.reason {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
