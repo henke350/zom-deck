@@ -13,9 +13,14 @@ export default function App() {
   // Keep the seed in the address so a game can be reloaded or shared.
   useEffect(() => {
     if (screen.kind !== 'game') return
-    const url = new URL(window.location.href)
-    url.searchParams.set('seed', String(screen.seed))
-    window.history.replaceState(null, '', url)
+    try {
+      const url = new URL(window.location.href)
+      url.searchParams.set('seed', String(screen.seed))
+      window.history.replaceState(null, '', url)
+    } catch {
+      // Some hosts (e.g. an embedded page) don't allow changing the address. The seed is
+      // still shown in the status bar.
+    }
   }, [screen])
 
   if (screen.kind === 'title') {

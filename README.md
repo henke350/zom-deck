@@ -6,6 +6,7 @@ Al tekst i spillet er på engelsk; "One More Building" er en arbejdstitel.
 
 - **Plan og beslutninger:** [docs/plan.md](docs/plan.md)
 - **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z (privat, indtil det deles)
+- **Spil prototypen i browseren:** https://claude.ai/artifact/1HKHPRedxcpRYNSh6GNZVY (privat, indtil det deles; opdateres ved hver milepæl)
 - **Status:** M0–M4 er færdige. Byen har nu zombier, støj og kamp. Næste milepæl er M5: den første hele ekspedition med slutskærm og regelskærm.
 
 ## Sådan kører du spillet lokalt

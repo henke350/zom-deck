@@ -15,8 +15,9 @@
   color-scheme: light;
 }
 
+/* Dark theme: follows the system, unless a host page sets data-theme explicitly. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #121514;
     --surface: #1a1e1c;
     --ink: #e4e7e2;
@@ -29,6 +30,20 @@
     --teal: #55b89e;
     color-scheme: dark;
   }
+}
+
+:root[data-theme='dark'] {
+  --bg: #121514;
+  --surface: #1a1e1c;
+  --ink: #e4e7e2;
+  --ink-2: #b9c0bb;
+  --muted: #8f9792;
+  --line: #323835;
+  --amber: #e3a33a;
+  --amber-ink: #f2be62;
+  --red: #e36b60;
+  --teal: #55b89e;
+  color-scheme: dark;
 }
 
 *,

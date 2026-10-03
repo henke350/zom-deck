@@ -3,6 +3,7 @@
 **Status:** Planen er godkendt (forslag 1–10 besluttet). **M0–M4 er færdige** (opsætning, dæk og ture, bykort og første skærm, søgning og pakker, zombier og støj). Næste milepæl: M5 – første hele ekspedition.
 **Besluttet:** stjerner for ekstra pakker (★/★★/★★★) og al tekst i spillet på engelsk. Version 2 bliver en kampagne med base, mad og vand (afsnit 12).
 **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z
+**Spilbar prototype:** https://claude.ai/artifact/1HKHPRedxcpRYNSh6GNZVY
 Repoet var tomt ved start; teknologien er valgt i afsnit 2.
 
 **Sådan læses planen**
