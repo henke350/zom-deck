@@ -1,7 +1,7 @@
 # Sidste tur ud – udviklingsplan (udkast 1)
 
 **Status:** Plan til godkendelse (runde 2). Der er ikke skrevet kode endnu.
-**Besluttet:** stjerner for ekstra pakker (★/★★/★★★) og al tekst i spillet på engelsk.
+**Besluttet:** stjerner for ekstra pakker (★/★★/★★★) og al tekst i spillet på engelsk. Version 2 bliver en kampagne med base, mad og vand (afsnit 12).
 **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z
 Repoet var tomt, så der er ingen eksisterende teknologi eller instruktioner at følge.
 
@@ -259,7 +259,7 @@ Hver milepæl ender med noget, du kan se eller afprøve.
 | M2 | Bykort, bevægelse og første skærm | Stedsdata og forbindelser, gratis bevægelse, Løb. Simpel skærm: kort, brik, hånd, toplinje, log og afslut tur. | Du kan klikke dig gennem ture i browseren, og ugyldige handlinger er grå med forklaring. |
 | M3 | Søgning, fund og pakker | Fundpuljer, fundvalg (tag/skrot/afstå), søgegrænser, Hastesøgning, søgebonusser, pakkeplacering, missionsvisning. | Test bekræfter grænserne og at der ligger 4 pakker i 1.000 forskellige seeds. Du kan finde pakker i browseren. |
 | M4 | Zombier, kamp og støj | Startzombier, angreb, støjmåler og ankomst, forfølgelse (3 indstillinger), Snig dig, Vækkeur, Kampvest, forhåndsvisning. | Test af zombiefasens rækkefølge og støjgrænser består. Forhåndsvisningen stemmer med det, der sker. |
-| **M5** | **Første spilbare version** | Sejr, nederlag, stjerner, slutskærm med forklaring, genstart (ny/samme by), skumring, regelskærm. | En hel ekspedition kan spilles fra start til slut uden fejl. Du har spillet tre ekspeditioner selv. |
+| **M5** | **Første spilbare version** | Sejr, nederlag, stjerner, slutskærm med forklaring, genstart (ny/samme by), skumring, regelskærm. Motoren afleverer et `ExpeditionResult` (forberedelse til version 2). | En hel ekspedition kan spilles fra start til slut uden fejl. Du har spillet tre ekspeditioner selv. |
 | M6 | Alt indhold + balanceværktøj | Resten af fundkortene. Et simuleringsscript, hvor tre simple bot-spillere (tilfældig, grådig, "skynd dig hjem") spiller 1.000 spil hver og laver en rapport. "Fuzz-test": tusindvis af tilfældige, gyldige handlinger for at finde nedbrud eller umulige tilstande. | Rapporten kan køres med én kommando. Fuzz-testen finder ingen fejl. |
 | M7 | Playtest 1 og justering | 5–10 spil (dig + 2–3 andre), kort spørgeskema, justering af balancetal. | Playtestspørgsmålene i afsnit 7 er besvaret, og 1–3 justeringer er afprøvet. |
 | M8 | Finpudsning og udgivelse | Ikoner, farver, læsbarhed, hjælpetekster, udgivelse som statisk side. | Spillet kan åbnes via et link. |
@@ -396,8 +396,23 @@ type Action =
   | { type: 'declineFind' }
   | { type: 'endTurn' };
 
+// Forberedelse til version 2 (kampagne): en ekspedition starter fra en
+// opsætning og slutter med et samlet resultat.
+interface ExpeditionSetup {
+  startDeck: CardId[];         // nulstilles hver morgen; Locker kan tilføje ét kort
+  startHp: number;             // fx −2 ved tørst, +2 med Infirmary
+  revealedBuildings: LocationId[]; // Lookout
+  cityState?: CityState;       // plyndrede bygninger og flere zombier over dage
+}
+interface ExpeditionResult {
+  outcome: 'home' | 'killed' | 'darkness';
+  food: number; water: number; materials: number;
+  hpLeft: number; cardsFound: CardId[];
+}
+
 // Regelmotorens offentlige funktioner
-newGame(seed, balance): GameState
+newGame(seed, balance, setup?: ExpeditionSetup): GameState
+expeditionResult(state): ExpeditionResult   // bruges af kampagnelaget i version 2
 validate(state, action): { ok: true } | { ok: false; reason: string } // reason vises i skærmen
 applyAction(state, action): { state: GameState; events: GameEvent[] }
 preview(state, action): { noiseBefore, noiseAfter, zombiesArriving, apAfter }
@@ -638,3 +653,76 @@ Erstatter fundkortene i afsnit 3.4 (First Aid, Energy Drink, Backpack, Shotgun o
 - Innovating Junk Cards in Signs of the Sojourner – https://saturshot.substack.com/p/innovating-junk-cards-in-signs-of
 - Game Developer: Designing interesting decisions in games – https://www.gamedeveloper.com/design/designing-interesting-decisions-in-games-and-when-not-to-
 - Bugnet: How to design a deck building game – https://bugnet.io/blog/how-to-design-a-deck-building-game
+
+---
+
+## 12. Version 2: kampagne med base, mad og vand
+
+**Status:** Besluttet retning. Bygges efter M8, når selve ekspeditionen er testet og sjov. Oplægget udskød basebygning og kampagne; det passer med denne rækkefølge.
+
+**Idé:** Én dag er én ekspedition. Mellem dagene spiser og drikker man, bygger på basen og høster det, basen producerer. Målet er at overleve 7 dage.
+
+### Dagsløkken
+
+1. **Morgen:** Dækket nulstilles til startdækket. Basens forbedringer og gårsdagens straffe lægges på (`ExpeditionSetup`).
+2. **Ekspedition:** Prototypens spil (15–25 min).
+3. **Hjem:** Mad, vand og materialer tælles op (`ExpeditionResult`).
+4. **Aften:** Brug 1 mad og 1 vand. Mangel giver straf næste dag.
+5. **Byg:** Brug materialer på forbedringer.
+6. **Nat:** Køkkenhave og regnvandsopsamler producerer. Dag +1; byen bliver farligere.
+
+### Regler
+
+| Emne | Regel | Startværdi |
+|---|---|---|
+| Mad og vand | Forsyningspakker *er* mad eller vand; typen ses, når pakken findes. 2 pakker = én dags forbrug (samme mål som prototypen). Ekstra pakker gemmes på lageret. | Forbrug 1 mad + 1 vand pr. aften |
+| Sult | Næste ekspedition starter med et ekstra Nerves-kort. | +1 Nerves |
+| Tørst | Næste ekspedition starter med færre liv. | −2 liv |
+| Materialer | Ny slags fund i "vælg 1 af 3" (kort navn: Salvage). Hvert materiale lægger et Heavy Load i dækket på vej hjem: "alt, du bærer hjem, tynger". | 1 materialetype |
+| Dækket | Nulstilles hver morgen. Locker kan beholde ét fundet kort. | – |
+| Byen | Husker plyndrede bygninger (færre søgninger) og får flere zombier hver dag. | +1 zombie pr. dag |
+| Længde | 7 dage. Kampagnen gemmes i browseren mellem dagene. | 7 dage |
+
+### Forbedringer (tekst på engelsk, som i spillet)
+
+| Forbedring | Pris (materialer) | Effekt | Type |
+|---|---|---|---|
+| Lookout (Udkigspost) | 2 | At the start of each expedition, see the exact zombies in 2 buildings. | Virker fra næste dag |
+| Workbench (Værkbænk) | 3 | Start each expedition with one Nerves fewer. | Virker fra næste dag |
+| Infirmary (Sygestue) | 3 | Start each expedition with +2 health. | Virker fra næste dag |
+| Locker (Våbenskab) | 4 | Keep 1 card you found for the next expedition. | Virker fra næste dag |
+| Rain Collector (Regnvandsopsamler) | 4 | +1 water every second night. | Investering |
+| Garden (Køkkenhave) | 6 | +1 food every second night. | Investering, betaler sig sent |
+
+Samlet pris 22 materialer. En kampagne forventes at give cirka 14–20, så man kan ikke bygge alt. Tallene justeres med bot-simulering.
+
+### Nye valg
+
+- **Kort eller materiale?** En stærkere ekspedition i dag eller en bedre base i morgen.
+- **Hvor meget bærer jeg hjem?** Flere materialer giver flere Heavy Load og en farligere hjemtur.
+- **Byg nu eller spar?** Garden betaler sig først efter flere dage; Infirmary hjælper i morgen.
+- **Spis lageret eller tag ud igen?** Lageret redder en dårlig dag, men byen bliver farligere hver dag.
+
+### Kompleksitetsbudget
+
+- **Med:** mad, vand, én materialetype, seks forbedringer, 7 dage, dæk der nulstilles hver morgen.
+- **Ikke med:** sult- eller tørstmålere under ekspeditionen, flere materialetyper, opskrifter (crafting), et dæk der vokser fra dag til dag.
+- **Ekspeditionen får kun én ny regel:** materialer som fund.
+
+### Milepæle for version 2
+
+| # | Milepæl | Indhold | Færdig når |
+|---|---|---|---|
+| K1 | Dagsløkke | Dage, aftensmad, straf ved mangel, gem kampagnen i browseren. | 3 dage i træk kan spilles og genoptages. |
+| K2 | Base og materialer | Materialer som fund, baseskærm, de seks forbedringer. | Forbedringer ændrer næste ekspedition. |
+| K3 | Byen udvikler sig | Plyndrede bygninger, flere zombier, produktion om natten. | Dag 7 føles tydeligt farligere end dag 1. |
+| K4 | Balance over 7 dage | Bot-spillere spiller hele kampagner; playtest med 2–3 personer. | Flere byggerækkefølger kan overleve. |
+
+### Forberedelse i prototypen
+
+Regelmotoren tager imod en `ExpeditionSetup` og afleverer et `ExpeditionResult` (se afsnit 5). Det koster næsten intet nu og gør kampagnen til et lag ovenpå, uden at ekspeditionen skal skrives om.
+
+### Åbne spørgsmål (til senere)
+
+1. **Død i kampagnen:** Anbefaling: man mister dagens fund og starter næste dag med 2 Wound-kort. Sker det to gange, er kampagnen slut.
+2. **Antal dage:** 7 som start; justeres efter playtest.
