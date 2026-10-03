@@ -17,11 +17,13 @@ import { checkSearchHere } from './search'
 import { zombiesAt } from './zombies'
 import type {
   Action,
+  CardInstance,
   Content,
   EndTurnAction,
   FreeMoveAction,
   GameState,
   PlayCardAction,
+  UseServiceAction,
   Validation,
 } from './types'
 
@@ -63,9 +65,50 @@ export function validate(
     }
     case 'declineFind':
       return ok
+    case 'useService':
+      return validateUseService(state, action, content)
     case 'endTurn':
       return validateEndTurn(state, action)
   }
+}
+
+/** Can the service where you stand be used at all right now? For the UI's button. */
+export function validateServiceHere(
+  state: GameState,
+  content: Content = defaultContent,
+): Validation {
+  if (state.phase === 'gameOver') return no(texts.reasons.gameOver)
+  if (state.phase === 'chooseFind') return no(texts.reasons.chooseFindFirst)
+  const service = content.locations[state.player.location]?.service
+  if (!service) return no(texts.reasons.noServiceHere)
+  const cost = state.balance.locationServiceCost
+  if (state.player.ap < cost) return no(texts.reasons.notEnoughAp(cost, state.player.ap))
+  const anyTarget = state.piles.hand.some((c) => serviceTargetCheck(c, service.filter, content).ok)
+  return anyTarget ? ok : no(texts.reasons.noTrashTarget)
+}
+
+function validateUseService(
+  state: GameState,
+  action: UseServiceAction,
+  content: Content,
+): Validation {
+  const here = validateServiceHere(state, content)
+  if (!here.ok && here.reason !== texts.reasons.noTrashTarget) return here
+  const target = state.piles.hand.find((c) => c.uid === action.uid)
+  if (!target) return no(texts.reasons.trashNotInHand)
+  const filter = content.locations[state.player.location]?.service?.filter ?? 'any'
+  return serviceTargetCheck(target, filter, content)
+}
+
+function serviceTargetCheck(
+  card: CardInstance,
+  filter: 'any' | 'junk',
+  content: Content,
+): Validation {
+  const def = content.cards[card.card]
+  if (!def?.trashable) return no(texts.reasons.notTrashable)
+  if (filter === 'junk' && def.kind !== 'junk') return no(texts.reasons.trashJunkOnly)
+  return ok
 }
 
 function validatePlayCard(state: GameState, action: PlayCardAction, content: Content): Validation {

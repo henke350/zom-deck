@@ -1,5 +1,5 @@
 import { shuffle } from './rng'
-import type { CardInstance, GameEvent, GameState, Piles } from './types'
+import type { CardId, CardInstance, GameEvent, GameState, Piles } from './types'
 
 /** Cards the player owns: everything except used-up and trashed cards. */
 export function ownedCount(piles: Piles): number {
@@ -43,4 +43,20 @@ export function drawCards(state: GameState, count: number, events: GameEvent[]):
 
   if (drawn.length > 0) events.push({ type: 'cardsDrawn', uids: drawn })
   return { ...state, rng, piles: { ...state.piles, draw, hand, discard } }
+}
+
+/** Adds a new card to the discard pile. */
+export function gainCard(
+  state: GameState,
+  card: CardId,
+  reason: 'find' | 'pack' | 'wound',
+  events: GameEvent[],
+): GameState {
+  const instance: CardInstance = { uid: `c${state.nextUid}`, card }
+  events.push({ type: 'cardGained', uid: instance.uid, card, reason })
+  return {
+    ...state,
+    nextUid: state.nextUid + 1,
+    piles: { ...state.piles, discard: [...state.piles.discard, instance] },
+  }
 }

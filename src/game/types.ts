@@ -65,6 +65,16 @@ export interface LocationDef {
   readonly alwaysHasPack?: boolean
   /** Zombies here at the start, rolled between min and max. Shown as a range until you visit. */
   readonly startZombies?: { readonly min: number; readonly max: number }
+  /** Something you can do here for AP (Workshop: Dismantle, Pharmacy: Patch up). */
+  readonly service?: LocationService
+}
+
+export type ServiceId = 'dismantle' | 'patchUp'
+
+/** A location service trashes one card from your hand. `junk`: only Nerves and Wound. */
+export interface LocationService {
+  readonly id: ServiceId
+  readonly filter: 'any' | 'junk'
 }
 
 export interface LootEntry {
@@ -112,6 +122,8 @@ export interface Content {
   readonly startLocation: LocationId
   /** The junk card added to the deck for each supply pack found (Heavy Load). */
   readonly packCard: CardId
+  /** The junk card added by a heavy zombie attack when the Wound variant is on. */
+  readonly woundCard: CardId
 }
 
 /** One physical card. Two copies of the same card have different uids. */
@@ -179,6 +191,8 @@ export interface GameState {
 
 export interface Stats {
   readonly startHp: number
+  /** Cards in the deck at the start. */
+  readonly startCards: number
   readonly steps: number
   readonly searches: number
   readonly packsFound: number
@@ -198,6 +212,8 @@ export interface Stats {
   readonly zombiesFromNoise: number
   readonly zombiesFromDusk: number
   readonly zombiesKilled: number
+  /** Wound variant: Wounds added by heavy attacks. */
+  readonly woundsGained: number
 }
 
 /** The outcome of one expedition. The version-2 campaign builds on this. */
@@ -250,6 +266,12 @@ export interface ScrapCardAction {
   readonly uid: string
 }
 
+/** Use the service where you stand (Dismantle, Patch up) on a card in your hand. */
+export interface UseServiceAction {
+  readonly type: 'useService'
+  readonly uid: string
+}
+
 export interface DeclineFindAction {
   readonly type: 'declineFind'
 }
@@ -267,6 +289,7 @@ export type Action =
   | TakeFindAction
   | ScrapCardAction
   | DeclineFindAction
+  | UseServiceAction
   | EndTurnAction
 
 export type GameEvent =
@@ -300,7 +323,7 @@ export type GameEvent =
       readonly type: 'cardGained'
       readonly uid: string
       readonly card: CardId
-      readonly reason: 'find' | 'pack'
+      readonly reason: 'find' | 'pack' | 'wound'
     }
   | { readonly type: 'cardScrapped'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'findDeclined' }
@@ -345,6 +368,7 @@ export type GameEvent =
   | { readonly type: 'healed'; readonly amount: number }
   | { readonly type: 'hpLost'; readonly amount: number; readonly source: 'zombies' | 'card' }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }
+  | { readonly type: 'serviceUsed'; readonly service: ServiceId; readonly location: LocationId }
   | { readonly type: 'searchBonusAdded'; readonly amount: number }
   | { readonly type: 'blockAdded'; readonly amount: number }
   | { readonly type: 'cardsKept'; readonly uids: readonly string[] }

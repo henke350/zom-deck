@@ -5,9 +5,11 @@ import {
   cardOptions,
   expeditionResult,
   freeMoveTargets,
+  listActions,
   previewEndTurn,
   previewOutcome,
   validate,
+  validateServiceHere,
 } from '../game'
 import type {
   Action,
@@ -59,6 +61,8 @@ export function GameScreen({
   // A move that would end the expedition by walking home, waiting for the player to confirm.
   const [homeMove, setHomeMove] = useState<Action | null>(null)
   const [pending, setPending] = useState<PendingPlay | null>(null)
+  // The service where you stand (Dismantle, Patch up) is waiting for a card to trash.
+  const [serviceOpen, setServiceOpen] = useState(false)
   const [keepUid, setKeepUid] = useState<string | null>(null)
   const [hovered, setHovered] = useState<LocationId | null>(null)
   const [selected, setSelected] = useState<LocationId | null>(null)
@@ -75,20 +79,42 @@ export function GameScreen({
       for (const action of pending.options.actions) {
         if (action.target?.location) result.set(action.target.location, action)
       }
-    } else if (!pending) {
+    } else if (!pending && !serviceOpen) {
       for (const to of freeMoveTargets(state, content)) result.set(to, { type: 'freeMove', to })
     }
     return result
-  }, [pending, state])
+  }, [pending, serviceOpen, state])
+
+  // Cards you can pick right now to trash, with the action each pick makes.
+  const trashTargets = useMemo((): ReadonlyMap<string, Action> | null => {
+    if (pending?.kind === 'trash') {
+      return new Map(pending.options.actions.map((a) => [a.target?.trash ?? '', a as Action]))
+    }
+    if (serviceOpen) {
+      return new Map(
+        listActions(state, content).flatMap((a) =>
+          a.type === 'useService' ? [[a.uid, a as Action] as const] : [],
+        ),
+      )
+    }
+    return null
+  }, [pending, serviceOpen, state])
 
   const act = (action: Action, confirmed = false) => {
     setPending(null)
+    setServiceOpen(false)
     if (!confirmed && previewOutcome(state, action, content)?.result === 'won') {
       setHomeMove(action)
       return
     }
     dispatch(action)
     setSelected(null)
+  }
+
+  const serviceCheck = validateServiceHere(state, content)
+  const openService = () => {
+    setPending(null)
+    setServiceOpen(true)
   }
 
   const closeRules = () => {
@@ -115,7 +141,7 @@ export function GameScreen({
   }
 
   const onTrash = (targetUid: string) => {
-    const action = pending?.options.actions.find((a) => a.target?.trash === targetUid)
+    const action = trashTargets?.get(targetUid)
     if (!action) return
     if (keepUid === targetUid || keepUid === pending?.uid) setKeepUid(null)
     act(action)
@@ -149,11 +175,20 @@ export function GameScreen({
       }
       return validate(state, action, content)
     }
-    if (pending) return null
+    if (pending || serviceOpen) return null
     return validate(state, { type: 'freeMove', to: id }, content)
   }
 
-  const pendingName = pending ? cardText(cardIdFor(pending.uid)).name : ''
+  const serviceHere = content.locations[state.player.location]?.service
+  const pendingName = pending
+    ? cardText(cardIdFor(pending.uid)).name
+    : serviceOpen && serviceHere
+      ? texts.services[serviceHere.id].name
+      : ''
+  const cancelChoice = () => {
+    setPending(null)
+    setServiceOpen(false)
+  }
   function cardIdFor(uid: string) {
     return state.piles.hand.find((c) => c.uid === uid)?.card ?? uid
   }
@@ -182,6 +217,8 @@ export function GameScreen({
               onQuickSearch={() => act({ type: 'quickSearch' })}
               zombieTargets={zombieTargets}
               onTarget={act}
+              serviceCheck={serviceCheck}
+              onService={openService}
             />
             {peek && (
               <div className="location-peek">
@@ -194,6 +231,8 @@ export function GameScreen({
                   onQuickSearch={() => act({ type: 'quickSearch' })}
                   zombieTargets={null}
                   onTarget={act}
+                  serviceCheck={serviceCheck}
+                  onService={openService}
                 />
               </div>
             )}
@@ -204,7 +243,7 @@ export function GameScreen({
 
       <section className="hand-area" aria-label={texts.ui.hand}>
         <div className="hand-bar">
-          {pending ? (
+          {pending || serviceOpen ? (
             <p className="prompt" role="status">
               <b>{pendingName}:</b>{' '}
               {
@@ -212,9 +251,9 @@ export function GameScreen({
                   location: texts.ui.chooseOnMap,
                   trash: texts.ui.chooseTrashTarget,
                   zombie: texts.ui.chooseZombieTarget,
-                }[pending.kind]
+                }[pending?.kind ?? 'trash']
               }{' '}
-              <button type="button" className="btn btn-quiet" onClick={() => setPending(null)}>
+              <button type="button" className="btn btn-quiet" onClick={cancelChoice}>
                 {texts.ui.cancel}
               </button>
             </p>
@@ -226,7 +265,9 @@ export function GameScreen({
             type="button"
             className="btn btn-primary"
             aria-describedby="end-turn-preview"
-            disabled={pending !== null || !validate(state, { type: 'endTurn' }, content).ok}
+            disabled={
+              pending !== null || serviceOpen || !validate(state, { type: 'endTurn' }, content).ok
+            }
             onClick={endTurn}
           >
             {keepInHand
@@ -239,6 +280,7 @@ export function GameScreen({
           content={content}
           optionsByUid={optionsByUid}
           pending={pending}
+          trashTargets={trashTargets}
           keepUid={keepInHand}
           onPlay={onPlay}
           onTrash={onTrash}

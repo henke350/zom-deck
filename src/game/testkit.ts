@@ -91,7 +91,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     visited: spec.visited ?? [...new Set(['shelter', location])],
     tagsPlayedThisTurn: spec.tags ?? [],
     nextUid: 1000,
-    stats: emptyStats(hp),
+    stats: emptyStats(hp, Object.values(piles).flat().length),
   }
 }
 

@@ -1,11 +1,10 @@
 import { texts } from '../data/texts.en'
 import type { Balance } from '../data/balance'
-import { withoutCard } from './deck'
+import { gainCard, withoutCard } from './deck'
 import { nextInt, shuffle } from './rng'
 import { addNoise, zombiesAt } from './zombies'
 import type {
   CardId,
-  CardInstance,
   Content,
   GameEvent,
   GameState,
@@ -144,22 +143,6 @@ export function performSearch(
     }
   }
   return next
-}
-
-/** Adds a new card to the discard pile. */
-export function gainCard(
-  state: GameState,
-  card: CardId,
-  reason: 'find' | 'pack',
-  events: GameEvent[],
-): GameState {
-  const instance: CardInstance = { uid: `c${state.nextUid}`, card }
-  events.push({ type: 'cardGained', uid: instance.uid, card, reason })
-  return {
-    ...state,
-    nextUid: state.nextUid + 1,
-    piles: { ...state.piles, discard: [...state.piles.discard, instance] },
-  }
 }
 
 /** Ends the find choice: take a find, scrap a card from hand, or take nothing. Then the search makes its noise. */

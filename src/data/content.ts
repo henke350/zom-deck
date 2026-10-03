@@ -9,4 +9,5 @@ export const defaultContent: Content = {
   connections,
   startLocation,
   packCard: 'heavyLoad',
+  woundCard: 'wound',
 }

@@ -25,9 +25,9 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
     case 'packFound':
       return log.packFound(event.packs)
     case 'cardGained':
-      return event.reason === 'pack'
-        ? log.heavyLoadGained
-        : log.findTaken(cardText(event.card).name)
+      if (event.reason === 'pack') return log.heavyLoadGained
+      if (event.reason === 'wound') return log.woundGained
+      return log.findTaken(cardText(event.card).name)
     case 'cardScrapped':
       return log.cardScrapped(cardText(event.card).name)
     case 'findDeclined':
@@ -62,6 +62,8 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.hpLost(event.amount)
     case 'cardTrashed':
       return log.cardTrashed(cardText(event.card).name)
+    case 'serviceUsed':
+      return log.serviceUsed(texts.services[event.service].name, locationText(event.location).name)
     case 'searchBonusAdded':
       return log.searchBonusAdded(event.amount)
     case 'blockAdded':

@@ -12,7 +12,7 @@ function result(outcome: Outcome, packs: number, stats: Partial<Stats> = {}): Ex
     hpLeft: 0,
     turnsUsed: 6,
     cardsFound: stats.cardsTaken ?? [],
-    stats: { ...emptyStats(balance.maxHp), ...stats },
+    stats: { ...emptyStats(balance.maxHp, 10), ...stats },
   }
 }
 

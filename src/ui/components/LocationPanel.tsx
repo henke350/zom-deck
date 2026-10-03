@@ -16,6 +16,9 @@ interface LocationPanelProps {
   /** While a card waits for a zombie target: the action for each zombie you can pick. */
   readonly zombieTargets: ReadonlyMap<string, Action> | null
   readonly onTarget: (action: Action) => void
+  /** Can you use the service where you stand (Dismantle, Patch up)? */
+  readonly serviceCheck: Validation
+  readonly onService: () => void
 }
 
 export function LocationPanel({
@@ -27,6 +30,8 @@ export function LocationPanel({
   onQuickSearch,
   zombieTargets,
   onTarget,
+  serviceCheck,
+  onService,
 }: LocationPanelProps) {
   const def = content.locations[location]
   const { name, description } = locationText(location)
@@ -106,6 +111,23 @@ export function LocationPanel({
             {ui.quickSearch(quickCost, quickOptions)}
           </button>
           {!quickSearch.ok && <p className="reason">{quickSearch.reason}</p>}
+        </div>
+      )}
+      {def?.service && (
+        <div className="service">
+          <h3 className="eyebrow">{texts.services[def.service.id].name}</h3>
+          <p>{texts.services[def.service.id].text}</p>
+          {isHere && (
+            <>
+              <button type="button" className="btn" disabled={!serviceCheck.ok} onClick={onService}>
+                {ui.useService(
+                  texts.services[def.service.id].name,
+                  state.balance.locationServiceCost,
+                )}
+              </button>
+              {!serviceCheck.ok && <p className="reason">{serviceCheck.reason}</p>}
+            </>
+          )}
         </div>
       )}
       <p className="free-move">{freeMoveStatus}</p>

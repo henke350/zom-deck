@@ -1,8 +1,9 @@
 import type { ExpeditionResult, GameEvent, GameState, Stats } from './types'
 
-export function emptyStats(startHp: number): Stats {
+export function emptyStats(startHp: number, startCards: number): Stats {
   return {
     startHp,
+    startCards,
     steps: 0,
     searches: 0,
     packsFound: 0,
@@ -18,6 +19,7 @@ export function emptyStats(startHp: number): Stats {
     zombiesFromNoise: 0,
     zombiesFromDusk: 0,
     zombiesKilled: 0,
+    woundsGained: 0,
   }
 }
 
@@ -37,6 +39,7 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
         break
       case 'cardGained':
         if (e.reason === 'find') s.cardsTaken.push(e.card)
+        if (e.reason === 'wound') s.woundsGained += 1
         break
       case 'cardPlayed':
         if (e.usedUp) s.cardsRemoved += 1

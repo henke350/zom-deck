@@ -40,6 +40,7 @@ export function endSummary(result: ExpeditionResult, balance: Balance): EndSumma
   }
   if (stats.damageFromCards > 0) explanation.push(end.cardDamage(stats.damageFromCards))
   if (stats.damageBlocked > 0) explanation.push(end.blocked(stats.damageBlocked))
+  if (stats.woundsGained > 0) explanation.push(end.wounds(stats.woundsGained))
   if (stats.zombiesFromNoise + stats.zombiesFromDusk > 0) {
     explanation.push(end.arrivals(stats.zombiesFromNoise, stats.zombiesFromDusk))
   }

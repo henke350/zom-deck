@@ -22,6 +22,7 @@ export const locations = {
     kind: 'building',
     mapPos: { x: 120, y: 70 },
     startZombies: { min: 0, max: 1 },
+    service: { id: 'dismantle', filter: 'any' },
     lootPool: [
       { card: 'toolbox', weight: 3 },
       { card: 'axe', weight: 3 },
@@ -71,6 +72,7 @@ export const locations = {
     kind: 'building',
     mapPos: { x: 320, y: 330 },
     startZombies: { min: 1, max: 2 },
+    service: { id: 'patchUp', filter: 'junk' },
     lootPool: [
       { card: 'bandage', weight: 3 },
       { card: 'painkillers', weight: 3 },

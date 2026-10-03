@@ -8,7 +8,7 @@ export const texts = {
   title: 'One More Building',
   workingTitleNote: 'Working title',
   tagline: 'Head home with what you have, or risk one more building?',
-  statusLine: 'Prototype in progress · milestone M5 (first complete expedition)',
+  statusLine: 'Prototype in progress · milestone M6 (all content, bots and balance)',
   startExpedition: 'Start expedition',
   prototypeNote:
     'Early prototype: search the city for supply packs, keep the noise down, and get home before dark.',
@@ -26,7 +26,7 @@ export const texts = {
     houseA: { name: 'House A', description: 'A quiet home close to the shelter.' },
     houseB: { name: 'House B', description: 'A home between the pharmacy and the street.' },
     supermarket: { name: 'Supermarket', description: 'Always holds one supply pack.' },
-    pharmacy: { name: 'Pharmacy', description: 'Medicine and bandages.' },
+    pharmacy: { name: 'Pharmacy', description: 'Medicine, bandages, and a place to patch up.' },
     workshop: { name: 'Workshop', description: 'Tools, and a bench to dismantle junk.' },
     police: {
       name: 'Police Station',
@@ -84,6 +84,7 @@ export const texts = {
       attack: (n: number, damage: number, blocked: number) =>
         `${n} zombie${n === 1 ? '' : 's'} will attack: −${damage} health${blocked > 0 ? ` (${blocked} blocked)` : ''}.`,
       lethal: 'Ending the turn here will kill you!',
+      wound: 'The attack will leave a Wound in your deck.',
       followers: (n: number) => `${n} zombie${n === 1 ? '' : 's'} will follow you.`,
       dusk: (noise: number, arrivals: number) =>
         `Dusk: +${noise} noise${arrivals > 0 ? ', and a zombie arrives' : ''}.`,
@@ -116,6 +117,7 @@ export const texts = {
     cancel: 'Cancel',
     chooseDestination: 'Choose where to go on the map.',
     chooseTrashTarget: 'Choose a card in your hand to trash.',
+    useService: (name: string, cost: number) => `${name} (${cost} AP)`,
     youAreHere: 'You are here',
     stepsAway: (n: number) => `${n} step${n === 1 ? '' : 's'} away`,
     freeMoveAvailable: 'Free move available: click a highlighted neighbour.',
@@ -138,6 +140,11 @@ export const texts = {
       darkness: 'Darkness fell before you got home.',
     },
     outcomeStars: (stars: number, max: number) => `${'★'.repeat(stars)} (${stars} of ${max})`,
+  },
+
+  services: {
+    dismantle: { name: 'Dismantle', text: 'Trash a card from your hand.' },
+    patchUp: { name: 'Patch up', text: 'Trash a Nerves or Wound from your hand.' },
   },
 
   rules: {
@@ -176,6 +183,11 @@ export const texts = {
           `When you end your turn, zombies that have seen you follow you one step. Then every zombie where you stand attacks for ${b.zombie.damage} health. Block soaks up damage.`,
           'Zombies two steps away lose track of you, and they never enter the Shelter.',
           "A building's zombies are only a guess until you go in or scout it. Next to the End turn button you can see who will attack.",
+          ...(b.wounds.enabled
+            ? [
+                `Losing ${b.wounds.damageInOnePhase} or more health in one zombie phase adds a Wound (junk) to your deck.`,
+              ]
+            : []),
         ],
       },
       {
@@ -191,6 +203,7 @@ export const texts = {
           'Trash weak cards so your good cards come up more often. Nerves and Wound are junk. Heavy Load cannot be trashed.',
           'Follow-up: a card gets stronger if you already played a card with the named tag this turn.',
           'Use up: the card is removed for good after you play it.',
+          `Workshop: Dismantle and Pharmacy: Patch up trash a card from your hand for ${b.locationServiceCost} AP. Patch up only takes Nerves and Wound.`,
         ],
       },
       {
@@ -222,6 +235,7 @@ export const texts = {
       packs >= needed
         ? `Night fell at the end of turn ${turn}. You had ${packs} supply packs, but you were not in the Shelter.`
         : `Night fell at the end of turn ${turn}. You had ${packs} of the ${needed} supply packs you needed.`,
+    wounds: (n: number) => `The attacks left ${count(n, 'Wound')} in your deck.`,
     zombieDamage: (damage: number, followers: number, there: number) =>
       `Zombies took ${damage} health. ${count(followers, 'attack')} came from zombies that followed you, ${there} from zombies that were already there.`,
     cardDamage: (damage: number) => `Your own cards cost ${damage} health.`,
@@ -280,6 +294,8 @@ export const texts = {
     healed: (n: number) => `You heal ${n}.`,
     hpLost: (n: number) => `You lose ${n} health.`,
     cardTrashed: (name: string) => `You trash ${name}.`,
+    serviceUsed: (service: string, place: string) => `You use ${service} at the ${place}.`,
+    woundGained: 'The attack leaves a Wound in your discard pile.',
     searchBonusAdded: (n: number) => `Your next search reveals +${n}.`,
     blockAdded: (n: number) => `You will block ${n} damage this turn.`,
     cardsKept: (names: string) => `You keep ${names} for next turn.`,
@@ -406,6 +422,7 @@ export const texts = {
     keepTooMany: (max: number) => `You can keep at most ${max} card${max === 1 ? '' : 's'}.`,
     keepNotInHand: 'You can only keep cards from your hand.',
     noTrashTarget: 'You have no card in hand that this can trash.',
+    noServiceHere: 'There is nothing to use here.',
     nothingToSearch: 'There is nothing to search here.',
     searchedOut: 'This building has no searches left.',
     chooseFindFirst: 'Choose a find first: take one, scrap a card, or take nothing.',

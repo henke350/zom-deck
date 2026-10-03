@@ -2,3 +2,6 @@ dist
 coverage
 node_modules
 package-lock.json
+.sim
+# Written by the simulator (npm run sim)
+docs/balance-report.md

@@ -1,5 +1,5 @@
 import { texts } from '../../data/texts.en'
-import type { CardInstance, Content, GameState, ModeOption } from '../../game'
+import type { Action, CardInstance, Content, GameState, ModeOption } from '../../game'
 import { cardText } from '../names'
 import { CardFace } from './CardFace'
 
@@ -15,6 +15,8 @@ interface HandProps {
   readonly content: Content
   readonly optionsByUid: ReadonlyMap<string, readonly ModeOption[]>
   readonly pending: PendingPlay | null
+  /** While a card or a service waits for a card to trash: the action for each card you can pick. */
+  readonly trashTargets: ReadonlyMap<string, Action> | null
   readonly keepUid: string | null
   readonly onPlay: (uid: string, option: ModeOption) => void
   readonly onTrash: (uid: string) => void
@@ -38,6 +40,7 @@ function CardView({
   content,
   optionsByUid,
   pending,
+  trashTargets,
   keepUid,
   onPlay,
   onTrash,
@@ -47,9 +50,9 @@ function CardView({
   const info = cardText(card.card)
   const options = optionsByUid.get(card.uid) ?? []
   const isPendingCard = pending?.uid === card.uid
-  const trashTarget =
-    pending?.kind === 'trash' &&
-    pending.options.actions.some((action) => action.target?.trash === card.uid)
+  const trashTarget = trashTargets?.has(card.uid) ?? false
+  // A card or service is waiting for a choice: other buttons are off until it is made or cancelled.
+  const choosing = pending !== null || trashTargets !== null
   const reasons = [
     ...new Set(
       options.flatMap((o) => {
@@ -82,7 +85,7 @@ function CardView({
       <CardFace card={card.card} state={state} content={content} showFollowUp />
 
       <div className="card-actions">
-        {pending?.kind === 'trash' ? (
+        {trashTargets ? (
           trashTarget && (
             <button type="button" className="btn btn-danger" onClick={() => onTrash(card.uid)}>
               {texts.ui.trash}
@@ -97,7 +100,7 @@ function CardView({
                   key={option.mode}
                   type="button"
                   className="btn"
-                  disabled={option.actions.length === 0 || pending !== null}
+                  disabled={option.actions.length === 0 || choosing}
                   onClick={() => onPlay(card.uid, option)}
                 >
                   {label(option)}
@@ -107,7 +110,7 @@ function CardView({
               type="button"
               className="btn btn-quiet"
               aria-pressed={kept}
-              disabled={pending !== null}
+              disabled={choosing}
               onClick={() => onToggleKeep(card.uid)}
             >
               {kept ? texts.ui.keeping : texts.ui.keep}
@@ -115,7 +118,7 @@ function CardView({
           </>
         )}
       </div>
-      {reasons.length > 0 && pending === null && <p className="reason">{reasons.join(' ')}</p>}
+      {reasons.length > 0 && !choosing && <p className="reason">{reasons.join(' ')}</p>}
     </li>
   )
 }

@@ -27,12 +27,16 @@ export interface Balance {
   /** Packs needed for ★, ★★ and ★★★. */
   readonly starThresholds: readonly [number, number, number]
   readonly zombie: { readonly hp: number; readonly damage: number }
+  /** Added to the start-zombie range of every building that has one (a tuning knob). */
+  readonly extraStartZombies: number
   readonly zombieFollow: ZombieFollow
   /** Unvisited buildings show a zombie range instead of the exact count. */
   readonly hiddenDanger: boolean
   readonly heavyLoadPerPack: number
   /** AP cost of a location service (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly locationServiceCost: number
+  /** Variant: losing this much health in one zombie phase adds a Wound to your deck. */
+  readonly wounds: { readonly enabled: boolean; readonly damageInOnePhase: number }
   readonly starterDeck: {
     readonly search: number
     readonly crowbar: number
@@ -60,10 +64,12 @@ export const balance: Balance = {
   packsOnMap: 4,
   starThresholds: [2, 3, 4],
   zombie: { hp: 2, damage: 1 },
+  extraStartZombies: 0,
   zombieFollow: 'chase',
   hiddenDanger: true,
   heavyLoadPerPack: 1,
   locationServiceCost: 1,
+  wounds: { enabled: false, damageInOnePhase: 2 },
   starterDeck: { search: 3, crowbar: 2, run: 2, sneak: 1, nerves: 2 },
 }
 

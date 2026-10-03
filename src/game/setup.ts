@@ -63,7 +63,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     nextZombieUid,
     noise: 0,
     visited: [content.startLocation],
-    stats: emptyStats(startHp),
+    stats: emptyStats(startHp, instances.length),
   }
   const events: GameEvent[] = []
   return startTurn(initial, events)

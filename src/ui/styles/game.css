@@ -422,6 +422,16 @@
 .quick-search {
   margin-top: 0.6rem;
 }
+.service {
+  margin-top: 0.6rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.5rem;
+}
+.service p {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
 .dialog-wide {
   max-width: 52rem;
   max-height: calc(100vh - 2rem);

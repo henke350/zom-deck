@@ -47,6 +47,18 @@ describe('starting zombies', () => {
     expect([...(seen.police ?? [])].sort()).toEqual([2, 3])
   })
 
+  it('can be raised for every building with the extra start zombies knob', () => {
+    const more = { ...balance, extraStartZombies: 1 }
+    for (let seed = 1; seed <= 100; seed++) {
+      const state = newGame(seed, { balance: more })
+      expect(zombiesAt(state, 'police').length).toBeGreaterThanOrEqual(3)
+      expect(zombiesAt(state, 'houseA').length).toBeGreaterThanOrEqual(1)
+      expect(zombiesAt(state, 'street')).toHaveLength(0)
+    }
+    const state = makeState({ balance: more })
+    expect(zombieInfo(state, defaultContent, 'police')).toEqual({ known: false, min: 3, max: 4 })
+  })
+
   it('are only a range until you visit or scout the building', () => {
     const state = makeState({ zombies: [{ at: 'pharmacy' }] })
     expect(zombieInfo(state, defaultContent, 'pharmacy')).toEqual({ known: false, min: 1, max: 2 })

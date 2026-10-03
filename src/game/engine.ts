@@ -24,6 +24,7 @@ import type {
   Outcome,
   PlayCardAction,
   StepResult,
+  UseServiceAction,
 } from './types'
 
 /**
@@ -74,6 +75,8 @@ function step(state: GameState, action: Action, content: Content, events: GameEv
       return chooseFind(state, { scrap: action.uid }, content, events)
     case 'declineFind':
       return chooseFind(state, 'decline', content, events)
+    case 'useService':
+      return applyService(state, action, content, events)
     case 'endTurn':
       return endTurn(state, action, content, events)
   }
@@ -283,6 +286,30 @@ function arrive(
     moved = neutralizeZombies(moved, there, events)
   }
   return noticeHere(moved)
+}
+
+/** Dismantle (Workshop) or Patch up (Pharmacy): pay AP and trash a card from your hand. */
+function applyService(
+  state: GameState,
+  action: UseServiceAction,
+  content: Content,
+  events: GameEvent[],
+): GameState {
+  const location = state.player.location
+  const service = content.locations[location]?.service
+  const target = state.piles.hand.find((c) => c.uid === action.uid)
+  if (!service || !target) throw new Error('applyService: validated service or card is missing')
+  events.push({ type: 'serviceUsed', service: service.id, location })
+  events.push({ type: 'cardTrashed', uid: target.uid, card: target.card })
+  return {
+    ...state,
+    player: { ...state.player, ap: state.player.ap - state.balance.locationServiceCost },
+    piles: {
+      ...state.piles,
+      hand: withoutCard(state.piles.hand, target.uid),
+      removed: [...state.piles.removed, target],
+    },
+  }
 }
 
 function endTurn(

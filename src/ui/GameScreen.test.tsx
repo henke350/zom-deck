@@ -261,6 +261,29 @@ describe('GameScreen: rules and the end of an expedition', () => {
     expect(within(end).getByText(texts.end.tips.moreStars(4))).toBeTruthy()
   })
 
+  it('uses the Workshop service to trash a card from your hand', async () => {
+    const { user } = renderState(makeState({ draw, location: 'workshop', hand: ['nerves', 'run'] }))
+    const name = texts.services.dismantle.name
+    await user.click(screen.getByRole('button', { name: texts.ui.useService(name, 1) }))
+    expect(screen.getByRole('status').textContent).toContain(texts.ui.chooseTrashTarget)
+    expect(screen.getByRole('button', { name: texts.ui.endTurn })).toHaveProperty('disabled', true)
+    const nerves = document.querySelector<HTMLElement>('[data-card="nerves"]')!
+    await user.click(within(nerves).getByRole('button', { name: texts.ui.trash }))
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.serviceUsed(name, 'Workshop'))).toBeTruthy()
+    expect(log.getByText(texts.log.cardTrashed('Nerves'))).toBeTruthy()
+    expect(document.querySelector('[data-card="nerves"]')).toBeNull()
+  })
+
+  it('explains why a service cannot be used', () => {
+    renderState(makeState({ draw, location: 'pharmacy', hand: ['run', 'search'] }))
+    const button = screen.getByRole('button', {
+      name: texts.ui.useService(texts.services.patchUp.name, 1),
+    })
+    expect(button).toHaveProperty('disabled', true)
+    expect(screen.getByText(texts.reasons.noTrashTarget)).toBeTruthy()
+  })
+
   it('does not ask when walking home without enough packs', async () => {
     const { node, user } = renderState(makeState({ draw, location: 'street', packs: 1 }))
     await user.click(node('Shelter'))

@@ -1,10 +1,21 @@
 import type { Balance } from '../data/balance'
+import { gainCard } from './deck'
 import { distance, neighbors } from './map'
 import { nextInt } from './rng'
-import type { Content, GameEvent, GameState, LocationId, Zombie } from './types'
+import type { Content, GameEvent, GameState, LocationDef, LocationId, Zombie } from './types'
 
 export function zombiesAt(state: GameState, location: LocationId): Zombie[] {
   return state.zombies.filter((z) => z.location === location)
+}
+
+/** A building's start-zombie range, including the balance file's extra zombies. */
+export function startZombieRange(
+  def: LocationDef,
+  balance: Balance,
+): { min: number; max: number } | undefined {
+  if (!def.startZombies) return undefined
+  const extra = balance.extraStartZombies
+  return { min: def.startZombies.min + extra, max: def.startZombies.max + extra }
 }
 
 /** Rolls the starting zombies of every building between its min and max. */
@@ -16,8 +27,9 @@ export function setupZombies(
   const zombies: Zombie[] = []
   let state = rng
   for (const loc of Object.values(content.locations)) {
-    if (!loc.startZombies) continue
-    const { min, max } = loc.startZombies
+    const range = startZombieRange(loc, balance)
+    if (!range) continue
+    const { min, max } = range
     const [extra, next] = nextInt(state, max - min + 1)
     state = next
     for (let i = 0; i < min + extra; i++) {
@@ -46,9 +58,8 @@ export function zombieInfo(state: GameState, content: Content, location: Locatio
     def.startZombies !== undefined &&
     !state.visited.includes(location) &&
     !state.sites[location]?.scouted
-  if (hidden && def.startZombies) {
-    return { known: false, min: def.startZombies.min, max: def.startZombies.max }
-  }
+  const range = def && startZombieRange(def, state.balance)
+  if (hidden && range) return { known: false, min: range.min, max: range.max }
   return { known: true, count: zombiesAt(state, location).length }
 }
 
@@ -202,7 +213,12 @@ export function zombiePhase(state: GameState, content: Content, events: GameEven
   if (blocked > 0) events.push({ type: 'damageBlocked', amount: blocked })
   const lost = total - blocked
   if (lost > 0) events.push({ type: 'hpLost', amount: lost, source: 'zombies' })
-  return { ...next, player: { ...next.player, hp: next.player.hp - lost } }
+  const hurt: GameState = { ...next, player: { ...next.player, hp: next.player.hp - lost } }
+  const { wounds } = state.balance
+  if (wounds.enabled && lost >= wounds.damageInOnePhase && hurt.player.hp > 0) {
+    return gainCard(hurt, content.woundCard, 'wound', events)
+  }
+  return hurt
 }
 
 export interface EndTurnPreview {
@@ -215,6 +231,8 @@ export interface EndTurnPreview {
   /** Noise added at dusk after the attacks, and how many zombies it brings. */
   readonly duskNoise: number
   readonly duskArrivals: number
+  /** Wound variant: the attack would add a Wound to your deck. */
+  readonly wound: boolean
 }
 
 /** What ending the turn now would do. Uses the same rules as the real zombie phase. */
@@ -233,5 +251,6 @@ export function previewEndTurn(state: GameState, content: Content): EndTurnPrevi
     lethal: after.player.hp <= 0,
     duskNoise,
     duskArrivals: noisePreview(after, duskNoise).arrivals,
+    wound: events.some((e) => e.type === 'cardGained' && e.reason === 'wound'),
   }
 }

@@ -7,7 +7,8 @@ Al tekst i spillet er på engelsk; "One More Building" er en arbejdstitel.
 - **Plan og beslutninger:** [docs/plan.md](docs/plan.md)
 - **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z (privat, indtil det deles)
 - **Spil prototypen i browseren:** https://claude.ai/artifact/1HKHPRedxcpRYNSh6GNZVY (privat, indtil det deles; opdateres ved hver milepæl)
-- **Status:** M0–M5 er bygget. En hel ekspedition kan spilles fra start til slut, med regelskærm og en slutskærm, der forklarer, hvad der skete. Næste milepæl er M6: alt indhold og et balanceværktøj.
+- **Status:** M0–M6 er bygget. En hel ekspedition kan spilles fra start til slut, og bot-spillere måler balancen. Næste milepæl er M7: playtest og justering.
+- **Balancerapport:** [docs/balance-report.md](docs/balance-report.md) (lavet af `npm run sim`)
 
 ## Sådan kører du spillet lokalt
 
@@ -18,7 +19,7 @@ npm install      # henter værktøjer og biblioteker (kun første gang)
 npm run dev      # starter spillet på http://localhost:5173
 ```
 
-## Sådan prøver du spillet (M5)
+## Sådan prøver du spillet (M6)
 
 1. Klik **Start expedition**. Første gang vises reglerne på én side. Du kan altid åbne dem igen med **How to play** på forsiden eller **Rules** i toplinjen.
 2. Klik på et af de stiplede nabosteder på kortet for at gå dertil gratis (én gang pr. tur).
@@ -31,9 +32,22 @@ npm run dev      # starter spillet på http://localhost:5173
 9. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
 10. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
 11. Grå knapper viser altid, hvorfor de ikke kan bruges.
-12. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
+12. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
+13. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
+
+## Balance og simulering
+
+```
+npm run sim                              # 7 bots spiller 1.000 spil hver → docs/balance-report.md
+npm run sim -- --set maxHp=9             # prøv et andet balancetal (rapporten havner i .sim/)
+npm run sim -- --set maxHp=9 --set starterDeck.run=1 --set starterDeck.search=4
+npm run fuzz                             # 10.000 tilfældige spil; alle regler tjekkes efter hver handling
+```
+
+Navnene efter `--set` er dem i `src/data/balance.ts`. Botterne ser kun det, en spiller ser på
+skærmen. Rapporten har et afsnit "Hvad hvis?", der viser effekten af de vigtigste justeringer.
 
 ## Kontroller
 
