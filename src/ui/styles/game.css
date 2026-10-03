@@ -103,6 +103,23 @@
 }
 
 /* Board */
+/* Hovering a place shows it on top of the side panel instead of replacing it, so the page never
+   changes height under the mouse (which would make the map jump). */
+.location-stack {
+  position: relative;
+}
+.location-peek {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.location-peek .panel {
+  border-color: var(--ink-2);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+}
 .board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 20rem;
@@ -518,4 +535,82 @@
   .seed {
     margin-left: 0;
   }
+}
+
+/* Rules, end screen and the go-home question */
+.btn-small {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+}
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.action-row .btn {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.95rem;
+}
+.rules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 0.25rem 1.5rem;
+  margin-top: 0.75rem;
+}
+.rules h3 {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 1rem;
+}
+.rules ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+.end-story {
+  margin-top: 0.75rem;
+}
+.end-story p {
+  margin: 0.35rem 0 0;
+}
+.end-tip {
+  margin: 1rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 4px solid var(--amber);
+  background: var(--bg);
+  border-radius: 0 6px 6px 0;
+}
+.end-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: 0.35rem 1.5rem;
+  margin: 0.25rem 0 0;
+}
+.end-stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--line);
+  padding: 0.2rem 0;
+  font-size: 0.9rem;
+}
+.end-stats dt {
+  color: var(--muted);
+}
+.end-stats dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.end-stats .end-stat-wide {
+  grid-column: 1 / -1;
+}
+.dialog section[aria-labelledby='end-stats-title'] {
+  margin-top: 1.25rem;
+}
+.end-seed {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
 }

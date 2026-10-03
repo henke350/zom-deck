@@ -209,7 +209,12 @@ describe('choosing a find', () => {
     const next = applyAction(state, { type: 'declineFind' })
     expect(next.events).toEqual([
       { type: 'findDeclined' },
-      { type: 'noiseAdded', amount: balance.searchNoise, total: balance.searchNoise },
+      {
+        type: 'noiseAdded',
+        amount: balance.searchNoise,
+        total: balance.searchNoise,
+        reason: 'noise',
+      },
     ])
     expect(ownedCount(next.state.piles)).toBe(ownedCount(state.piles))
   })

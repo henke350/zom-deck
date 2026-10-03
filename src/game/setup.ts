@@ -3,6 +3,7 @@ import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
 import { normalizeSeed, shuffle } from './rng'
 import { placePacks } from './search'
+import { emptyStats } from './stats'
 import { setupZombies } from './zombies'
 import type { CardId, CardInstance, Content, ExpeditionSetup, GameEvent, GameState } from './types'
 
@@ -38,6 +39,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   const [sites, afterPacks] = placePacks(content, balance, afterDeck)
   const [zombies, nextZombieUid, rng] = setupZombies(content, balance, afterPacks)
 
+  const startHp = options.setup?.startHp ?? balance.maxHp
   const initial: GameState = {
     seed: normalized,
     rng,
@@ -46,7 +48,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     phase: 'action',
     player: {
       location: content.startLocation,
-      hp: options.setup?.startHp ?? balance.maxHp,
+      hp: startHp,
       ap: 0,
       freeMoveUsed: false,
       packs: 0,
@@ -61,6 +63,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     nextZombieUid,
     noise: 0,
     visited: [content.startLocation],
+    stats: emptyStats(startHp),
   }
   const events: GameEvent[] = []
   return startTurn(initial, events)

@@ -2,10 +2,17 @@ import { useEffect, useState } from 'react'
 import { GameScreen } from './GameScreen'
 import { TitleScreen } from './components/TitleScreen'
 import { randomSeed, readSeedFromSearch } from './seed'
+import { rulesSeen } from './storage'
 
 type Screen =
   | { readonly kind: 'title' }
-  | { readonly kind: 'game'; readonly seed: number; readonly run: number }
+  | {
+      readonly kind: 'game'
+      readonly seed: number
+      readonly run: number
+      /** First expedition on this device: show the rules over the map. */
+      readonly showRules: boolean
+    }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'title' })
@@ -31,6 +38,7 @@ export default function App() {
             kind: 'game',
             seed: readSeedFromSearch(window.location.search) ?? randomSeed(),
             run: 1,
+            showRules: !rulesSeen(),
           })
         }
       />
@@ -41,8 +49,11 @@ export default function App() {
     <GameScreen
       key={`${screen.seed}-${screen.run}`}
       seed={screen.seed}
-      onNewExpedition={() => setScreen({ kind: 'game', seed: randomSeed(), run: screen.run + 1 })}
-      onRestart={() => setScreen({ ...screen, run: screen.run + 1 })}
+      showRulesOnStart={screen.showRules}
+      onNewExpedition={() =>
+        setScreen({ kind: 'game', seed: randomSeed(), run: screen.run + 1, showRules: false })
+      }
+      onRestart={() => setScreen({ ...screen, run: screen.run + 1, showRules: false })}
       onExit={() => setScreen({ kind: 'title' })}
     />
   )

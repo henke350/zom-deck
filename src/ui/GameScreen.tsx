@@ -1,22 +1,43 @@
 import { useMemo, useState } from 'react'
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
-import { cardOptions, freeMoveTargets, previewEndTurn, validate } from '../game'
-import type { Action, ExpeditionSetup, LocationId, ModeOption, Validation } from '../game'
+import {
+  cardOptions,
+  expeditionResult,
+  freeMoveTargets,
+  previewEndTurn,
+  previewOutcome,
+  validate,
+} from '../game'
+import type {
+  Action,
+  ExpeditionSetup,
+  GameState,
+  LocationId,
+  ModeOption,
+  Validation,
+} from '../game'
 import { CityMap } from './components/CityMap'
+import { ConfirmHomeDialog } from './components/ConfirmHomeDialog'
 import { EventLog } from './components/EventLog'
 import { FindDialog } from './components/FindDialog'
 import { GameOverPanel } from './components/GameOverPanel'
 import { Hand, type PendingPlay } from './components/Hand'
 import { LocationPanel } from './components/LocationPanel'
+import { RulesDialog } from './components/RulesDialog'
 import { TopBar } from './components/TopBar'
 import { EndTurnPreview } from './components/EndTurnPreview'
 import { cardText } from './names'
+import { markRulesSeen } from './storage'
 import { useGame } from './useGame'
 
 interface GameScreenProps {
   readonly seed: number
   readonly setup?: ExpeditionSetup
+  /** Start from this exact state (used by tests). */
+  readonly initialState?: GameState
+  /** Open the rules as soon as the game starts (first expedition on this device). */
+  readonly showRulesOnStart?: boolean
   readonly onNewExpedition: () => void
   readonly onRestart: () => void
   readonly onExit: () => void
@@ -24,8 +45,19 @@ interface GameScreenProps {
 
 const content = defaultContent
 
-export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: GameScreenProps) {
-  const { state, log, dispatch } = useGame(seed, setup)
+export function GameScreen({
+  seed,
+  setup,
+  initialState,
+  showRulesOnStart = false,
+  onNewExpedition,
+  onRestart,
+  onExit,
+}: GameScreenProps) {
+  const { state, log, dispatch } = useGame(seed, setup, initialState)
+  const [rulesOpen, setRulesOpen] = useState(showRulesOnStart)
+  // A move that would end the expedition by walking home, waiting for the player to confirm.
+  const [homeMove, setHomeMove] = useState<Action | null>(null)
   const [pending, setPending] = useState<PendingPlay | null>(null)
   const [keepUid, setKeepUid] = useState<string | null>(null)
   const [hovered, setHovered] = useState<LocationId | null>(null)
@@ -49,10 +81,19 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
     return result
   }, [pending, state])
 
-  const act = (action: Action) => {
-    dispatch(action)
+  const act = (action: Action, confirmed = false) => {
     setPending(null)
+    if (!confirmed && previewOutcome(state, action, content)?.result === 'won') {
+      setHomeMove(action)
+      return
+    }
+    dispatch(action)
     setSelected(null)
+  }
+
+  const closeRules = () => {
+    markRulesSeen()
+    setRulesOpen(false)
   }
 
   const onActivateLocation = (id: LocationId) => {
@@ -86,16 +127,17 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
     setKeepUid(null)
   }
 
+  // The side panel shows where you are (or a place you clicked). A hovered place is shown on top.
   const shown =
-    pending?.kind === 'zombie'
-      ? state.player.location
-      : (hovered ?? selected ?? state.player.location)
+    pending?.kind === 'zombie' ? state.player.location : (selected ?? state.player.location)
+  const peek = pending?.kind !== 'zombie' && hovered !== shown ? hovered : null
   const zombieTargets =
     pending?.kind === 'zombie'
       ? new Map(pending.options.actions.map((a) => [a.target?.zombie ?? '', a as Action]))
       : null
   const preview = state.phase === 'action' ? previewEndTurn(state, content) : null
-  const moveCheck = moveCheckFor(shown)
+  const result = expeditionResult(state)
+  const homeOutcome = homeMove ? previewOutcome(state, homeMove, content) : undefined
 
   function moveCheckFor(id: LocationId): Validation | null {
     if (pending?.kind === 'location') {
@@ -118,7 +160,7 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
 
   return (
     <div className="game">
-      <TopBar state={state} />
+      <TopBar state={state} onShowRules={() => setRulesOpen(true)} />
 
       <main className="board">
         <CityMap
@@ -130,16 +172,32 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
           onFocusLocation={setHovered}
         />
         <aside className="side">
-          <LocationPanel
-            state={state}
-            content={content}
-            location={shown}
-            moveCheck={moveCheck}
-            quickSearch={validate(state, { type: 'quickSearch' }, content)}
-            onQuickSearch={() => act({ type: 'quickSearch' })}
-            zombieTargets={zombieTargets}
-            onTarget={act}
-          />
+          <div className="location-stack">
+            <LocationPanel
+              state={state}
+              content={content}
+              location={shown}
+              moveCheck={moveCheckFor(shown)}
+              quickSearch={validate(state, { type: 'quickSearch' }, content)}
+              onQuickSearch={() => act({ type: 'quickSearch' })}
+              zombieTargets={zombieTargets}
+              onTarget={act}
+            />
+            {peek && (
+              <div className="location-peek">
+                <LocationPanel
+                  state={state}
+                  content={content}
+                  location={peek}
+                  moveCheck={moveCheckFor(peek)}
+                  quickSearch={validate(state, { type: 'quickSearch' }, content)}
+                  onQuickSearch={() => act({ type: 'quickSearch' })}
+                  zombieTargets={null}
+                  onTarget={act}
+                />
+              </div>
+            )}
+          </div>
           <EventLog entries={log} />
         </aside>
       </main>
@@ -192,15 +250,31 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
         <FindDialog state={state} content={content} find={state.pendingFind} onChoose={act} />
       )}
 
-      {state.outcome && (
+      {result && (
         <GameOverPanel
-          outcome={state.outcome}
-          turn={state.turn}
+          result={result}
+          balance={state.balance}
+          seed={state.seed}
           onNewExpedition={onNewExpedition}
           onRestart={onRestart}
           onExit={onExit}
         />
       )}
+
+      {homeMove && homeOutcome && (
+        <ConfirmHomeDialog
+          packs={state.player.packs}
+          stars={homeOutcome.stars ?? 0}
+          nextStarAt={state.balance.starThresholds.find((n) => n > state.player.packs)}
+          onConfirm={() => {
+            setHomeMove(null)
+            act(homeMove, true)
+          }}
+          onCancel={() => setHomeMove(null)}
+        />
+      )}
+
+      {rulesOpen && <RulesDialog balance={state.balance} onClose={closeRules} />}
     </div>
   )
 }

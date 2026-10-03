@@ -1,3 +1,5 @@
+import type { Balance } from './balance'
+
 /**
  * All player-facing text (the game is in English). Keep wording here so a
  * translation can be added later without touching rules or UI code.
@@ -6,7 +8,7 @@ export const texts = {
   title: 'One More Building',
   workingTitleNote: 'Working title',
   tagline: 'Head home with what you have, or risk one more building?',
-  statusLine: 'Prototype in progress · milestone M4 (zombies, combat and noise)',
+  statusLine: 'Prototype in progress · milestone M5 (first complete expedition)',
   startExpedition: 'Start expedition',
   prototypeNote:
     'Early prototype: search the city for supply packs, keep the noise down, and get home before dark.',
@@ -135,7 +137,135 @@ export const texts = {
       killed: 'You did not survive.',
       darkness: 'Darkness fell before you got home.',
     },
-    outcomeStars: (stars: number) => `${'★'.repeat(stars)} (${stars} of 3)`,
+    outcomeStars: (stars: number, max: number) => `${'★'.repeat(stars)} (${stars} of ${max})`,
+  },
+
+  rules: {
+    title: 'How to play',
+    open: 'How to play',
+    short: 'Rules',
+    close: 'Got it',
+    intro: 'One city, one deck, ten turns. Bring supplies home before dark.',
+    sections: (b: Balance) => [
+      {
+        heading: 'Goal',
+        items: [
+          `Find at least ${b.packsToWin} supply packs and walk back into the Shelter before the end of turn ${b.turnLimit}.`,
+          `More packs give more stars: ${b.starThresholds.map((n, i) => `${'★'.repeat(i + 1)} for ${n}`).join(', ')}. You decide when to go home.`,
+        ],
+      },
+      {
+        heading: 'Your turn',
+        items: [
+          `Draw up to ${b.handSize} cards and get ${b.apPerTurn} AP. Play a card by paying its AP cost.`,
+          'Once per turn you may walk one step for free: click a highlighted neighbour on the map.',
+          `When you end the turn you may keep ${b.keepCards} unplayed card. The rest are discarded.`,
+        ],
+      },
+      {
+        heading: 'Searching',
+        items: [
+          `Play Search in a building to see ${b.searchOptions} finds, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Take one into your deck, scrap a card from your hand for good, or take nothing.`,
+          `No Search card? A quick search costs ${b.quickSearch.cost} AP and shows ${b.quickSearch.options} finds. Each building can be searched ${b.searchesPerBuilding} times.`,
+          `The first search in a building that hides a pack gives you the pack and a Heavy Load card that clogs your deck. The Supermarket always has a pack.`,
+        ],
+      },
+      {
+        heading: 'Zombies',
+        items: [
+          `When you end your turn, zombies that have seen you follow you one step. Then every zombie where you stand attacks for ${b.zombie.damage} health. Block soaks up damage.`,
+          'Zombies two steps away lose track of you, and they never enter the Shelter.',
+          "A building's zombies are only a guess until you go in or scout it. Next to the End turn button you can see who will attack.",
+        ],
+      },
+      {
+        heading: 'Noise',
+        items: [
+          `Searching and loud cards make noise. Every ${b.noiseThreshold} noise brings one more zombie to you.`,
+          `Dusk starts on turn ${b.duskFromTurn}: from then on every turn adds ${b.duskNoise} noise.`,
+        ],
+      },
+      {
+        heading: 'Your deck',
+        items: [
+          'Trash weak cards so your good cards come up more often. Nerves and Wound are junk. Heavy Load cannot be trashed.',
+          'Follow-up: a card gets stronger if you already played a card with the named tag this turn.',
+          'Use up: the card is removed for good after you play it.',
+        ],
+      },
+      {
+        heading: 'Losing',
+        items: [
+          `At 0 health you die. At the end of turn ${b.turnLimit} night falls and the expedition is lost.`,
+        ],
+      },
+    ],
+  },
+
+  confirmHome: {
+    title: 'Go home now?',
+    body: (packs: number, stars: number) =>
+      `Walking into the Shelter ends the expedition with ${packs} supply packs: ${'★'.repeat(stars)}.`,
+    next: (packs: number) => `With ${packs} packs you would get one more star.`,
+    yes: 'Go home',
+    no: 'Not yet',
+  },
+
+  end: {
+    heading: 'What happened',
+    statsHeading: 'Expedition',
+    tipHeading: 'Tip',
+    home: (turn: number, packs: number) =>
+      `You walked into the Shelter on turn ${turn} with ${packs} supply packs.`,
+    killed: (turn: number) => `You died on turn ${turn}.`,
+    darkness: (turn: number, packs: number, needed: number) =>
+      packs >= needed
+        ? `Night fell at the end of turn ${turn}. You had ${packs} supply packs, but you were not in the Shelter.`
+        : `Night fell at the end of turn ${turn}. You had ${packs} of the ${needed} supply packs you needed.`,
+    zombieDamage: (damage: number, followers: number, there: number) =>
+      `Zombies took ${damage} health. ${count(followers, 'attack')} came from zombies that followed you, ${there} from zombies that were already there.`,
+    cardDamage: (damage: number) => `Your own cards cost ${damage} health.`,
+    blocked: (n: number) => `Block stopped ${n} damage.`,
+    arrivals: (noise: number, dusk: number) => {
+      if (noise > 0 && dusk > 0) return `Noise brought ${count(noise, 'zombie')} and dusk ${dusk}.`
+      return noise > 0
+        ? `Noise brought ${count(noise, 'zombie')}.`
+        : `Dusk brought ${count(dusk, 'zombie')}.`
+    },
+    tips: {
+      followers:
+        'Zombies that have seen you follow one step each turn. Walk two steps in one turn to shake them off (a move card plus the free move), or fight them first.',
+      noise: (threshold: number) =>
+        `Every ${threshold} noise calls a zombie. Quiet cards, fewer searches and fewer loud weapons keep the count down.`,
+      attacked:
+        'Read the warning next to the End turn button. When it says zombies will attack, leave, block or fight first.',
+      packsShort: (needed: number) =>
+        `You need ${needed} packs. The Supermarket always holds one. Head for a pack early and save turns for the walk home.`,
+      notHome:
+        'You had enough packs. Start walking home earlier: dusk turns the turn counter amber.',
+      moreStars: (packs: number) =>
+        `Bring ${packs} packs for one more star, if you dare one more building.`,
+      perfect: 'Full stars. Try a new city.',
+    },
+    stats: {
+      turns: 'Turns',
+      health: 'Health left',
+      packs: 'Supply packs',
+      steps: 'Steps walked',
+      searches: 'Searches',
+      cardsTaken: 'Cards taken',
+      cardsRemoved: 'Cards removed',
+      killed: 'Zombies killed',
+      damage: 'Damage taken',
+      damageValue: (zombies: number, cards: number, blocked: number) =>
+        `${zombies} from zombies, ${cards} from your cards, ${blocked} blocked`,
+      healed: 'Health healed',
+      noise: 'Noise made',
+      arrivals: 'Zombies drawn in',
+      arrivalsValue: (noise: number, dusk: number) => `${noise} by noise, ${dusk} by dusk`,
+      none: 'none',
+    },
+    seed: (seed: number) => `City seed ${seed}. "Same city again" replays this map.`,
   },
 
   log: {
@@ -300,3 +430,7 @@ export const texts = {
     noDestination: 'There is nowhere this card can take you.',
   },
 } as const
+
+function count(n: number, noun: string): string {
+  return `${n} ${noun}${n === 1 ? '' : 's'}`
+}

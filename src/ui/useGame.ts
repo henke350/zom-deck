@@ -15,8 +15,15 @@ interface GameModel {
   readonly nextLogId: number
 }
 
-function init({ seed, setup }: { seed: number; setup?: ExpeditionSetup }): GameModel {
-  const state = newGame(seed, { setup })
+interface GameStart {
+  readonly seed: number
+  readonly setup?: ExpeditionSetup
+  /** Start from this exact state instead (used by tests). */
+  readonly initialState?: GameState
+}
+
+function init({ seed, setup, initialState }: GameStart): GameModel {
+  const state = initialState ?? newGame(seed, { setup })
   const opening = [
     formatEvent({ type: 'turnStarted', turn: state.turn }, state),
     formatEvent({ type: 'cardsDrawn', uids: state.piles.hand.map((c) => c.uid) }, state),
@@ -41,8 +48,8 @@ function reducer(model: GameModel, action: Action): GameModel {
 }
 
 /** Holds one expedition: the engine state, a readable log, and a dispatch function. */
-export function useGame(seed: number, setup?: ExpeditionSetup) {
-  const [model, send] = useReducer(reducer, { seed, setup }, init)
+export function useGame(seed: number, setup?: ExpeditionSetup, initialState?: GameState) {
+  const [model, send] = useReducer(reducer, { seed, setup, initialState }, init)
   const dispatch = useCallback((action: Action) => send(action), [])
   return { state: model.state, log: model.log, dispatch }
 }

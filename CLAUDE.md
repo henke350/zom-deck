@@ -5,7 +5,8 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
-- **Current milestone:** M0–M4 done. Next: **M5 – first complete expedition** (end screen with explanation, rules screen, `ExpeditionResult`).
+- **Current milestone:** M0–M5 done (M5 waits only for the user's own three playthroughs).
+  Next: **M6 – all content and the balance tool** (bots and reports in `src/sim/`).
   Work one milestone at a time and meet its "done" criteria before moving on.
 
 ## Talking to the user
@@ -45,6 +46,10 @@ src/sim/   bots and balance reports (from M6), run in Node
   `src/game/rules.ts`; `validate` refuses them with a reason. Add an effect there
   when its milestone implements it.
 - `src/game/testkit.ts` builds exact game states for tests (`makeState`, incl. `packsAt`).
+- Expedition stats are folded from the events of every action (`src/game/stats.ts`), so they
+  always match what happened. `expeditionResult(state)` returns the result once the game is
+  over; `previewOutcome(state, action)` tells the UI if an action would end the expedition.
+- UI tests can start `GameScreen` from an exact state with `initialState={makeState(...)}`.
 - Search lives in `src/game/search.ts`: pack placement, weighted finds, the
   `chooseFind` phase (take / scrap / decline). A search is always the last effect
   of a card mode, because the game then waits for the player.

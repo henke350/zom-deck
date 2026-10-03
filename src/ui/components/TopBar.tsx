@@ -17,7 +17,7 @@ function Stat({ label, value, tone, hint }: StatProps) {
   )
 }
 
-export function TopBar({ state }: { state: GameState }) {
+export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: () => void }) {
   const { player, balance, piles, turn } = state
   const dusk = turn >= balance.duskFromTurn
   const lowHp = player.hp <= Math.ceil(balance.maxHp / 3)
@@ -61,6 +61,9 @@ export function TopBar({ state }: { state: GameState }) {
       <span className="seed">
         {ui.seed} {state.seed}
       </span>
+      <button type="button" className="btn btn-quiet btn-small" onClick={onShowRules}>
+        {texts.rules.short}
+      </button>
     </header>
   )
 }

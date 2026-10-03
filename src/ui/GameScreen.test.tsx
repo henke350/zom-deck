@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
-import { newGame, zombiesAt } from '../game'
+import { newGame, zombiesAt, type GameState } from '../game'
+import { makeState } from '../game/testkit'
 import { GameScreen } from './GameScreen'
 
 afterEach(cleanup)
@@ -38,6 +39,17 @@ describe('GameScreen', () => {
     await user.click(node('Street'))
     expect(log().getByText(texts.log.moved('Street', '', 0))).toBeTruthy()
     expect(node('Street').getAttribute('aria-label')).toContain(texts.ui.youAreHere)
+  })
+
+  it('shows a hovered place on top of the panel without replacing where you are', async () => {
+    const { node, user } = renderGame()
+    await user.hover(node('Police Station'))
+    const panels = screen.getAllByRole('region', { name: texts.ui.location })
+    expect(panels).toHaveLength(2)
+    expect(within(panels[0]!).getByText(texts.ui.youAreHere)).toBeTruthy()
+    expect(within(panels[1]!).getByText(texts.ui.stepsAway(3))).toBeTruthy()
+    await user.unhover(node('Police Station'))
+    expect(screen.getAllByRole('region', { name: texts.ui.location })).toHaveLength(1)
   })
 
   it('explains why a card cannot be played yet', () => {
@@ -192,5 +204,82 @@ describe('GameScreen: searching', () => {
     expect(within(dialog).getByText(texts.ui.findNoise(1, 0))).toBeTruthy()
     await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
     expect(screen.getByText(`1/${balance.noiseThreshold}`)).toBeTruthy()
+  })
+})
+
+describe('GameScreen: rules and the end of an expedition', () => {
+  const draw = ['bandage', 'bandage', 'bandage', 'bandage', 'bandage', 'bandage']
+
+  function renderState(state: GameState, showRulesOnStart = false) {
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    render(
+      <GameScreen
+        seed={state.seed}
+        initialState={state}
+        showRulesOnStart={showRulesOnStart}
+        {...handlers}
+      />,
+    )
+    const node = (name: string) => screen.getByRole('button', { name: new RegExp(`^${name}`) })
+    return { ...handlers, node, user: userEvent.setup() }
+  }
+
+  it('opens the rules from the status bar and closes them with Escape', async () => {
+    const { user } = renderState(makeState({ draw }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await user.click(screen.getByRole('button', { name: texts.rules.short }))
+    const rules = screen.getByRole('dialog', { name: texts.rules.title })
+    expect(within(rules).getByRole('heading', { name: 'Zombies' })).toBeTruthy()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('can show the rules as soon as the game starts', async () => {
+    const { user } = renderState(makeState({ draw }), true)
+    const rules = screen.getByRole('dialog', { name: texts.rules.title })
+    await user.click(within(rules).getByRole('button', { name: texts.rules.close }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('asks before a move home ends the expedition', async () => {
+    const { node, user } = renderState(makeState({ draw, location: 'street', packs: 3 }))
+    await user.click(node('Shelter'))
+    let ask = screen.getByRole('dialog', { name: texts.confirmHome.title })
+    expect(within(ask).getByText(texts.confirmHome.body(3, 2))).toBeTruthy()
+    expect(within(ask).getByText(texts.confirmHome.next(4))).toBeTruthy()
+
+    await user.click(within(ask).getByRole('button', { name: texts.confirmHome.no }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(node('Street').getAttribute('aria-label')).toContain(texts.ui.youAreHere)
+
+    await user.click(node('Shelter'))
+    ask = screen.getByRole('dialog', { name: texts.confirmHome.title })
+    await user.click(within(ask).getByRole('button', { name: texts.confirmHome.yes }))
+    const end = screen.getByRole('dialog', { name: texts.ui.outcomeTitle.home })
+    expect(within(end).getByText(texts.ui.outcomeStars(2, 3))).toBeTruthy()
+    expect(within(end).getByText(texts.end.home(1, 3))).toBeTruthy()
+    expect(within(end).getByText(texts.end.tips.moreStars(4))).toBeTruthy()
+  })
+
+  it('does not ask when walking home without enough packs', async () => {
+    const { node, user } = renderState(makeState({ draw, location: 'street', packs: 1 }))
+    await user.click(node('Shelter'))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(node('Shelter').getAttribute('aria-label')).toContain(texts.ui.youAreHere)
+  })
+
+  it('explains a death and shows the numbers', async () => {
+    const state = makeState({ draw, hp: 1, location: 'houseA', zombies: [{ at: 'houseA' }] })
+    const { onNewExpedition, user } = renderState(state)
+    await user.click(screen.getByRole('button', { name: texts.ui.endTurn }))
+    const end = screen.getByRole('dialog', { name: texts.ui.outcomeTitle.killed })
+    expect(within(end).getByText(texts.end.killed(1))).toBeTruthy()
+    expect(within(end).getByText(texts.end.zombieDamage(1, 0, 1))).toBeTruthy()
+    expect(within(end).getByText(texts.end.tips.attacked)).toBeTruthy()
+    const stats = within(end).getByRole('region', { name: texts.end.statsHeading })
+    expect(within(stats).getByText(texts.end.stats.health).nextSibling?.textContent).toBe('0')
+    expect(within(end).getByText(texts.end.seed(state.seed))).toBeTruthy()
+    await user.click(within(end).getByRole('button', { name: texts.ui.newExpedition }))
+    expect(onNewExpedition).toHaveBeenCalledOnce()
   })
 })

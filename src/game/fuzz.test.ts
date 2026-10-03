@@ -5,6 +5,7 @@ import { totalCount } from './deck'
 import { applyAction } from './engine'
 import { nextInt } from './rng'
 import { newGame } from './setup'
+import { expeditionResult } from './stats'
 import type { Action, GameState } from './types'
 import { previewEndTurn } from './zombies'
 
@@ -99,6 +100,20 @@ function invariants(start: number) {
     expect(state.turn).toBeLessThanOrEqual(balance.turnLimit)
     expect(state.phase === 'gameOver').toBe(state.outcome !== undefined)
     if (state.phase === 'gameOver') expect(listActions(state)).toEqual([])
+    // The stats explain the health bar and the deck exactly.
+    const { stats } = state
+    expect(player.hp).toBe(
+      stats.startHp + stats.healed - stats.damageFromZombies - stats.damageFromCards,
+    )
+    expect(stats.packsFound).toBe(player.packs)
+    expect(stats.cardsTaken.length + stats.packsFound * balance.heavyLoadPerPack).toBe(
+      state.nextUid - start - 1,
+    )
+    expect(stats.cardsRemoved).toBe(piles.removed.length)
+    expect(stats.attacksByFollowers + stats.attacksByZombiesThere).toBeGreaterThanOrEqual(
+      Math.ceil(stats.damageFromZombies / balance.zombie.damage),
+    )
+    expect(expeditionResult(state) === undefined).toBe(state.outcome === undefined)
   }
 }
 

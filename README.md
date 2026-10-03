@@ -7,7 +7,7 @@ Al tekst i spillet er på engelsk; "One More Building" er en arbejdstitel.
 - **Plan og beslutninger:** [docs/plan.md](docs/plan.md)
 - **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z (privat, indtil det deles)
 - **Spil prototypen i browseren:** https://claude.ai/artifact/1HKHPRedxcpRYNSh6GNZVY (privat, indtil det deles; opdateres ved hver milepæl)
-- **Status:** M0–M4 er færdige. Byen har nu zombier, støj og kamp. Næste milepæl er M5: den første hele ekspedition med slutskærm og regelskærm.
+- **Status:** M0–M5 er bygget. En hel ekspedition kan spilles fra start til slut, med regelskærm og en slutskærm, der forklarer, hvad der skete. Næste milepæl er M6: alt indhold og et balanceværktøj.
 
 ## Sådan kører du spillet lokalt
 
@@ -18,19 +18,20 @@ npm install      # henter værktøjer og biblioteker (kun første gang)
 npm run dev      # starter spillet på http://localhost:5173
 ```
 
-## Sådan prøver du spillet (M4)
+## Sådan prøver du spillet (M5)
 
-1. Klik **Start expedition**.
+1. Klik **Start expedition**. Første gang vises reglerne på én side. Du kan altid åbne dem igen med **How to play** på forsiden eller **Rules** i toplinjen.
 2. Klik på et af de stiplede nabosteder på kortet for at gå dertil gratis (én gang pr. tur).
 3. Spil kort med **Play**. Kort som Run beder dig vælge et sted på kortet; Toolbox beder dig vælge et kort at fjerne.
 4. Klik **Keep** på ét kort for at gemme det til næste tur, og klik **End turn**.
 5. Stå i en bygning og spil **Search**, eller brug **Quick search** i sidepanelet (2 AP, ingen kort). Vælg ét fund, skrot et kort fra hånden, eller tag ingenting.
 6. Supermarket har altid en forsyningspakke; tre andre ligger tilfældigt. Hver pakke lægger et Heavy Load i dit dæk.
-7. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★).
+7. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★). Spillet spørger først **Go home now?**, så du kan vælge at tage én bygning mere.
 8. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger ét skridt efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol).
 9. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
 10. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
 11. Grå knapper viser altid, hvorfor de ikke kan bruges.
+12. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 

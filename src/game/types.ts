@@ -172,7 +172,42 @@ export interface GameState {
   readonly noise: number
   /** Places the player has been this expedition (hidden danger is revealed there). */
   readonly visited: readonly LocationId[]
+  /** Running totals for the end screen. Updated from the events of every action. */
+  readonly stats: Stats
   readonly outcome?: Outcome
+}
+
+export interface Stats {
+  readonly startHp: number
+  readonly steps: number
+  readonly searches: number
+  readonly packsFound: number
+  /** Finds taken, in order. */
+  readonly cardsTaken: readonly CardId[]
+  /** Cards trashed, scrapped or used up. */
+  readonly cardsRemoved: number
+  readonly healed: number
+  /** Health lost to zombie attacks, after Block. */
+  readonly damageFromZombies: number
+  /** Health lost to your own cards (Adrenaline). */
+  readonly damageFromCards: number
+  readonly damageBlocked: number
+  readonly attacksByFollowers: number
+  readonly attacksByZombiesThere: number
+  readonly noiseMade: number
+  readonly zombiesFromNoise: number
+  readonly zombiesFromDusk: number
+  readonly zombiesKilled: number
+}
+
+/** The outcome of one expedition. The version-2 campaign builds on this. */
+export interface ExpeditionResult {
+  readonly outcome: Outcome
+  readonly packs: number
+  readonly hpLeft: number
+  readonly turnsUsed: number
+  readonly cardsFound: readonly CardId[]
+  readonly stats: Stats
 }
 
 /** How an expedition starts. The version-2 campaign fills this in from the base. */
@@ -269,7 +304,12 @@ export type GameEvent =
     }
   | { readonly type: 'cardScrapped'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'findDeclined' }
-  | { readonly type: 'noiseAdded'; readonly amount: number; readonly total: number }
+  | {
+      readonly type: 'noiseAdded'
+      readonly amount: number
+      readonly total: number
+      readonly reason: 'noise' | 'dusk'
+    }
   | {
       readonly type: 'zombieArrived'
       readonly uid: string
@@ -283,7 +323,13 @@ export type GameEvent =
       readonly to: LocationId
     }
   | { readonly type: 'zombieLostTrack'; readonly uid: string }
-  | { readonly type: 'zombieAttacked'; readonly uid: string; readonly damage: number }
+  | {
+      readonly type: 'zombieAttacked'
+      readonly uid: string
+      readonly damage: number
+      /** It followed you this zombie phase. */
+      readonly followed: boolean
+    }
   | { readonly type: 'damageBlocked'; readonly amount: number }
   | {
       readonly type: 'zombieHit'
@@ -297,7 +343,7 @@ export type GameEvent =
   | { readonly type: 'buildingBurned'; readonly location: LocationId }
   | { readonly type: 'apGained'; readonly amount: number }
   | { readonly type: 'healed'; readonly amount: number }
-  | { readonly type: 'hpLost'; readonly amount: number }
+  | { readonly type: 'hpLost'; readonly amount: number; readonly source: 'zombies' | 'card' }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'searchBonusAdded'; readonly amount: number }
   | { readonly type: 'blockAdded'; readonly amount: number }

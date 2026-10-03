@@ -2,6 +2,7 @@ import { defaultContent } from '../data/content'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
 import { chooseFind, performSearch } from './search'
+import { updateStats } from './stats'
 import { validate } from './validate'
 import {
   addNoise,
@@ -38,25 +39,43 @@ export function applyAction(
   if (!validation.ok) throw new Error(`Illegal action ${action.type}: ${validation.reason}`)
 
   const events: GameEvent[] = []
+  const next = step(state, action, content, events)
+  return { state: { ...next, stats: updateStats(next.stats, events) }, events }
+}
+
+/**
+ * How the expedition would end if this action were taken now, or undefined if it goes on
+ * (or the action is illegal). Used to confirm a winning move before it ends the game.
+ */
+export function previewOutcome(
+  state: GameState,
+  action: Action,
+  content: Content = defaultContent,
+): Outcome | undefined {
+  if (!validate(state, action, content).ok) return undefined
+  return applyAction(state, action, content).state.outcome
+}
+
+function step(state: GameState, action: Action, content: Content, events: GameEvent[]): GameState {
   switch (action.type) {
     case 'playCard':
-      return { state: playCard(state, action, content, events), events }
+      return playCard(state, action, content, events)
     case 'freeMove':
-      return { state: freeMove(state, action, content, events), events }
+      return freeMove(state, action, content, events)
     case 'quickSearch': {
       const { cost, options } = state.balance.quickSearch
       const paid = { ...state, player: { ...state.player, ap: state.player.ap - cost } }
       const spec = { base: options, extra: 0, quick: true, noise: state.balance.searchNoise }
-      return { state: performSearch(paid, content, spec, events), events }
+      return performSearch(paid, content, spec, events)
     }
     case 'takeFind':
-      return { state: chooseFind(state, { take: action.card }, content, events), events }
+      return chooseFind(state, { take: action.card }, content, events)
     case 'scrapCard':
-      return { state: chooseFind(state, { scrap: action.uid }, content, events), events }
+      return chooseFind(state, { scrap: action.uid }, content, events)
     case 'declineFind':
-      return { state: chooseFind(state, 'decline', content, events), events }
+      return chooseFind(state, 'decline', content, events)
     case 'endTurn':
-      return { state: endTurn(state, action, content, events), events }
+      return endTurn(state, action, content, events)
   }
 }
 
@@ -151,7 +170,7 @@ function resolveEffect(
       return { ...state, player: { ...player, hp } }
     }
     case 'loseHp':
-      events.push({ type: 'hpLost', amount: effect.amount })
+      events.push({ type: 'hpLost', amount: effect.amount, source: 'card' })
       return { ...state, player: { ...player, hp: player.hp - effect.amount } }
     case 'searchBonus':
       events.push({ type: 'searchBonusAdded', amount: effect.amount })

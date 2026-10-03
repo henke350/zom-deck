@@ -136,7 +136,7 @@ export function addNoise(
   if (amount <= 0) return state
   const threshold = state.balance.noiseThreshold
   let noise = state.noise + amount
-  events.push({ type: 'noiseAdded', amount, total: noise })
+  events.push({ type: 'noiseAdded', amount, total: noise, reason })
   let next: GameState = state
   while (noise >= threshold) {
     noise -= threshold
@@ -194,12 +194,14 @@ export function zombiePhase(state: GameState, content: Content, events: GameEven
   if (attackers.length === 0) return next
 
   const damage = state.balance.zombie.damage
-  for (const z of attackers) events.push({ type: 'zombieAttacked', uid: z.uid, damage })
+  for (const z of attackers) {
+    events.push({ type: 'zombieAttacked', uid: z.uid, damage, followed: followed.has(z.uid) })
+  }
   const total = attackers.length * damage
   const blocked = Math.min(next.player.block, total)
   if (blocked > 0) events.push({ type: 'damageBlocked', amount: blocked })
   const lost = total - blocked
-  if (lost > 0) events.push({ type: 'hpLost', amount: lost })
+  if (lost > 0) events.push({ type: 'hpLost', amount: lost, source: 'zombies' })
   return { ...next, player: { ...next.player, hp: next.player.hp - lost } }
 }
 

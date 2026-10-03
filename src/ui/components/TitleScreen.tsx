@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
+import { markRulesSeen } from '../storage'
+import { RulesDialog } from './RulesDialog'
 
 const facts = [
   { value: balance.turnLimit, label: texts.facts.turns },
@@ -9,6 +12,7 @@ const facts = [
 ]
 
 export function TitleScreen({ onStart }: { onStart: () => void }) {
+  const [rulesOpen, setRulesOpen] = useState(false)
   return (
     <main className="title-screen">
       <p className="eyebrow">{texts.workingTitleNote}</p>
@@ -27,13 +31,28 @@ export function TitleScreen({ onStart }: { onStart: () => void }) {
       </section>
 
       <div className="actions">
-        <button type="button" className="btn btn-primary" onClick={onStart}>
-          {texts.startExpedition}
-        </button>
+        <div className="action-row">
+          <button type="button" className="btn btn-primary" onClick={onStart}>
+            {texts.startExpedition}
+          </button>
+          <button type="button" className="btn" onClick={() => setRulesOpen(true)}>
+            {texts.rules.open}
+          </button>
+        </div>
         <p className="reason">{texts.prototypeNote}</p>
       </div>
 
       <p className="status">{texts.statusLine}</p>
+
+      {rulesOpen && (
+        <RulesDialog
+          balance={balance}
+          onClose={() => {
+            markRulesSeen()
+            setRulesOpen(false)
+          }}
+        />
+      )}
     </main>
   )
 }

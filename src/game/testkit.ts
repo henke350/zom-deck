@@ -1,5 +1,6 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
 import { defaultContent } from '../data/content'
+import { emptyStats } from './stats'
 import type { CardId, CardInstance, GameState, LocationId, SiteState, Tag, Zombie } from './types'
 
 /** Builds a game state with exact piles, for tests. Uids show the pile: h1 (hand), d1 (draw), x1 (discard). */
@@ -66,6 +67,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     inPlay: instances('p', spec.inPlay),
     removed: instances('r', spec.removed),
   }
+  const hp = spec.hp ?? balance.maxHp
   return {
     seed: spec.seed ?? 1,
     rng: spec.seed ?? 1,
@@ -74,7 +76,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     phase: 'action',
     player: {
       location,
-      hp: spec.hp ?? balance.maxHp,
+      hp,
       ap: spec.ap ?? balance.apPerTurn,
       freeMoveUsed: spec.freeMoveUsed ?? false,
       packs: spec.packs ?? 0,
@@ -89,6 +91,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     visited: spec.visited ?? [...new Set(['shelter', location])],
     tagsPlayedThisTurn: spec.tags ?? [],
     nextUid: 1000,
+    stats: emptyStats(hp),
   }
 }
 
