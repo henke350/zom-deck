@@ -1,18 +1,75 @@
-import type { LocationDef, LocationId } from '../game/types'
+import type { LocationDef, LocationId, LootEntry } from '../game/types'
+
+/** Mixed everyday finds in homes. Weights are relative chances. */
+const houseLoot = [
+  { card: 'softSoles', weight: 2 },
+  { card: 'baseballBat', weight: 2 },
+  { card: 'bandage', weight: 2 },
+  { card: 'flashlight', weight: 2 },
+  { card: 'runningShoes', weight: 1 },
+  { card: 'alarmClock', weight: 1 },
+  { card: 'districtMap', weight: 1 },
+  { card: 'travelLight', weight: 1 },
+] as const satisfies readonly LootEntry[]
 
 /**
- * The fixed city map of the prototype (docs/plan.md, section 3.2).
+ * The fixed city map of the prototype (docs/plan.md, sections 3.2 and 11).
  * Names and descriptions live in texts.en.ts under `locations`.
  */
 export const locations = {
-  workshop: { id: 'workshop', kind: 'building', mapPos: { x: 120, y: 70 } },
-  police: { id: 'police', kind: 'building', mapPos: { x: 520, y: 70 } },
-  houseA: { id: 'houseA', kind: 'building', mapPos: { x: 120, y: 200 } },
+  workshop: {
+    id: 'workshop',
+    kind: 'building',
+    mapPos: { x: 120, y: 70 },
+    lootPool: [
+      { card: 'toolbox', weight: 3 },
+      { card: 'axe', weight: 3 },
+      { card: 'lockpick', weight: 2 },
+      { card: 'flashlight', weight: 2 },
+      { card: 'molotov', weight: 2 },
+    ],
+  },
+  police: {
+    id: 'police',
+    kind: 'building',
+    mapPos: { x: 520, y: 70 },
+    lootPool: [
+      { card: 'pistol', weight: 3 },
+      { card: 'kevlarVest', weight: 3 },
+      { card: 'baseballBat', weight: 2 },
+      { card: 'districtMap', weight: 2 },
+      { card: 'flashlight', weight: 1 },
+    ],
+  },
+  houseA: { id: 'houseA', kind: 'building', mapPos: { x: 120, y: 200 }, lootPool: houseLoot },
   street: { id: 'street', kind: 'street', mapPos: { x: 320, y: 200 } },
-  supermarket: { id: 'supermarket', kind: 'building', mapPos: { x: 520, y: 200 } },
+  supermarket: {
+    id: 'supermarket',
+    kind: 'building',
+    mapPos: { x: 520, y: 200 },
+    alwaysHasPack: true,
+    lootPool: [
+      { card: 'runningShoes', weight: 2 },
+      { card: 'alarmClock', weight: 2 },
+      { card: 'travelLight', weight: 2 },
+      { card: 'painkillers', weight: 2 },
+      { card: 'bandage', weight: 2 },
+    ],
+  },
   shelter: { id: 'shelter', kind: 'shelter', mapPos: { x: 120, y: 330 } },
-  pharmacy: { id: 'pharmacy', kind: 'building', mapPos: { x: 320, y: 330 } },
-  houseB: { id: 'houseB', kind: 'building', mapPos: { x: 520, y: 330 } },
+  pharmacy: {
+    id: 'pharmacy',
+    kind: 'building',
+    mapPos: { x: 320, y: 330 },
+    lootPool: [
+      { card: 'bandage', weight: 3 },
+      { card: 'painkillers', weight: 3 },
+      { card: 'adrenaline', weight: 2 },
+      { card: 'travelLight', weight: 1 },
+      { card: 'alarmClock', weight: 1 },
+    ],
+  },
+  houseB: { id: 'houseB', kind: 'building', mapPos: { x: 520, y: 330 }, lootPool: houseLoot },
 } as const satisfies Record<string, LocationDef>
 
 export type KnownLocationId = keyof typeof locations

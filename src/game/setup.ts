@@ -2,6 +2,7 @@ import { balance as defaultBalance, type Balance } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
 import { normalizeSeed, shuffle } from './rng'
+import { placePacks } from './search'
 import type { CardId, CardInstance, Content, ExpeditionSetup, GameEvent, GameState } from './types'
 
 export interface NewGameOptions {
@@ -32,7 +33,8 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
 
   const instances: CardInstance[] = deckIds.map((card, i) => ({ uid: `c${i + 1}`, card }))
   const normalized = normalizeSeed(seed)
-  const [draw, rng] = shuffle(instances, normalized)
+  const [draw, afterDeck] = shuffle(instances, normalized)
+  const [sites, rng] = placePacks(content, balance, afterDeck)
 
   const initial: GameState = {
     seed: normalized,
@@ -50,6 +52,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
       block: 0,
     },
     piles: { draw, hand: [], inPlay: [], discard: [], removed: [] },
+    sites,
     tagsPlayedThisTurn: [],
     nextUid: instances.length + 1,
   }

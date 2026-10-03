@@ -1,5 +1,6 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
-import type { CardId, CardInstance, GameState, LocationId, Tag } from './types'
+import { defaultContent } from '../data/content'
+import type { CardId, CardInstance, GameState, LocationId, SiteState, Tag } from './types'
 
 /** Builds a game state with exact piles, for tests. Uids show the pile: h1 (hand), d1 (draw), x1 (discard). */
 export interface StateSpec {
@@ -17,6 +18,10 @@ export interface StateSpec {
   readonly tags?: readonly Tag[]
   readonly balance?: Balance
   readonly seed?: number
+  /** Buildings that hide a pack. Default: none. */
+  readonly packsAt?: readonly LocationId[]
+  /** Override searches left per building. */
+  readonly searchesLeft?: Readonly<Record<LocationId, number>>
 }
 
 function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] {
@@ -25,6 +30,15 @@ function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] 
 
 export function makeState(spec: StateSpec = {}): GameState {
   const balance = spec.balance ?? defaultBalance
+  const sites: Record<LocationId, SiteState> = {}
+  for (const loc of Object.values(defaultContent.locations)) {
+    if (loc.kind !== 'building') continue
+    sites[loc.id] = {
+      searchesLeft: spec.searchesLeft?.[loc.id] ?? balance.searchesPerBuilding,
+      hasPack: spec.packsAt?.includes(loc.id) ?? false,
+      packTaken: false,
+    }
+  }
   const piles = {
     hand: instances('h', spec.hand),
     draw: instances('d', spec.draw),
@@ -48,6 +62,7 @@ export function makeState(spec: StateSpec = {}): GameState {
       block: 0,
     },
     piles,
+    sites,
     tagsPlayedThisTurn: spec.tags ?? [],
     nextUid: 1000,
   }

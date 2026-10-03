@@ -1,7 +1,7 @@
 import { texts } from '../../data/texts.en'
 import type { CardInstance, Content, GameState, ModeOption } from '../../game'
-import { isFollowUpActive, modeNoise } from '../../game'
 import { cardText } from '../names'
+import { CardFace } from './CardFace'
 
 export interface PendingPlay {
   readonly uid: string
@@ -46,9 +46,6 @@ function CardView({
   const def = content.cards[card.card]
   const info = cardText(card.card)
   const options = optionsByUid.get(card.uid) ?? []
-  const firstMode = def?.modes[0]
-  const noise = firstMode ? modeNoise(state, firstMode) : 0
-  const followUpReady = def?.modes.some((m) => isFollowUpActive(state, m)) ?? false
   const isPendingCard = pending?.uid === card.uid
   const trashTarget =
     pending?.kind === 'trash' &&
@@ -82,20 +79,7 @@ function CardView({
 
   return (
     <li className={classes} data-card={card.card}>
-      <div className="card-face">
-        <div className="card-head">
-          <span className="cost" aria-label={texts.ui.cost(def?.cost ?? 0)}>
-            {def?.kind === 'junk' ? '–' : (def?.cost ?? 0)}
-          </span>
-          <h3>{info.name}</h3>
-          {noise > 0 && <span className="noise">{texts.ui.noise(noise)}</span>}
-        </div>
-        <p className="card-text">{info.text}</p>
-        <p className="card-tags">
-          {def?.tags.map((t) => texts.tags[t]).join(' · ')}
-          {followUpReady && <span className="follow-up">{texts.ui.followUpActive}</span>}
-        </p>
-      </div>
+      <CardFace card={card.card} state={state} content={content} showFollowUp />
 
       <div className="card-actions">
         {pending?.kind === 'trash' ? (

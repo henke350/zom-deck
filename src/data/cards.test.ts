@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { balance } from './balance'
 import { cards, starterCardIds } from './cards'
+import type { CardDef } from '../game/types'
 import { texts } from './texts.en'
 
 const all = Object.entries(cards)
@@ -46,6 +47,18 @@ describe('card catalog', () => {
 
   it('builds the starter deck from known cards', () => {
     for (const id of Object.keys(balance.starterDeck)) expect(cards).toHaveProperty(id)
+  })
+
+  it('only searches as the last effect, because the game then waits for a choice', () => {
+    const defs: readonly CardDef[] = Object.values(cards)
+    for (const def of defs) {
+      for (const mode of def.modes) {
+        for (const effects of [mode.effects, mode.followUp?.effects ?? []]) {
+          const at = effects.findIndex((e) => e.kind === 'search')
+          if (at >= 0) expect(at).toBe(effects.length - 1)
+        }
+      }
+    }
   })
 
   it('has 16 find cards', () => {

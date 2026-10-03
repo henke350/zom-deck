@@ -52,6 +52,11 @@ export function listActions(state: GameState, content: Content = defaultContent)
   }
 
   for (const to of Object.keys(content.locations)) candidates.push({ type: 'freeMove', to })
+  candidates.push({ type: 'quickSearch' })
+
+  for (const card of state.pendingFind?.options ?? []) candidates.push({ type: 'takeFind', card })
+  for (const card of hand) candidates.push({ type: 'scrapCard', uid: card.uid })
+  candidates.push({ type: 'declineFind' })
 
   candidates.push({ type: 'endTurn' })
   if (state.balance.keepCards > 0) {

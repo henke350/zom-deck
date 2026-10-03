@@ -5,6 +5,7 @@ import { cardOptions, freeMoveTargets, validate } from '../game'
 import type { Action, ExpeditionSetup, LocationId, ModeOption, Validation } from '../game'
 import { CityMap } from './components/CityMap'
 import { EventLog } from './components/EventLog'
+import { FindDialog } from './components/FindDialog'
 import { GameOverPanel } from './components/GameOverPanel'
 import { Hand, type PendingPlay } from './components/Hand'
 import { LocationPanel } from './components/LocationPanel'
@@ -118,7 +119,14 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
           onFocusLocation={setHovered}
         />
         <aside className="side">
-          <LocationPanel state={state} content={content} location={shown} moveCheck={moveCheck} />
+          <LocationPanel
+            state={state}
+            content={content}
+            location={shown}
+            moveCheck={moveCheck}
+            quickSearch={validate(state, { type: 'quickSearch' }, content)}
+            onQuickSearch={() => act({ type: 'quickSearch' })}
+          />
           <EventLog entries={log} />
         </aside>
       </main>
@@ -141,7 +149,7 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
           <button
             type="button"
             className="btn btn-primary"
-            disabled={pending !== null || state.phase === 'gameOver'}
+            disabled={pending !== null || !validate(state, { type: 'endTurn' }, content).ok}
             onClick={endTurn}
           >
             {keepInHand
@@ -160,6 +168,10 @@ export function GameScreen({ seed, setup, onNewExpedition, onRestart, onExit }: 
           onToggleKeep={(uid) => setKeepUid((current) => (current === uid ? null : uid))}
         />
       </section>
+
+      {state.phase === 'chooseFind' && state.pendingFind && (
+        <FindDialog state={state} content={content} find={state.pendingFind} onChoose={act} />
+      )}
 
       {state.outcome && (
         <GameOverPanel

@@ -56,7 +56,15 @@ function playRandomly(seed: number, check: (state: GameState) => void): Playthro
 function invariants(start: number) {
   return (state: GameState) => {
     const { piles, player, balance } = state
-    expect(totalCount(piles)).toBe(start)
+    // Cards only appear as finds or Heavy Loads, and each new card takes the next uid.
+    expect(totalCount(piles)).toBe(start + (state.nextUid - start - 1))
+    const hidden = Object.values(state.sites).filter((s) => s.hasPack).length
+    expect(player.packs + hidden).toBe(balance.packsOnMap)
+    for (const site of Object.values(state.sites)) {
+      expect(site.searchesLeft).toBeGreaterThanOrEqual(0)
+      expect(site.searchesLeft).toBeLessThanOrEqual(balance.searchesPerBuilding)
+    }
+    expect(state.phase === 'chooseFind').toBe(state.pendingFind !== undefined)
     const uids = [piles.draw, piles.hand, piles.inPlay, piles.discard, piles.removed]
       .flat()
       .map((c) => c.uid)
@@ -76,7 +84,7 @@ describe('random playthroughs', () => {
     for (let seed = 1; seed <= 150; seed++) {
       const { final } = playRandomly(seed, invariants(fuzzDeck.length))
       expect(final.phase).toBe('gameOver')
-      expect(['darkness', 'killed']).toContain(final.outcome?.cause)
+      expect(['darkness', 'killed', 'home']).toContain(final.outcome?.cause)
     }
   })
 

@@ -119,7 +119,7 @@ describe('move cards', () => {
     expect(toolbox?.actions).toHaveLength(0)
     expect(toolbox?.reason).toBe(texts.reasons.noTrashTarget)
     const [search] = cardOptions(makeState({ hand: ['search'] }), 'h1')
-    expect(search?.reason).toBe(texts.reasons.notBuiltYet)
+    expect(search?.reason).toBe(texts.reasons.nothingToSearch)
   })
 })
 

@@ -10,6 +10,7 @@ import {
   moveStepsOf,
   trashFilterOf,
 } from './rules'
+import { checkSearchHere } from './search'
 import type {
   Action,
   Content,
@@ -23,6 +24,8 @@ import type {
 const ok: Validation = { ok: true }
 const no = (reason: string): Validation => ({ ok: false, reason })
 
+const findChoices: ReadonlySet<Action['type']> = new Set(['takeFind', 'scrapCard', 'declineFind'])
+
 /** Is the action legal? If not, `reason` explains why (shown in the UI). */
 export function validate(
   state: GameState,
@@ -30,11 +33,32 @@ export function validate(
   content: Content = defaultContent,
 ): Validation {
   if (state.phase === 'gameOver') return no(texts.reasons.gameOver)
+  const isFindChoice = findChoices.has(action.type)
+  if (state.phase === 'chooseFind' && !isFindChoice) return no(texts.reasons.chooseFindFirst)
+  if (state.phase !== 'chooseFind' && isFindChoice) return no(texts.reasons.noFindToChoose)
+
   switch (action.type) {
     case 'playCard':
       return validatePlayCard(state, action, content)
     case 'freeMove':
       return validateFreeMove(state, action, content)
+    case 'quickSearch': {
+      const here = checkSearchHere(state, content)
+      if (!here.ok) return here
+      const cost = state.balance.quickSearch.cost
+      if (state.player.ap < cost) return no(texts.reasons.notEnoughAp(cost, state.player.ap))
+      return ok
+    }
+    case 'takeFind':
+      return state.pendingFind?.options.includes(action.card) ? ok : no(texts.reasons.notAFind)
+    case 'scrapCard': {
+      const target = state.piles.hand.find((c) => c.uid === action.uid)
+      if (!target) return no(texts.reasons.trashNotInHand)
+      if (!content.cards[target.card]?.trashable) return no(texts.reasons.notTrashable)
+      return ok
+    }
+    case 'declineFind':
+      return ok
     case 'endTurn':
       return validateEndTurn(state, action)
   }
@@ -57,6 +81,11 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
 
   const effects = activeEffects(state, mode)
   if (effects.some((e) => !implementedEffects.has(e.kind))) return no(texts.reasons.notBuiltYet)
+
+  if (effects.some((e) => e.kind === 'search')) {
+    const here = checkSearchHere(state, content)
+    if (!here.ok) return here
+  }
 
   const filter = trashFilterOf(effects)
   if (filter) {

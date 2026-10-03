@@ -1,6 +1,7 @@
 import { defaultContent } from '../data/content'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, starsFor } from './rules'
+import { chooseFind, performSearch } from './search'
 import { validate } from './validate'
 import type {
   Action,
@@ -34,6 +35,23 @@ export function applyAction(
       return { state: playCard(state, action, content, events), events }
     case 'freeMove':
       return { state: freeMove(state, action, content, events), events }
+    case 'quickSearch': {
+      const { cost, options } = state.balance.quickSearch
+      const paid = { ...state, player: { ...state.player, ap: state.player.ap - cost } }
+      const searched = performSearch(
+        paid,
+        content,
+        { base: options, extra: 0, quick: true },
+        events,
+      )
+      return { state: searched, events }
+    }
+    case 'takeFind':
+      return { state: chooseFind(state, { take: action.card }, events), events }
+    case 'scrapCard':
+      return { state: chooseFind(state, { scrap: action.uid }, events), events }
+    case 'declineFind':
+      return { state: chooseFind(state, 'decline', events), events }
     case 'endTurn':
       return { state: endTurn(state, action, events), events }
   }
@@ -142,6 +160,13 @@ function resolveEffect(
         },
       }
     }
+    case 'search':
+      return performSearch(
+        state,
+        content,
+        { base: state.balance.searchOptions, extra: effect.bonus ?? 0, quick: false },
+        events,
+      )
     case 'move': {
       const to = action.target?.location
       if (!to) throw new Error('move: validated destination is missing')

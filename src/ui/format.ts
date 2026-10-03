@@ -20,6 +20,18 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
         event.by === 'free' ? '' : cardText(event.by).name,
         event.apCost,
       )
+    case 'searched':
+      return log.searched(locationText(event.location).name, event.options.length, event.quick)
+    case 'packFound':
+      return log.packFound(event.packs)
+    case 'cardGained':
+      return event.reason === 'pack'
+        ? log.heavyLoadGained
+        : log.findTaken(cardText(event.card).name)
+    case 'cardScrapped':
+      return log.cardScrapped(cardText(event.card).name)
+    case 'findDeclined':
+      return log.findDeclined
     case 'apGained':
       return log.apGained(event.amount)
     case 'healed':

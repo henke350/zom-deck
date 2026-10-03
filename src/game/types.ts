@@ -59,6 +59,31 @@ export interface LocationDef {
   readonly kind: 'shelter' | 'street' | 'building'
   /** Position on the city map (SVG units, 640 × 400). */
   readonly mapPos: { readonly x: number; readonly y: number }
+  /** Cards a search here can reveal, with relative weights. Buildings only. */
+  readonly lootPool?: readonly LootEntry[]
+  /** This building always holds a supply pack (the Supermarket). */
+  readonly alwaysHasPack?: boolean
+}
+
+export interface LootEntry {
+  readonly card: CardId
+  readonly weight: number
+}
+
+/** What a building looks like during an expedition. */
+export interface SiteState {
+  readonly searchesLeft: number
+  /** A supply pack is still hidden here. It is found by the next search. */
+  readonly hasPack: boolean
+  /** A supply pack was found here this expedition. */
+  readonly packTaken: boolean
+}
+
+/** A search waiting for the player to choose. */
+export interface PendingFind {
+  readonly location: LocationId
+  readonly options: readonly CardId[]
+  readonly packFound: boolean
 }
 
 export interface Content {
@@ -67,6 +92,8 @@ export interface Content {
   /** Two-way connections between neighbouring locations. */
   readonly connections: readonly (readonly [LocationId, LocationId])[]
   readonly startLocation: LocationId
+  /** The junk card added to the deck for each supply pack found (Heavy Load). */
+  readonly packCard: CardId
 }
 
 /** One physical card. Two copies of the same card have different uids. */
@@ -112,9 +139,13 @@ export interface GameState {
   readonly rng: number
   readonly balance: Balance
   readonly turn: number
-  readonly phase: 'action' | 'gameOver'
+  /** chooseFind: a search revealed finds and the player must take, scrap or decline. */
+  readonly phase: 'action' | 'chooseFind' | 'gameOver'
   readonly player: PlayerState
   readonly piles: Piles
+  /** Buildings only: searches left and hidden packs. */
+  readonly sites: Readonly<Record<LocationId, SiteState>>
+  readonly pendingFind?: PendingFind
   readonly tagsPlayedThisTurn: readonly Tag[]
   readonly nextUid: number
   readonly outcome?: Outcome
@@ -139,13 +170,40 @@ export interface FreeMoveAction {
   readonly to: LocationId
 }
 
+/** Search without a card: costs more AP and reveals fewer finds. */
+export interface QuickSearchAction {
+  readonly type: 'quickSearch'
+}
+
+export interface TakeFindAction {
+  readonly type: 'takeFind'
+  readonly card: CardId
+}
+
+/** Instead of taking a find, remove a card from your hand for good. */
+export interface ScrapCardAction {
+  readonly type: 'scrapCard'
+  readonly uid: string
+}
+
+export interface DeclineFindAction {
+  readonly type: 'declineFind'
+}
+
 export interface EndTurnAction {
   readonly type: 'endTurn'
   /** Unplayed cards to keep in hand for the next turn. */
   readonly keep?: readonly string[]
 }
 
-export type Action = PlayCardAction | FreeMoveAction | EndTurnAction
+export type Action =
+  | PlayCardAction
+  | FreeMoveAction
+  | QuickSearchAction
+  | TakeFindAction
+  | ScrapCardAction
+  | DeclineFindAction
+  | EndTurnAction
 
 export type GameEvent =
   | { readonly type: 'turnStarted'; readonly turn: number }
@@ -167,6 +225,21 @@ export type GameEvent =
       readonly by: 'free' | CardId
       readonly apCost: number
     }
+  | {
+      readonly type: 'searched'
+      readonly location: LocationId
+      readonly options: readonly CardId[]
+      readonly quick: boolean
+    }
+  | { readonly type: 'packFound'; readonly location: LocationId; readonly packs: number }
+  | {
+      readonly type: 'cardGained'
+      readonly uid: string
+      readonly card: CardId
+      readonly reason: 'find' | 'pack'
+    }
+  | { readonly type: 'cardScrapped'; readonly uid: string; readonly card: CardId }
+  | { readonly type: 'findDeclined' }
   | { readonly type: 'apGained'; readonly amount: number }
   | { readonly type: 'healed'; readonly amount: number }
   | { readonly type: 'hpLost'; readonly amount: number }

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
+import { newGame } from '../game'
 import { GameScreen } from './GameScreen'
 
 afterEach(cleanup)
@@ -43,7 +44,7 @@ describe('GameScreen', () => {
     const { card } = renderGame()
     const play = card('search').getByRole('button', { name: texts.ui.play }) as HTMLButtonElement
     expect(play.disabled).toBe(true)
-    expect(card('search').getByText(texts.reasons.notBuiltYet)).toBeTruthy()
+    expect(card('search').getByText(texts.reasons.nothingToSearch)).toBeTruthy()
     expect(card('nerves').getByText(texts.reasons.unplayable)).toBeTruthy()
   })
 
@@ -87,5 +88,74 @@ describe('GameScreen', () => {
     const dialog = screen.getByRole('dialog', { name: texts.ui.outcomeTitle.darkness })
     await user.click(within(dialog).getByRole('button', { name: texts.ui.sameCity }))
     expect(onRestart).toHaveBeenCalledOnce()
+  })
+})
+
+describe('GameScreen: searching', () => {
+  /** "Take <card>" buttons, not the "Take nothing" button. */
+  const takeFindButton = new RegExp(`^${texts.ui.take} (?!nothing)`)
+  const deck = ['search', 'search', 'nerves', 'bandage', 'run']
+
+  /** First seed where House A hides a supply pack (or does not). */
+  function seedWhere(houseAHasPack: boolean) {
+    for (let seed = 1; seed < 500; seed++) {
+      if (newGame(seed, { setup: { startDeck: deck } }).sites.houseA?.hasPack === houseAHasPack) {
+        return seed
+      }
+    }
+    throw new Error('no matching seed')
+  }
+
+  function renderAt(houseAHasPack: boolean) {
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    const view = render(
+      <GameScreen seed={seedWhere(houseAHasPack)} setup={{ startDeck: deck }} {...handlers} />,
+    )
+    const log = () => within(screen.getByRole('region', { name: texts.ui.log }))
+    const houseA = () => screen.getByRole('button', { name: /^House A/ })
+    return { view, log, houseA, user: userEvent.setup() }
+  }
+
+  it('searches with a card and takes a find', async () => {
+    const { view, log, houseA, user } = renderAt(false)
+    await user.click(houseA())
+    const searchCard = view.container.querySelector<HTMLElement>('[data-card="search"]')
+    await user.click(within(searchCard!).getByRole('button', { name: texts.ui.play }))
+    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    const takes = within(dialog).getAllByRole('button', { name: takeFindButton })
+    expect(takes).toHaveLength(3)
+    await user.click(takes[0]!)
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(log().getByText(/^You take .+ It goes into your discard pile\.$/)).toBeTruthy()
+    expect(houseA().textContent).toContain(texts.ui.mapSearches(1, 2))
+  })
+
+  it('quick-searches without a card and can take nothing', async () => {
+    const { log, houseA, user } = renderAt(false)
+    await user.click(houseA())
+    await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
+    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    expect(within(dialog).getAllByRole('button', { name: takeFindButton })).toHaveLength(2)
+    await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
+    expect(log().getByText(texts.log.findDeclined)).toBeTruthy()
+  })
+
+  it('can scrap a card from hand instead of taking a find', async () => {
+    const { log, houseA, user } = renderAt(false)
+    await user.click(houseA())
+    await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
+    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    await user.click(within(dialog).getByRole('button', { name: texts.ui.scrap('Nerves') }))
+    expect(log().getByText(texts.log.cardScrapped('Nerves'))).toBeTruthy()
+  })
+
+  it('finds a supply pack and shows it', async () => {
+    const { houseA, user } = renderAt(true)
+    await user.click(houseA())
+    await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
+    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    expect(within(dialog).getByText(texts.ui.packBanner(1))).toBeTruthy()
+    await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
+    expect(screen.getByText(`1/${balance.packsToWin}`)).toBeTruthy()
   })
 })

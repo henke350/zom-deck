@@ -5,7 +5,7 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
-- **Current milestone:** M0–M2 done. Next: **M3 – search, finds and supply packs**.
+- **Current milestone:** M0–M3 done. Next: **M4 – zombies, combat and noise**.
   Work one milestone at a time and meet its "done" criteria before moving on.
 
 ## Talking to the user
@@ -44,7 +44,10 @@ src/sim/   bots and balance reports (from M6), run in Node
 - Effects the engine cannot resolve yet are left out of `implementedEffects` in
   `src/game/rules.ts`; `validate` refuses them with a reason. Add an effect there
   when its milestone implements it.
-- `src/game/testkit.ts` builds exact game states for tests (`makeState`).
+- `src/game/testkit.ts` builds exact game states for tests (`makeState`, incl. `packsAt`).
+- Search lives in `src/game/search.ts`: pack placement, weighted finds, the
+  `chooseFind` phase (take / scrap / decline). A search is always the last effect
+  of a card mode, because the game then waits for the player.
 - UI: `src/ui/GameScreen.tsx` composes `src/ui/components/*`; `useGame` holds the
   engine state and a readable log. The UI gets choices and reasons from
   `cardOptions`, `freeMoveTargets` and `validate`, never from its own rules.

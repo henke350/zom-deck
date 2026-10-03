@@ -73,3 +73,29 @@ describe('city map data', () => {
     expect(distance(island, 'shelter', 'police')).toBe(Number.POSITIVE_INFINITY)
   })
 })
+
+describe('loot pools', () => {
+  const locs = Object.values(defaultContent.locations)
+
+  it('exist for every building and nowhere else', () => {
+    for (const loc of locs) {
+      if (loc.kind === 'building') expect(loc.lootPool?.length ?? 0).toBeGreaterThan(0)
+      else expect(loc.lootPool).toBeUndefined()
+    }
+  })
+
+  it('hold at least 5 different playable cards, so bonus searches can show 5', () => {
+    for (const loc of locs.filter((l) => l.kind === 'building')) {
+      const cards = new Set(loc.lootPool?.map((entry) => entry.card))
+      expect(cards.size).toBeGreaterThanOrEqual(5)
+      for (const entry of loc.lootPool ?? []) {
+        expect(defaultContent.cards[entry.card]?.kind).toBe('action')
+        expect(entry.weight).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('put the guaranteed pack in the Supermarket only', () => {
+    expect(locs.filter((l) => l.alwaysHasPack).map((l) => l.id)).toEqual(['supermarket'])
+  })
+})

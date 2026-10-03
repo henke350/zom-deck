@@ -1,7 +1,7 @@
 import { ownedCount } from './deck'
 import type { CardDef, CardMode, Content, Effect, EffectKind, GameState } from './types'
 
-/** Effects the engine can resolve so far. Search arrives in M3, zombies in M4. */
+/** Effects the engine can resolve so far. Zombie effects arrive in M4. */
 export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'gainAp',
   'draw',
@@ -11,6 +11,7 @@ export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'searchBonus',
   'block',
   'move',
+  'search',
 ])
 
 export function isFollowUpActive(state: GameState, mode: CardMode): boolean {

@@ -2,6 +2,7 @@ import type { KeyboardEvent } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Content, GameState, LocationId } from '../../game'
 import { locationText } from '../names'
+import { siteSummary } from '../sites'
 
 interface CityMapProps {
   readonly state: GameState
@@ -84,7 +85,7 @@ export function CityMap({
                 {name}
               </text>
               <text className="node-kind" x={x} y={y + 15} textAnchor="middle">
-                {texts.locationKinds[loc.kind]}
+                {siteSummary(state, content, loc.id)?.short ?? texts.locationKinds[loc.kind]}
               </text>
             </g>
           )
