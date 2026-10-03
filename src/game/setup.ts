@@ -26,6 +26,9 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   for (const id of deckIds) {
     if (!content.cards[id]) throw new Error(`Unknown card in start deck: ${id}`)
   }
+  if (!content.locations[content.startLocation]) {
+    throw new Error(`Unknown start location: ${content.startLocation}`)
+  }
 
   const instances: CardInstance[] = deckIds.map((card, i) => ({ uid: `c${i + 1}`, card }))
   const normalized = normalizeSeed(seed)
@@ -37,7 +40,15 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     balance,
     turn: 0,
     phase: 'action',
-    player: { hp: options.setup?.startHp ?? balance.maxHp, ap: 0, searchBonus: 0, block: 0 },
+    player: {
+      location: content.startLocation,
+      hp: options.setup?.startHp ?? balance.maxHp,
+      ap: 0,
+      freeMoveUsed: false,
+      packs: 0,
+      searchBonus: 0,
+      block: 0,
+    },
     piles: { draw, hand: [], inPlay: [], discard: [], removed: [] },
     tagsPlayedThisTurn: [],
     nextUid: instances.length + 1,

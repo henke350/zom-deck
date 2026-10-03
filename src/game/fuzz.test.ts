@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { listActions } from './actions'
+import { defaultContent } from '../data/content'
 import { totalCount } from './deck'
 import { applyAction } from './engine'
 import { nextInt } from './rng'
@@ -24,6 +25,8 @@ const fuzzDeck = [
   'painkillers',
   'travelLight',
   'kevlarVest',
+  'runningShoes',
+  'softSoles',
 ]
 
 interface Playthrough {
@@ -59,6 +62,7 @@ function invariants(start: number) {
       .map((c) => c.uid)
     expect(new Set(uids).size).toBe(uids.length)
     expect(player.ap).toBeGreaterThanOrEqual(0)
+    expect(defaultContent.locations[player.location]).toBeDefined()
     expect(player.hp).toBeLessThanOrEqual(balance.maxHp)
     expect(state.turn).toBeGreaterThanOrEqual(1)
     expect(state.turn).toBeLessThanOrEqual(balance.turnLimit)

@@ -25,8 +25,11 @@ describe('newGame', () => {
     expect(state.piles.hand).toHaveLength(balance.handSize)
     expect(state.piles.draw).toHaveLength(10 - balance.handSize)
     expect(state.player).toEqual({
+      location: 'shelter',
       hp: balance.maxHp,
       ap: balance.apPerTurn,
+      freeMoveUsed: false,
+      packs: 0,
       searchBonus: 0,
       block: 0,
     })

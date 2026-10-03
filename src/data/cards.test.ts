@@ -18,6 +18,17 @@ describe('card catalog', () => {
     }
   })
 
+  it('labels every option of cards that can be played in more than one way', () => {
+    const entries: Readonly<
+      Record<string, { readonly name: string; readonly modes?: readonly string[] }>
+    > = texts.cards
+    for (const [id, def] of all) {
+      const modes = entries[id]?.modes
+      if (def.modes.length > 1) expect(modes).toHaveLength(def.modes.length)
+      else expect(modes).toBeUndefined()
+    }
+  })
+
   it('makes junk unplayable and every other card playable', () => {
     for (const [, def] of all) {
       if (def.kind === 'junk') expect(def.modes).toHaveLength(0)

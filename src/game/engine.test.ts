@@ -68,13 +68,13 @@ describe('playing cards', () => {
     )
   })
 
-  it('refuses effects that are not built yet (map, search, zombies)', () => {
-    const state = makeState({ hand: ['search', 'run', 'sneak', 'crowbar'] })
-    for (const uid of ['h1', 'h2', 'h3', 'h4']) {
+  it('refuses effects that are not built yet (search, zombies)', () => {
+    const state = makeState({ hand: ['search', 'sneak', 'crowbar'] })
+    for (const uid of ['h1', 'h2', 'h3']) {
       expect(reasonFor(state, { type: 'playCard', uid })).toBe(texts.reasons.notBuiltYet)
     }
     // Crowbar's second mode (pry open) works already.
-    expect(reasonFor(state, { type: 'playCard', uid: 'h4', mode: 1 })).toBeUndefined()
+    expect(reasonFor(state, { type: 'playCard', uid: 'h3', mode: 1 })).toBeUndefined()
   })
 
   it('throws on an illegal action and never changes the input state', () => {

@@ -1,7 +1,7 @@
 import { ownedCount } from './deck'
-import type { CardDef, CardMode, Effect, EffectKind, GameState } from './types'
+import type { CardDef, CardMode, Content, Effect, EffectKind, GameState } from './types'
 
-/** Effects the engine can resolve so far. The rest arrive with the map (M2), search (M3) and zombies (M4). */
+/** Effects the engine can resolve so far. Search arrives in M3, zombies in M4. */
 export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'gainAp',
   'draw',
@@ -10,6 +10,7 @@ export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'trashFromHand',
   'searchBonus',
   'block',
+  'move',
 ])
 
 export function isFollowUpActive(state: GameState, mode: CardMode): boolean {
@@ -34,4 +35,34 @@ export function trashFilterOf(effects: readonly Effect[]): 'any' | 'junk' | unde
     if (effect.kind === 'trashFromHand') return effect.filter
   }
   return undefined
+}
+
+/** Largest number of steps a move effect allows, or undefined if the effects don't move you. */
+export function moveStepsOf(effects: readonly Effect[]): number | undefined {
+  for (const effect of effects) {
+    if (effect.kind === 'move') return effect.maxSteps
+  }
+  return undefined
+}
+
+/** AP cost of the free move: 0, or more while Heavy Load (or similar) is in hand. Does not stack. */
+export function freeMoveCost(state: GameState, content: Content): number {
+  let cost = 0
+  for (const card of state.piles.hand) {
+    cost = Math.max(cost, content.cards[card.card]?.freeMoveCostWhileInHand ?? 0)
+  }
+  return cost
+}
+
+/** Noise a mode makes when played: its own noise plus search noise from the balance file. */
+export function modeNoise(state: GameState, mode: CardMode): number {
+  const searchNoise = activeEffects(state, mode).some((e) => e.kind === 'search' && !e.silent)
+    ? state.balance.searchNoise
+    : 0
+  return (mode.noise ?? 0) + searchNoise
+}
+
+/** Stars for a number of packs: 0 below the win condition, then 1–3. */
+export function starsFor(state: GameState, packs: number): number {
+  return state.balance.starThresholds.filter((needed) => packs >= needed).length
 }

@@ -51,8 +51,22 @@ export interface CardDef {
   readonly freeMoveCostWhileInHand?: number
 }
 
+export type LocationId = string
+
+export interface LocationDef {
+  readonly id: LocationId
+  /** Shelter: start and goal, safe. Street: a hub with nothing to search. Building: can be searched. */
+  readonly kind: 'shelter' | 'street' | 'building'
+  /** Position on the city map (SVG units, 640 × 400). */
+  readonly mapPos: { readonly x: number; readonly y: number }
+}
+
 export interface Content {
   readonly cards: Readonly<Record<CardId, CardDef>>
+  readonly locations: Readonly<Record<LocationId, LocationDef>>
+  /** Two-way connections between neighbouring locations. */
+  readonly connections: readonly (readonly [LocationId, LocationId])[]
+  readonly startLocation: LocationId
 }
 
 /** One physical card. Two copies of the same card have different uids. */
@@ -72,8 +86,13 @@ export interface Piles {
 }
 
 export interface PlayerState {
+  readonly location: LocationId
   readonly hp: number
   readonly ap: number
+  /** The free move (one step) has been used this turn. */
+  readonly freeMoveUsed: boolean
+  /** Supply packs carried. */
+  readonly packs: number
   /** Extra finds on the next search this turn. */
   readonly searchBonus: number
   /** Damage prevented this turn. */
@@ -83,6 +102,8 @@ export interface PlayerState {
 export interface Outcome {
   readonly result: 'won' | 'lost'
   readonly cause: 'home' | 'killed' | 'darkness'
+  /** 1–3 stars when won. */
+  readonly stars?: number
 }
 
 export interface GameState {
@@ -110,7 +131,12 @@ export interface PlayCardAction {
   readonly uid: string
   /** Index into the card's modes. Defaults to 0. */
   readonly mode?: number
-  readonly target?: { readonly trash?: string }
+  readonly target?: { readonly trash?: string; readonly location?: LocationId }
+}
+
+export interface FreeMoveAction {
+  readonly type: 'freeMove'
+  readonly to: LocationId
 }
 
 export interface EndTurnAction {
@@ -119,7 +145,7 @@ export interface EndTurnAction {
   readonly keep?: readonly string[]
 }
 
-export type Action = PlayCardAction | EndTurnAction
+export type Action = PlayCardAction | FreeMoveAction | EndTurnAction
 
 export type GameEvent =
   | { readonly type: 'turnStarted'; readonly turn: number }
@@ -132,6 +158,14 @@ export type GameEvent =
       readonly mode: number
       readonly followUp: boolean
       readonly usedUp: boolean
+    }
+  | {
+      readonly type: 'moved'
+      readonly from: LocationId
+      readonly to: LocationId
+      /** Free move, or the card that moved you. */
+      readonly by: 'free' | CardId
+      readonly apCost: number
     }
   | { readonly type: 'apGained'; readonly amount: number }
   | { readonly type: 'healed'; readonly amount: number }

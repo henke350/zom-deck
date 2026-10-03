@@ -5,7 +5,7 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
-- **Current milestone:** M0 and M1 done. Next: **M2 – city map, movement and first screen**.
+- **Current milestone:** M0–M2 done. Next: **M3 – search, finds and supply packs**.
   Work one milestone at a time and meet its "done" criteria before moving on.
 
 ## Talking to the user
@@ -45,6 +45,10 @@ src/sim/   bots and balance reports (from M6), run in Node
   `src/game/rules.ts`; `validate` refuses them with a reason. Add an effect there
   when its milestone implements it.
 - `src/game/testkit.ts` builds exact game states for tests (`makeState`).
+- UI: `src/ui/GameScreen.tsx` composes `src/ui/components/*`; `useGame` holds the
+  engine state and a readable log. The UI gets choices and reasons from
+  `cardOptions`, `freeMoveTargets` and `validate`, never from its own rules.
+- UI tests use Testing Library with `// @vitest-environment jsdom` at the top of the file.
 - No backend, accounts, database, API keys or LLM calls in the game.
 
 ## Checks before every push

@@ -6,15 +6,102 @@ export const texts = {
   title: 'One More Building',
   workingTitleNote: 'Working title',
   tagline: 'Head home with what you have, or risk one more building?',
-  statusLine: 'Prototype in progress · milestone M1 (rules core: deck and turns)',
+  statusLine: 'Prototype in progress · milestone M2 (city map and first screen)',
   startExpedition: 'Start expedition',
-  startExpeditionDisabled: 'Available from milestone M2, when the city map is playable.',
+  prototypeNote:
+    'Early prototype: you can walk the city and play cards. Searching arrives in M3 and zombies in M4.',
   factsHeading: 'Starting values',
   facts: {
     turns: 'turns before dark',
     health: 'health',
     hand: 'cards in hand',
     ap: 'action points per turn',
+  },
+
+  locations: {
+    shelter: { name: 'Shelter', description: 'Your safe base. Come back with supplies to win.' },
+    street: { name: 'Street', description: 'A hub with routes to five places. Nothing to search.' },
+    houseA: { name: 'House A', description: 'A quiet home close to the shelter.' },
+    houseB: { name: 'House B', description: 'A home between the pharmacy and the street.' },
+    supermarket: { name: 'Supermarket', description: 'Always holds one supply pack.' },
+    pharmacy: { name: 'Pharmacy', description: 'Medicine and bandages.' },
+    workshop: { name: 'Workshop', description: 'Tools, and a bench to dismantle junk.' },
+    police: {
+      name: 'Police Station',
+      description: 'The best gear, the most danger, the longest walk.',
+    },
+  },
+
+  locationKinds: {
+    shelter: 'Shelter',
+    street: 'Street',
+    building: 'Building',
+  },
+
+  ui: {
+    health: 'Health',
+    ap: 'AP',
+    turn: 'Turn',
+    dusk: 'Dusk',
+    packs: 'Packs',
+    starsHint: (thresholds: readonly number[]) =>
+      thresholds.map((n, i) => `${'★'.repeat(i + 1)} ${n}`).join(' · '),
+    drawPile: 'Draw',
+    discardPile: 'Discard',
+    removedPile: 'Removed',
+    seed: 'Seed',
+    hand: 'Your hand',
+    endTurn: 'End turn',
+    endTurnKeeping: (name: string) => `End turn (keep ${name})`,
+    keep: 'Keep',
+    play: 'Play',
+    trash: 'Trash',
+    youToken: 'You',
+    keeping: 'Keeping',
+    keepHint: (n: number) => `You may keep ${n} unplayed card for next turn.`,
+    cancel: 'Cancel',
+    chooseDestination: 'Choose where to go on the map.',
+    chooseTrashTarget: 'Choose a card in your hand to trash.',
+    youAreHere: 'You are here',
+    stepsAway: (n: number) => `${n} step${n === 1 ? '' : 's'} away`,
+    freeMoveAvailable: 'Free move available: click a highlighted neighbour.',
+    freeMoveCosts: (ap: number) => `Free move costs ${ap} AP (Heavy Load in hand).`,
+    freeMoveUsed: 'Free move used this turn.',
+    log: 'Log',
+    map: 'City map',
+    location: 'Location',
+    newExpedition: 'New expedition',
+    sameCity: 'Same city again',
+    backToTitle: 'Title screen',
+    cost: (ap: number) => `${ap} AP`,
+    noise: (n: number) => `+${n} noise`,
+    followUpActive: 'Follow-up ready',
+    useUp: 'Use up',
+    playMode: (n: number) => `Option ${n}`,
+    outcomeTitle: {
+      home: 'You made it home!',
+      killed: 'You did not survive.',
+      darkness: 'Darkness fell before you got home.',
+    },
+    outcomeStars: (stars: number) => `${'★'.repeat(stars)} (${stars} of 3)`,
+  },
+
+  log: {
+    turnStarted: (turn: number) => `Turn ${turn} begins.`,
+    deckShuffled: 'Your discard pile is shuffled into a new draw pile.',
+    cardsDrawn: (n: number) => `You draw ${n} card${n === 1 ? '' : 's'}.`,
+    cardPlayed: (name: string, followUp: boolean, usedUp: boolean) =>
+      `You play ${name}${followUp ? ' (Follow-up)' : ''}${usedUp ? ' and use it up' : ''}.`,
+    moved: (to: string, by: string, apCost: number) =>
+      `You go to ${to}${by ? ` with ${by}` : ''}${apCost > 0 ? ` (${apCost} AP)` : ''}.`,
+    apGained: (n: number) => `You gain ${n} AP.`,
+    healed: (n: number) => `You heal ${n}.`,
+    hpLost: (n: number) => `You lose ${n} health.`,
+    cardTrashed: (name: string) => `You trash ${name}.`,
+    searchBonusAdded: (n: number) => `Your next search reveals +${n}.`,
+    blockAdded: (n: number) => `You will block ${n} damage this turn.`,
+    cardsKept: (names: string) => `You keep ${names} for next turn.`,
+    turnEnded: (turn: number) => `Turn ${turn} ends.`,
   },
 
   tags: {
@@ -30,6 +117,7 @@ export const texts = {
     crowbar: {
       name: 'Crowbar',
       text: 'Deal 1 damage. Or: your next search this turn reveals +1 find.',
+      modes: ['Hit', 'Pry open'],
     },
     run: { name: 'Run', text: 'Move to an adjacent location.' },
     sneak: {
@@ -82,8 +170,13 @@ export const texts = {
     districtMap: {
       name: 'District Map',
       text: 'See the exact zombies in a building within 2 steps, and whether it has a pack. Use up: see all buildings.',
+      modes: ['Scout one', 'Use up: scout all'],
     },
-    bandage: { name: 'Bandage', text: 'Heal 1. Use up: heal 3 instead.' },
+    bandage: {
+      name: 'Bandage',
+      text: 'Heal 1. Use up: heal 3 instead.',
+      modes: ['Heal 1', 'Use up: heal 3'],
+    },
     painkillers: {
       name: 'Painkillers',
       text: 'Trash a Nerves or Wound from your hand. Draw 1 card.',
@@ -108,5 +201,16 @@ export const texts = {
     trashJunkOnly: 'Only Nerves or Wound can be trashed with this card.',
     keepTooMany: (max: number) => `You can keep at most ${max} card${max === 1 ? '' : 's'}.`,
     keepNotInHand: 'You can only keep cards from your hand.',
+    noTrashTarget: 'You have no card in hand that this can trash.',
+    unknownLocation: 'Unknown location.',
+    alreadyHere: 'You are already here.',
+    notAdjacent: 'Not next to where you are. The free move is one step.',
+    freeMoveUsed: 'You have already used your free move this turn.',
+    freeMoveNeedsAp: (cost: number, ap: number) =>
+      `Heavy Load makes the free move cost ${cost} AP. You have ${ap}.`,
+    chooseDestination: 'Choose where to go.',
+    tooFar: (max: number) =>
+      `Too far. This card moves you up to ${max} step${max === 1 ? '' : 's'}.`,
+    noDestination: 'There is nowhere this card can take you.',
   },
 } as const

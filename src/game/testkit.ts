@@ -1,5 +1,5 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
-import type { CardId, CardInstance, GameState, Tag } from './types'
+import type { CardId, CardInstance, GameState, LocationId, Tag } from './types'
 
 /** Builds a game state with exact piles, for tests. Uids show the pile: h1 (hand), d1 (draw), x1 (discard). */
 export interface StateSpec {
@@ -8,8 +8,11 @@ export interface StateSpec {
   readonly discard?: readonly CardId[]
   readonly inPlay?: readonly CardId[]
   readonly removed?: readonly CardId[]
+  readonly location?: LocationId
   readonly hp?: number
   readonly ap?: number
+  readonly packs?: number
+  readonly freeMoveUsed?: boolean
   readonly turn?: number
   readonly tags?: readonly Tag[]
   readonly balance?: Balance
@@ -36,8 +39,11 @@ export function makeState(spec: StateSpec = {}): GameState {
     turn: spec.turn ?? 1,
     phase: 'action',
     player: {
+      location: spec.location ?? 'shelter',
       hp: spec.hp ?? balance.maxHp,
       ap: spec.ap ?? balance.apPerTurn,
+      freeMoveUsed: spec.freeMoveUsed ?? false,
+      packs: spec.packs ?? 0,
       searchBonus: 0,
       block: 0,
     },

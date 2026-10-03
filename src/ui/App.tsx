@@ -1,41 +1,44 @@
-import { balance } from '../data/balance'
-import { texts } from '../data/texts.en'
+import { useEffect, useState } from 'react'
+import { GameScreen } from './GameScreen'
+import { TitleScreen } from './components/TitleScreen'
+import { randomSeed, readSeedFromSearch } from './seed'
 
-const facts = [
-  { value: balance.turnLimit, label: texts.facts.turns },
-  { value: balance.maxHp, label: texts.facts.health },
-  { value: balance.handSize, label: texts.facts.hand },
-  { value: balance.apPerTurn, label: texts.facts.ap },
-]
+type Screen =
+  | { readonly kind: 'title' }
+  | { readonly kind: 'game'; readonly seed: number; readonly run: number }
 
 export default function App() {
+  const [screen, setScreen] = useState<Screen>({ kind: 'title' })
+
+  // Keep the seed in the address so a game can be reloaded or shared.
+  useEffect(() => {
+    if (screen.kind !== 'game') return
+    const url = new URL(window.location.href)
+    url.searchParams.set('seed', String(screen.seed))
+    window.history.replaceState(null, '', url)
+  }, [screen])
+
+  if (screen.kind === 'title') {
+    return (
+      <TitleScreen
+        onStart={() =>
+          setScreen({
+            kind: 'game',
+            seed: readSeedFromSearch(window.location.search) ?? randomSeed(),
+            run: 1,
+          })
+        }
+      />
+    )
+  }
+
   return (
-    <main className="title-screen">
-      <p className="eyebrow">{texts.workingTitleNote}</p>
-      <h1>{texts.title}</h1>
-      <p className="tagline">{texts.tagline}</p>
-
-      <section aria-labelledby="facts-heading" className="facts">
-        <h2 id="facts-heading">{texts.factsHeading}</h2>
-        <ul>
-          {facts.map((fact) => (
-            <li key={fact.label}>
-              <strong>{fact.value}</strong> {fact.label}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <div className="actions">
-        <button type="button" disabled aria-describedby="start-reason">
-          {texts.startExpedition}
-        </button>
-        <p id="start-reason" className="reason">
-          {texts.startExpeditionDisabled}
-        </p>
-      </div>
-
-      <p className="status">{texts.statusLine}</p>
-    </main>
+    <GameScreen
+      key={`${screen.seed}-${screen.run}`}
+      seed={screen.seed}
+      onNewExpedition={() => setScreen({ kind: 'game', seed: randomSeed(), run: screen.run + 1 })}
+      onRestart={() => setScreen({ ...screen, run: screen.run + 1 })}
+      onExit={() => setScreen({ kind: 'title' })}
+    />
   )
 }

@@ -1,14 +1,16 @@
 import { defaultContent } from '../data/content'
 import { drawCards, withoutCard } from './deck'
-import { activeEffects, isFollowUpActive } from './rules'
+import { activeEffects, freeMoveCost, isFollowUpActive, starsFor } from './rules'
 import { validate } from './validate'
 import type {
   Action,
   Content,
   Effect,
   EndTurnAction,
+  FreeMoveAction,
   GameEvent,
   GameState,
+  LocationId,
   Outcome,
   PlayCardAction,
   StepResult,
@@ -30,6 +32,8 @@ export function applyAction(
   switch (action.type) {
     case 'playCard':
       return { state: playCard(state, action, content, events), events }
+    case 'freeMove':
+      return { state: freeMove(state, action, content, events), events }
     case 'endTurn':
       return { state: endTurn(state, action, events), events }
   }
@@ -43,7 +47,7 @@ export function startTurn(state: GameState, events: GameEvent[]): GameState {
     ...state,
     turn,
     phase: 'action',
-    player: { ...state.player, ap: state.balance.apPerTurn },
+    player: { ...state.player, ap: state.balance.apPerTurn, freeMoveUsed: false },
     tagsPlayedThisTurn: [],
   }
   return drawCards(started, state.balance.handSize - started.piles.hand.length, events)
@@ -87,8 +91,9 @@ function playCard(
   })
 
   for (const effect of effects) {
-    next = resolveEffect(next, effect, action, events)
+    next = resolveEffect(next, effect, action, instance.card, content, events)
     if (next.player.hp <= 0) return gameOver(next, { result: 'lost', cause: 'killed' }, events)
+    if (next.phase === 'gameOver') return next
   }
 
   const tags = new Set([...next.tagsPlayedThisTurn, ...def.tags])
@@ -99,6 +104,8 @@ function resolveEffect(
   state: GameState,
   effect: Effect,
   action: PlayCardAction,
+  card: string,
+  content: Content,
   events: GameEvent[],
 ): GameState {
   const { player, piles } = state
@@ -135,9 +142,48 @@ function resolveEffect(
         },
       }
     }
+    case 'move': {
+      const to = action.target?.location
+      if (!to) throw new Error('move: validated destination is missing')
+      // `unnoticed` (Soft Soles) is applied by the zombie rules when zombies arrive in M4.
+      return arrive(state, to, card, 0, content, events)
+    }
     default:
       throw new Error(`Effect "${effect.kind}" is not implemented yet`)
   }
+}
+
+function freeMove(
+  state: GameState,
+  action: FreeMoveAction,
+  content: Content,
+  events: GameEvent[],
+): GameState {
+  const cost = freeMoveCost(state, content)
+  const paid: GameState = {
+    ...state,
+    player: { ...state.player, ap: state.player.ap - cost, freeMoveUsed: true },
+  }
+  return arrive(paid, action.to, 'free', cost, content, events)
+}
+
+/** Moves the player. Entering the shelter with enough packs wins at once. */
+function arrive(
+  state: GameState,
+  to: LocationId,
+  by: string,
+  apCost: number,
+  content: Content,
+  events: GameEvent[],
+): GameState {
+  events.push({ type: 'moved', from: state.player.location, to, by, apCost })
+  const moved: GameState = { ...state, player: { ...state.player, location: to } }
+  const atShelter = content.locations[to]?.kind === 'shelter'
+  if (atShelter && moved.player.packs >= state.balance.packsToWin) {
+    const stars = starsFor(moved, moved.player.packs)
+    return gameOver(moved, { result: 'won', cause: 'home', stars }, events)
+  }
+  return moved
 }
 
 function endTurn(state: GameState, action: EndTurnAction, events: GameEvent[]): GameState {

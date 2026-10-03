@@ -1,8 +1,24 @@
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import { ownedCount } from './deck'
-import { activeEffects, conditionMet, implementedEffects, trashFilterOf } from './rules'
-import type { Action, Content, EndTurnAction, GameState, PlayCardAction, Validation } from './types'
+import { distance, neighbors } from './map'
+import {
+  activeEffects,
+  conditionMet,
+  freeMoveCost,
+  implementedEffects,
+  moveStepsOf,
+  trashFilterOf,
+} from './rules'
+import type {
+  Action,
+  Content,
+  EndTurnAction,
+  FreeMoveAction,
+  GameState,
+  PlayCardAction,
+  Validation,
+} from './types'
 
 const ok: Validation = { ok: true }
 const no = (reason: string): Validation => ({ ok: false, reason })
@@ -17,6 +33,8 @@ export function validate(
   switch (action.type) {
     case 'playCard':
       return validatePlayCard(state, action, content)
+    case 'freeMove':
+      return validateFreeMove(state, action, content)
     case 'endTurn':
       return validateEndTurn(state, action)
   }
@@ -51,6 +69,35 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
     if (!targetDef?.trashable) return no(texts.reasons.notTrashable)
     if (filter === 'junk' && targetDef.kind !== 'junk') return no(texts.reasons.trashJunkOnly)
   }
+
+  const maxSteps = moveStepsOf(effects)
+  if (maxSteps !== undefined) {
+    const to = action.target?.location
+    if (!to) return no(texts.reasons.chooseDestination)
+    const check = validateDestination(state, to, content)
+    if (!check.ok) return check
+    if (distance(content, state.player.location, to) > maxSteps) {
+      return no(texts.reasons.tooFar(maxSteps))
+    }
+  }
+  return ok
+}
+
+function validateFreeMove(state: GameState, action: FreeMoveAction, content: Content): Validation {
+  const check = validateDestination(state, action.to, content)
+  if (!check.ok) return check
+  if (!neighbors(content, state.player.location).includes(action.to)) {
+    return no(texts.reasons.notAdjacent)
+  }
+  if (state.player.freeMoveUsed) return no(texts.reasons.freeMoveUsed)
+  const cost = freeMoveCost(state, content)
+  if (state.player.ap < cost) return no(texts.reasons.freeMoveNeedsAp(cost, state.player.ap))
+  return ok
+}
+
+function validateDestination(state: GameState, to: string, content: Content): Validation {
+  if (!content.locations[to]) return no(texts.reasons.unknownLocation)
+  if (to === state.player.location) return no(texts.reasons.alreadyHere)
   return ok
 }
 
