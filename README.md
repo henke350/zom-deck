@@ -59,12 +59,12 @@ npm run check    # alt det, den automatiske kontrol på GitHub tjekker
 Den automatiske kontrol (GitHub Actions) kører lint, formatering, typekontrol, tests og
 build ved hvert push.
 
-## Kunstnere og licenser
+## Illustrationer
 
-Kortillustrationerne er ikoner fra [game-icons.net](https://game-icons.net) af Lorc og
-Delapouite, brugt under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Licensen
-kræver, at kunstnerne krediteres. Det sker i spillets regelskærm og her. Hvilket ikon
-der kommer fra hvem, står i `src/ui/cardIcons.ts`.
+Kort- og stedillustrationerne er lavet med en AI-billedgenerator ud fra prompts i `docs/`
+(`card-art-prompt.md`, `card-art/cards.json` og `location-art/prompt.md`). Spillet bruger små
+WebP-filer i `src/assets/cards/` og `src/assets/locations/`; originalerne ligger i `art-source/`.
+Filnavnet er kortets eller stedets id, så et nyt billede findes automatisk.
 
 ## Teknik
 
