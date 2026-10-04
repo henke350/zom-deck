@@ -366,6 +366,12 @@
 .card-art path {
   fill: currentColor;
 }
+.card-art-image {
+  height: auto;
+  aspect-ratio: 3 / 2;
+  padding: 0;
+  object-fit: cover;
+}
 .card-text {
   margin: 0.4rem 0 0;
   font-size: 0.85rem;
