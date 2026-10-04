@@ -138,6 +138,16 @@
   border-radius: 6px;
   padding: 0.9rem 1rem;
 }
+.location-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  margin-bottom: 0.7rem;
+  border: 1.5px solid var(--ink-2);
+  border-radius: 5px;
+  background: var(--bg);
+}
 .panel h2 {
   margin: 0;
   font-size: 1.3rem;

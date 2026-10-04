@@ -1,6 +1,7 @@
 import { texts } from '../../data/texts.en'
 import type { Action, Content, GameState, LocationId, Validation } from '../../game'
 import { distance, freeMoveCost, zombieInfo, zombiesAt } from '../../game'
+import { locationImages } from '../locationImages'
 import { locationText } from '../names'
 import { siteSummary } from '../sites'
 
@@ -49,6 +50,9 @@ export function LocationPanel({
 
   return (
     <section className="panel location-panel" aria-label={ui.location} aria-live="polite">
+      {locationImages[location] && (
+        <img className="location-art" src={locationImages[location]} alt="" />
+      )}
       <p className="eyebrow">{def ? texts.locationKinds[def.kind] : ''}</p>
       <h2>{name}</h2>
       <p className="muted">{description}</p>
