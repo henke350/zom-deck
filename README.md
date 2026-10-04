@@ -7,7 +7,7 @@ Al tekst i spillet er på engelsk; "One More Building" er en arbejdstitel.
 - **Plan og beslutninger:** [docs/plan.md](docs/plan.md)
 - **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z (privat, indtil det deles)
 - **Spil prototypen i browseren:** https://claude.ai/artifact/1HKHPRedxcpRYNSh6GNZVY (privat, indtil det deles; opdateres ved hver milepæl)
-- **Status:** M0–M6 er bygget. En hel ekspedition kan spilles fra start til slut, og bot-spillere måler balancen. Næste milepæl er M7: playtest og justering.
+- **Status:** M0–M6 er bygget, og M7 (playtest og justering) er i gang. Første justering efter simuleringen: 9 liv og Run ×1 / Search ×4 i startdækket. Nu mangler playtest med rigtige spillere.
 - **Balancerapport:** [docs/balance-report.md](docs/balance-report.md) (lavet af `npm run sim`)
 
 ## Sådan kører du spillet lokalt
@@ -41,8 +41,8 @@ Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 
 ```
 npm run sim                              # 7 bots spiller 1.000 spil hver → docs/balance-report.md
-npm run sim -- --set maxHp=9             # prøv et andet balancetal (rapporten havner i .sim/)
-npm run sim -- --set maxHp=9 --set starterDeck.run=1 --set starterDeck.search=4
+npm run sim -- --set maxHp=8             # prøv et andet balancetal (rapporten havner i .sim/)
+npm run sim -- --set turnLimit=8 --set duskFromTurn=6
 npm run fuzz                             # 10.000 tilfældige spil; alle regler tjekkes efter hver handling
 ```
 

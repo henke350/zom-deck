@@ -47,7 +47,7 @@ export interface Balance {
 }
 
 export const balance: Balance = {
-  maxHp: 10,
+  maxHp: 9,
   handSize: 5,
   apPerTurn: 3,
   keepCards: 1,
@@ -70,7 +70,7 @@ export const balance: Balance = {
   heavyLoadPerPack: 1,
   locationServiceCost: 1,
   wounds: { enabled: false, damageInOnePhase: 2 },
-  starterDeck: { search: 3, crowbar: 2, run: 2, sneak: 1, nerves: 2 },
+  starterDeck: { search: 4, crowbar: 2, run: 1, sneak: 1, nerves: 2 },
 }
 
 export function starterDeckSize(b: Balance): number {

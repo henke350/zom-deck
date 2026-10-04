@@ -297,7 +297,7 @@ function renderVariants(
   const lines = ['## Hvad hvis?', '']
   lines.push(
     `Sejrsrate med ét eller flere balancetal ændret (${games} spil pr. bot). ` +
-      'Prøv selv med fx `npm run sim -- --set maxHp=9`.',
+      'Prøv selv med fx `npm run sim -- --set maxHp=8`.',
   )
   lines.push('')
   lines.push(`| Ændring | ${names.join(' | ')} |`)

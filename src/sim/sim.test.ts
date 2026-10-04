@@ -9,6 +9,7 @@ import { runBots, runVariants } from './simulate'
 
 describe('balance overrides', () => {
   it('change numbers, nested values, switches and lists', () => {
+    const before = structuredClone(balance)
     const b = applyOverrides(balance, [
       'maxHp=12',
       'zombie.damage=2',
@@ -21,7 +22,7 @@ describe('balance overrides', () => {
     expect(b.wounds.enabled).toBe(true)
     expect(b.zombieFollow).toBe('gentle')
     expect(b.starThresholds).toEqual([3, 4, 5])
-    expect(balance.maxHp).toBe(10)
+    expect(balance).toEqual(before)
   })
 
   it('refuse names that do not exist and numbers that are not numbers', () => {

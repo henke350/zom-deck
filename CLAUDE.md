@@ -6,8 +6,9 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
 - **Current milestone:** M0–M6 done (M5 waits only for the user's own three playthroughs).
-  Next: **M7 – playtest and tuning**. Balance changes are the user's call; show them the
-  effect with `npm run sim -- --set …` first.
+  **M7 – playtest and tuning** is in progress: tuning 1 (9 health, Run ×1, Search ×4) is in;
+  the playtest is next. Balance changes are the user's call; show them the effect with
+  `npm run sim -- --set …` first.
   Work one milestone at a time and meet its "done" criteria before moving on.
 
 ## Talking to the user
@@ -85,7 +86,7 @@ npm install        # once
 npm run dev        # local dev server at http://localhost:5173
 npm test           # run tests once (npm run test:watch to keep running)
 npm run check      # everything CI checks
-npm run sim        # balance report → docs/balance-report.md (add -- --set maxHp=9 to try a change)
+npm run sim        # balance report → docs/balance-report.md (add -- --set maxHp=8 to try a change)
 npm run fuzz       # 10 000 random games, every rule checked after every action
 npm run build      # production build in dist/
 ```

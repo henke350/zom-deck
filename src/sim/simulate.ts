@@ -25,19 +25,16 @@ export interface Variant {
   readonly overrides: readonly string[]
 }
 
-/** The tuning knobs from docs/plan.md (section 7) that the M6 runs showed matter most. */
+/** Tuning knobs from docs/plan.md (section 7), compared with the current balance. */
 export const variants: readonly Variant[] = [
+  {
+    name: 'Som i M6: 10 liv, Run ×2 og Search ×3',
+    overrides: ['maxHp=10', 'starterDeck.run=2', 'starterDeck.search=3'],
+  },
+  { name: '10 liv', overrides: ['maxHp=10'] },
   { name: '8 liv', overrides: ['maxHp=8'] },
   { name: 'Zombier giver 2 skade', overrides: ['zombie.damage=2'] },
   { name: '+1 startzombie i hver bygning', overrides: ['extraStartZombies=1'] },
-  {
-    name: 'Run ×1 og Search ×4 i startdækket',
-    overrides: ['starterDeck.run=1', 'starterDeck.search=4'],
-  },
-  {
-    name: '9 liv, Run ×1 og Search ×4',
-    overrides: ['maxHp=9', 'starterDeck.run=1', 'starterDeck.search=4'],
-  },
   { name: '8 ture (skumring fra tur 6)', overrides: ['turnLimit=8', 'duskFromTurn=6'] },
 ]
 
