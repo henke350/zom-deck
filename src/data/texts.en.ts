@@ -152,6 +152,8 @@ export const texts = {
     open: 'How to play',
     short: 'Rules',
     close: 'Got it',
+    credits:
+      'Card art: icons from game-icons.net by Lorc and Delapouite, licensed CC BY 3.0 (creativecommons.org/licenses/by/3.0).',
     intro: 'One city, one deck, ten turns. Bring supplies home before dark.',
     sections: (b: Balance) => [
       {
