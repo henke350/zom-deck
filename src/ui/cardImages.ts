@@ -1,7 +1,7 @@
 /**
  * Card illustrations: every image in `src/assets/cards/` named after a card id
  * (for example `crowbar.png`) is picked up automatically at build time.
- * Cards without an image fall back to the icon in `cardIcons.ts`.
+ * Cards without an image show no picture.
  */
 const files = import.meta.glob<string>('../assets/cards/*.{png,webp,jpg,jpeg}', {
   eager: true,
