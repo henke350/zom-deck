@@ -126,7 +126,9 @@ describe('searching', () => {
     state = play(state, { type: 'playCard', uid: 'h1', mode: 1 })
     state = play(state, { type: 'playCard', uid: 'h2' })
     state = play(state, { type: 'playCard', uid: 'h3' })
-    expect(state.pendingFind?.options).toHaveLength(5)
+    expect(state.pendingFind?.options).toHaveLength(
+      balance.searchOptions + 2 + balance.peacefulSearchBonus,
+    )
     expect(state.player.searchBonus).toBe(0)
   })
 

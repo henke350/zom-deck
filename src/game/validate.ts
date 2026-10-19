@@ -22,6 +22,7 @@ import type {
   EndTurnAction,
   FreeMoveAction,
   GameState,
+  OpenStashAction,
   PlayCardAction,
   UseServiceAction,
   Validation,
@@ -67,6 +68,8 @@ export function validate(
       return ok
     case 'useService':
       return validateUseService(state, action, content)
+    case 'openStash':
+      return validateOpenStash(state, action, content)
     case 'endTurn':
       return validateEndTurn(state, action)
   }
@@ -85,6 +88,29 @@ export function validateServiceHere(
   if (state.player.ap < cost) return no(texts.reasons.notEnoughAp(cost, state.player.ap))
   const anyTarget = state.piles.hand.some((c) => serviceTargetCheck(c, service.filter, content).ok)
   return anyTarget ? ok : no(texts.reasons.noTrashTarget)
+}
+
+function validateOpenStash(
+  state: GameState,
+  action: OpenStashAction,
+  content: Content,
+): Validation {
+  const site = state.sites[state.player.location]
+  if (!site || site.stash !== 'found') return no(texts.reasons.noStashHere)
+  const { stashToolCost, stashForce } = state.balance
+  if (action.uid === undefined) {
+    if (state.player.ap < stashForce.cost) {
+      return no(texts.reasons.notEnoughAp(stashForce.cost, state.player.ap))
+    }
+    return ok
+  }
+  const tool = state.piles.hand.find((c) => c.uid === action.uid)
+  if (!tool) return no(texts.reasons.notInHand)
+  if (!content.cards[tool.card]?.tags.includes('tool')) return no(texts.reasons.notATool)
+  if (state.player.ap < stashToolCost) {
+    return no(texts.reasons.notEnoughAp(stashToolCost, state.player.ap))
+  }
+  return ok
 }
 
 function validateUseService(

@@ -62,6 +62,10 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.hpLost(event.amount)
     case 'cardTrashed':
       return log.cardTrashed(cardText(event.card).name)
+    case 'stashFound':
+      return log.stashFound(locationText(event.location).name)
+    case 'stashOpened':
+      return log.stashOpened(event.by === 'force' ? '' : cardText(event.by).name)
     case 'serviceUsed':
       return log.serviceUsed(texts.services[event.service].name, locationText(event.location).name)
     case 'searchBonusAdded':

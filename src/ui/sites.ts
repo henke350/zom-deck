@@ -7,6 +7,8 @@ export interface SiteSummary {
   /** Short form for the map, e.g. "1/2 searches" */
   readonly short: string
   readonly pack: string
+  /** What the player knows of a locked stash here, if anything. */
+  readonly stash?: string
 }
 
 /** What the player knows about a building: searches left and what they know of its pack. */
@@ -40,5 +42,11 @@ export function siteSummary(
         ? texts.ui.mapSearches(site.searchesLeft, max)
         : texts.ui.searchedOutShort,
     pack,
+    stash:
+      site.stash === 'found' || site.stash === 'opened' || site.stash === 'lost'
+        ? texts.ui.stashStatus[site.stash]
+        : site.stash === 'hidden' && site.scouted
+          ? texts.ui.stashStatus.scouted
+          : undefined,
   }
 }

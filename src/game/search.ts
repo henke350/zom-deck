@@ -1,7 +1,7 @@
 import { texts } from '../data/texts.en'
 import type { Balance } from '../data/balance'
 import { gainCard, withoutCard } from './deck'
-import { nextInt, shuffle } from './rng'
+import { nextFloat, shuffle } from './rng'
 import { addNoise, zombiesAt } from './zombies'
 import type {
   CardId,
@@ -14,7 +14,10 @@ import type {
   Validation,
 } from './types'
 
-/** Places supply packs: always in `alwaysHasPack` buildings, the rest at random among the others. */
+/**
+ * Places supply packs (always in `alwaysHasPack` buildings, the rest at random among the
+ * others) and the locked stashes (at random among all buildings).
+ */
 export function placePacks(
   content: Content,
   balance: Balance,
@@ -28,8 +31,17 @@ export function placePacks(
     throw new Error(`Cannot place ${balance.packsOnMap} packs in ${buildings.length} buildings`)
   }
 
-  const [shuffled, next] = shuffle(others, rng)
+  if (balance.stashesOnMap < 0 || balance.stashesOnMap > buildings.length) {
+    throw new Error(`Cannot place ${balance.stashesOnMap} stashes in ${buildings.length} buildings`)
+  }
+
+  const [shuffled, afterPacks] = shuffle(others, rng)
   const withPack = new Set([...fixed, ...shuffled.slice(0, randomCount)])
+  const [stashOrder, next] = shuffle(
+    buildings.map((l) => l.id),
+    afterPacks,
+  )
+  const withStash = new Set(stashOrder.slice(0, balance.stashesOnMap))
   const sites: Record<LocationId, SiteState> = {}
   for (const building of buildings) {
     sites[building.id] = {
@@ -38,6 +50,7 @@ export function placePacks(
       packTaken: false,
       scouted: false,
       burned: false,
+      stash: withStash.has(building.id) ? 'hidden' : 'none',
     }
   }
   return [sites, next]
@@ -55,7 +68,7 @@ export function checkSearchHere(state: GameState, content: Content): Validation 
   return { ok: true }
 }
 
-/** Picks up to `count` different cards from a weighted pool, without repeats. */
+/** Picks up to `count` different cards from a weighted pool, without repeats. Weights may be fractions. */
 export function drawFinds(
   pool: readonly LootEntry[],
   count: number,
@@ -66,8 +79,9 @@ export function drawFinds(
   const finds: CardId[] = []
   while (finds.length < count && remaining.length > 0) {
     const total = remaining.reduce((sum, entry) => sum + entry.weight, 0)
-    const [roll, next] = nextInt(state, total)
+    const [r, next] = nextFloat(state)
     state = next
+    const roll = r * total
     let acc = 0
     const picked = remaining.find((entry) => (acc += entry.weight) > roll) ?? remaining[0]
     if (!picked) break
@@ -101,7 +115,12 @@ export function performSearch(
 ): GameState {
   const location = state.player.location
   const site = state.sites[location]
-  const pool = content.locations[location]?.lootPool ?? []
+  // Rare finds only count part of their weight in an ordinary search.
+  const pool = (content.locations[location]?.lootPool ?? []).map((entry) =>
+    content.cards[entry.card]?.rare
+      ? { ...entry, weight: entry.weight * state.balance.rareFindWeight }
+      : entry,
+  )
   if (!site) throw new Error(`performSearch: ${location} cannot be searched`)
 
   const peaceful = zombiesAt(state, location).length === 0
@@ -112,14 +131,23 @@ export function performSearch(
     (peaceful ? state.balance.peacefulSearchBonus : 0)
   const [options, rng] = drawFinds(pool, count, state.rng)
   events.push({ type: 'searched', location, options, quick: spec.quick })
+  const stashFound = site.stash === 'hidden'
+  if (stashFound) events.push({ type: 'stashFound', location })
 
   let next: GameState = {
     ...state,
     rng,
     phase: 'chooseFind',
     player: { ...state.player, searchBonus: 0 },
-    sites: { ...state.sites, [location]: { ...site, searchesLeft: site.searchesLeft - 1 } },
-    pendingFind: { location, options, packFound: site.hasPack, noise: spec.noise },
+    sites: {
+      ...state.sites,
+      [location]: {
+        ...site,
+        searchesLeft: site.searchesLeft - 1,
+        stash: stashFound ? 'found' : site.stash,
+      },
+    },
+    pendingFind: { location, options, packFound: site.hasPack, noise: spec.noise, stashFound },
   }
 
   if (site.hasPack) {
@@ -129,12 +157,7 @@ export function performSearch(
       player: { ...next.player, packs },
       sites: {
         ...next.sites,
-        [location]: {
-          ...site,
-          searchesLeft: site.searchesLeft - 1,
-          hasPack: false,
-          packTaken: true,
-        },
+        [location]: { ...(next.sites[location] ?? site), hasPack: false, packTaken: true },
       },
     }
     events.push({ type: 'packFound', location, packs })
@@ -143,6 +166,55 @@ export function performSearch(
     }
   }
   return next
+}
+
+/** Rare finds that can turn up in a stash: every rare card, equally likely. */
+export function rarePool(content: Content): LootEntry[] {
+  return Object.values(content.cards)
+    .filter((c) => c.rare)
+    .map((c) => ({ card: c.id, weight: 1 }))
+}
+
+/**
+ * Opens the found stash where the player stands, with a Tool card (which goes to the cards in
+ * play) or by force (more AP and noise). Reveals rare finds; the game then waits for a choice,
+ * and forcing makes its noise after it, like a search.
+ */
+export function openStash(
+  state: GameState,
+  uid: string | undefined,
+  content: Content,
+  events: GameEvent[],
+): GameState {
+  const location = state.player.location
+  const site = state.sites[location]
+  if (!site) throw new Error(`openStash: no stash at ${location}`)
+  const tool = uid ? state.piles.hand.find((c) => c.uid === uid) : undefined
+  const { stashToolCost, stashForce, stashOptions } = state.balance
+  const cost = tool ? stashToolCost : stashForce.cost
+  const [options, rng] = drawFinds(rarePool(content), stashOptions, state.rng)
+  events.push({ type: 'stashOpened', location, by: tool?.card ?? 'force', options })
+  return {
+    ...state,
+    rng,
+    phase: 'chooseFind',
+    player: { ...state.player, ap: state.player.ap - cost },
+    piles: tool
+      ? {
+          ...state.piles,
+          hand: withoutCard(state.piles.hand, tool.uid),
+          inPlay: [...state.piles.inPlay, tool],
+        }
+      : state.piles,
+    sites: { ...state.sites, [location]: { ...site, stash: 'opened' } },
+    pendingFind: {
+      location,
+      options,
+      packFound: false,
+      noise: tool ? 0 : stashForce.noise,
+      fromStash: true,
+    },
+  }
 }
 
 /** Ends the find choice: take a find, scrap a card from hand, or take nothing. Then the search makes its noise. */

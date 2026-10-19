@@ -30,6 +30,8 @@ export interface GameRecord {
   readonly actions: number
   readonly quickSearches: number
   readonly servicesUsed: number
+  /** Rare finds taken into the deck. */
+  readonly rareTaken: number
   /** Turns that ended without playing a card, moving or searching. */
   readonly idleTurns: number
   /** Times each card was played. */
@@ -112,6 +114,7 @@ export function playGame(bot: Bot, seed: number, options: PlayOptions = {}): Gam
     actions,
     quickSearches,
     servicesUsed,
+    rareTaken: state.stats.cardsTaken.filter((c) => content.cards[c]?.rare).length,
     idleTurns,
     plays,
     problems,

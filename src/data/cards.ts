@@ -279,6 +279,47 @@ export const cards = {
       },
     ],
   },
+
+  // Rare finds: seldom in searches, always in locked stashes.
+  shotgun: {
+    id: 'shotgun',
+    kind: 'action',
+    cost: 1,
+    tags: ['weapon'],
+    trashable: true,
+    rare: true,
+    modes: [{ noise: 2, effects: [{ kind: 'damage', amount: 2, target: 'allHere' }] }],
+  },
+  chainsaw: {
+    id: 'chainsaw',
+    kind: 'action',
+    cost: 2,
+    tags: ['weapon', 'tool'],
+    trashable: true,
+    rare: true,
+    modes: [{ noise: 3, effects: [{ kind: 'damage', amount: 4, target: 'allHere' }] }],
+  },
+  bicycle: {
+    id: 'bicycle',
+    kind: 'action',
+    cost: 1,
+    tags: ['move'],
+    trashable: true,
+    rare: true,
+    modes: [{ effects: [{ kind: 'move', maxSteps: 3 }] }],
+  },
+  firstAidKit: {
+    id: 'firstAidKit',
+    kind: 'action',
+    cost: 1,
+    tags: ['med'],
+    trashable: true,
+    rare: true,
+    modes: [
+      { effects: [{ kind: 'heal', amount: 3 }] },
+      { useUp: true, effects: [{ kind: 'heal', amount: 6 }] },
+    ],
+  },
 } as const satisfies Record<string, CardDef>
 
 export type KnownCardId = keyof typeof cards

@@ -10,6 +10,7 @@ const houseLoot = [
   { card: 'alarmClock', weight: 1 },
   { card: 'districtMap', weight: 1 },
   { card: 'travelLight', weight: 1 },
+  { card: 'bicycle', weight: 1 },
 ] as const satisfies readonly LootEntry[]
 
 /**
@@ -29,6 +30,7 @@ export const locations = {
       { card: 'lockpick', weight: 2 },
       { card: 'flashlight', weight: 2 },
       { card: 'molotov', weight: 2 },
+      { card: 'chainsaw', weight: 1 },
     ],
   },
   police: {
@@ -42,6 +44,7 @@ export const locations = {
       { card: 'baseballBat', weight: 2 },
       { card: 'districtMap', weight: 2 },
       { card: 'flashlight', weight: 1 },
+      { card: 'shotgun', weight: 1 },
     ],
   },
   houseA: {
@@ -64,6 +67,7 @@ export const locations = {
       { card: 'travelLight', weight: 2 },
       { card: 'painkillers', weight: 2 },
       { card: 'bandage', weight: 2 },
+      { card: 'bicycle', weight: 1 },
     ],
   },
   shelter: { id: 'shelter', kind: 'shelter', mapPos: { x: 120, y: 330 } },
@@ -79,6 +83,7 @@ export const locations = {
       { card: 'adrenaline', weight: 2 },
       { card: 'travelLight', weight: 1 },
       { card: 'alarmClock', weight: 1 },
+      { card: 'firstAidKit', weight: 1 },
     ],
   },
   houseB: {

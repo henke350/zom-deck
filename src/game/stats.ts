@@ -20,6 +20,7 @@ export function emptyStats(startHp: number, startCards: number): Stats {
     zombiesFromDusk: 0,
     zombiesKilled: 0,
     woundsGained: 0,
+    stashesOpened: 0,
   }
 }
 
@@ -68,6 +69,9 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
       case 'zombieArrived':
         if (e.reason === 'dusk') s.zombiesFromDusk += 1
         else s.zombiesFromNoise += 1
+        break
+      case 'stashOpened':
+        s.stashesOpened += 1
         break
       case 'zombieKilled':
         s.zombiesKilled += 1

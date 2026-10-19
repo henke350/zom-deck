@@ -65,6 +65,8 @@ export function listActions(state: GameState, content: Content = defaultContent)
   for (const card of hand) candidates.push({ type: 'scrapCard', uid: card.uid })
   candidates.push({ type: 'declineFind' })
   for (const card of hand) candidates.push({ type: 'useService', uid: card.uid })
+  candidates.push({ type: 'openStash' })
+  for (const card of hand) candidates.push({ type: 'openStash', uid: card.uid })
 
   candidates.push({ type: 'endTurn' })
   if (state.balance.keepCards > 0) {

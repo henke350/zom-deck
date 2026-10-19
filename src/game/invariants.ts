@@ -37,6 +37,18 @@ export function checkInvariants(state: GameState, content: Content = defaultCont
       fail(`searches left out of range at ${id}`)
     }
     if (site.packTaken && site.hasPack) fail(`pack both taken and hidden at ${id}`)
+    const searched = site.searchesLeft < balance.searchesPerBuilding
+    if ((site.stash === 'found' || site.stash === 'opened') && !searched) {
+      fail(`stash found at ${id} before any search`)
+    }
+    if (site.stash === 'lost' && !site.burned) fail(`stash lost at ${id} without a fire`)
+  }
+  const stashes = Object.values(state.sites).filter((s) => s.stash !== 'none').length
+  if (stashes !== balance.stashesOnMap) fail('locked stashes do not add up')
+  if (
+    stats.stashesOpened !== Object.values(state.sites).filter((s) => s.stash === 'opened').length
+  ) {
+    fail('opened stashes do not match the stats')
   }
 
   // Zombies and noise.

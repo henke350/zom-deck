@@ -275,6 +275,27 @@ describe('GameScreen: rules and the end of an expedition', () => {
     expect(document.querySelector('[data-card="nerves"]')).toBeNull()
   })
 
+  it('opens a found stash with a Tool card and shows rare finds', async () => {
+    const state = makeState({
+      draw,
+      location: 'houseA',
+      hand: ['crowbar', 'run'],
+      stashAt: { houseA: 'found' },
+    })
+    const { user } = renderState(state)
+    expect(screen.getByText(texts.ui.stashStatus.found)).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: texts.ui.forceStash(2, 2) }).hasAttribute('disabled'),
+    ).toBe(false)
+    await user.click(screen.getByRole('button', { name: texts.ui.openStashWith('Crowbar', 1) }))
+    const dialog = screen.getByRole('dialog', { name: texts.ui.stashTitle })
+    expect(within(dialog).getAllByText(texts.ui.rare)).toHaveLength(2)
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.stashOpened('Crowbar'))).toBeTruthy()
+    await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
+    expect(screen.getByText(texts.ui.stashStatus.opened)).toBeTruthy()
+  })
+
   it('explains why a service cannot be used', () => {
     renderState(makeState({ draw, location: 'pharmacy', hand: ['run', 'search'] }))
     const button = screen.getByRole('button', {

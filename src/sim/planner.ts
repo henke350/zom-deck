@@ -60,6 +60,10 @@ const baseValue: Readonly<Record<string, number>> = {
   districtMap: 3,
   bandage: 5,
   painkillers: 4,
+  shotgun: 8,
+  chainsaw: 8,
+  bicycle: 8,
+  firstAidKit: 7,
 }
 
 const styleBonus: Readonly<Record<Style, (id: string, def: CardDef) => number>> = {
@@ -105,6 +109,7 @@ export function plannerBot(o: PlannerOptions): Bot {
       return (
         tempo(ctx) ??
         fight(ctx) ??
+        stash(ctx) ??
         search(ctx) ??
         move(ctx) ??
         defend(ctx) ??
@@ -296,6 +301,28 @@ function fight(ctx: Ctx): Action | undefined {
     }
   }
   return best
+}
+
+/** A found stash where you stand: open it with the least useful Tool card, or force it if quiet enough. */
+function stash(ctx: Ctx): Action | undefined {
+  const { o, state, content } = ctx
+  const opens = ctx.actions.filter((a) => a.type === 'openStash')
+  if (opens.length === 0 || state.player.packs >= o.targetPacks) return undefined
+  const withTool = opens
+    .filter((a) => a.uid !== undefined)
+    .sort((a, b) => toolValue(state, content, a.uid) - toolValue(state, content, b.uid))
+  if (withTool[0]) return withTool[0]
+  const force = opens.find((a) => a.uid === undefined)
+  const quietEnough = state.noise + state.balance.stashForce.noise < state.balance.noiseThreshold
+  return force && (quietEnough || !o.careful) ? force : undefined
+}
+
+/** How much the bot would miss a card used as a key: Search cards matter most. */
+function toolValue(state: GameState, content: Content, uid: string | undefined): number {
+  const def = defOf(state, content, uid)
+  if (!def) return 0
+  const searches = def.modes.some((m) => m.effects.some((e) => e.kind === 'search'))
+  return (searches ? 10 : 0) + (baseValue[def.id] ?? 3)
 }
 
 function search(ctx: Ctx): Action | undefined {

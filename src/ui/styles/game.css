@@ -624,3 +624,27 @@
   margin: 0.75rem 0 0;
   font-size: 0.8rem;
 }
+
+/* Rare finds and locked stashes */
+.rare-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--amber);
+  border-radius: 3px;
+  padding: 0.05rem 0.35rem;
+}
+.card:has(.card-face-rare) {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber);
+}
+.stash-banner {
+  border-left-color: var(--amber);
+}
+.stash-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}

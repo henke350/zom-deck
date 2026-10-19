@@ -1,7 +1,7 @@
 import { defaultContent } from '../data/content'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
-import { chooseFind, performSearch } from './search'
+import { chooseFind, openStash, performSearch } from './search'
 import { updateStats } from './stats'
 import { validate } from './validate'
 import {
@@ -77,6 +77,8 @@ function step(state: GameState, action: Action, content: Content, events: GameEv
       return chooseFind(state, 'decline', content, events)
     case 'useService':
       return applyService(state, action, content, events)
+    case 'openStash':
+      return openStash(state, action.uid, content, events)
     case 'endTurn':
       return endTurn(state, action, content, events)
   }
@@ -237,7 +239,16 @@ function resolveEffect(
       events.push({ type: 'buildingBurned', location: here })
       return {
         ...state,
-        sites: { ...state.sites, [here]: { ...site, searchesLeft: 0, burned: true } },
+        sites: {
+          ...state.sites,
+          [here]: {
+            ...site,
+            searchesLeft: 0,
+            burned: true,
+            // A stash that was not opened burns with the building.
+            stash: site.stash === 'hidden' || site.stash === 'found' ? 'lost' : site.stash,
+          },
+        },
       }
     }
   }

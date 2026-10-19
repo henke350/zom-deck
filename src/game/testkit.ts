@@ -21,6 +21,8 @@ export interface StateSpec {
   readonly seed?: number
   /** Buildings that hide a pack. Default: none. */
   readonly packsAt?: readonly LocationId[]
+  /** Buildings with a locked stash, and how far it is: hidden (default), found or opened. */
+  readonly stashAt?: Readonly<Record<LocationId, 'hidden' | 'found' | 'opened'>>
   /** Override searches left per building. */
   readonly searchesLeft?: Readonly<Record<LocationId, number>>
   /** Zombies, with uids z1, z2, … in this order. Default: none. */
@@ -58,6 +60,7 @@ export function makeState(spec: StateSpec = {}): GameState {
       packTaken: false,
       scouted: false,
       burned: false,
+      stash: spec.stashAt?.[loc.id] ?? 'none',
     }
   }
   const piles = {

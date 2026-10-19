@@ -112,6 +112,15 @@ export function GameScreen({
   }
 
   const serviceCheck = validateServiceHere(state, content)
+  const stashActions = useMemo(
+    () =>
+      listActions(state, content)
+        .filter((a) => a.type === 'openStash')
+        // Quiet ways first: with a Tool card, then by force.
+        .sort((a, b) => Number(a.uid === undefined) - Number(b.uid === undefined)),
+    [state],
+  )
+  const forceCheck = validate(state, { type: 'openStash' }, content)
   const openService = () => {
     setPending(null)
     setServiceOpen(true)
@@ -219,6 +228,8 @@ export function GameScreen({
               onTarget={act}
               serviceCheck={serviceCheck}
               onService={openService}
+              stashActions={stashActions}
+              forceCheck={forceCheck}
             />
             {peek && (
               <div className="location-peek">
@@ -233,6 +244,8 @@ export function GameScreen({
                   onTarget={act}
                   serviceCheck={serviceCheck}
                   onService={openService}
+                  stashActions={stashActions}
+                  forceCheck={forceCheck}
                 />
               </div>
             )}
