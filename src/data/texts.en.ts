@@ -295,6 +295,11 @@ export const texts = {
       none: 'none',
     },
     seed: (seed: number) => `City seed ${seed}. "Same city again" replays this map.`,
+    resultHeading: 'Playtest result',
+    resultHint: 'Copy this line into the playtest form.',
+    copy: 'Copy',
+    copied: 'Copied',
+    copyFailed: 'Select the line and copy it yourself.',
   },
 
   log: {

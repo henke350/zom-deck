@@ -94,3 +94,19 @@ function statRows({ stats, packs, hpLeft, turnsUsed, cardsFound }: ExpeditionRes
     },
   ]
 }
+
+/** One line that sums up a finished expedition, for the playtest form. Not translated: it is data. */
+export function resultCode(result: ExpeditionResult, seed: number, maxHp: number): string {
+  const { outcome, stats } = result
+  const stars = outcome.stars ? ` ${'*'.repeat(outcome.stars)}` : ''
+  const finds = result.cardsFound.map((card) => cardText(card).name).join(', ') || '-'
+  return [
+    `OMB seed ${seed}`,
+    `${outcome.cause}${stars}`,
+    `turn ${result.turnsUsed}`,
+    `hp ${result.hpLeft}/${maxHp}`,
+    `packs ${result.packs}`,
+    `stashes ${stats.stashesOpened}`,
+    `finds ${finds}`,
+  ].join(' | ')
+}

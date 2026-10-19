@@ -8,6 +8,7 @@ Al tekst i spillet er på engelsk; "One More Building" er en arbejdstitel.
 - **Visuelt overblik:** https://claude.ai/artifact/XnjVimEtZRq8AUFBc4VR9Z (privat, indtil det deles)
 - **Spil prototypen i browseren:** https://claude.ai/artifact/1HKHPRedxcpRYNSh6GNZVY (privat, indtil det deles; opdateres ved hver milepæl)
 - **Status:** M0–M6 er bygget, og M7 (playtest og justering) er i gang. Første justering efter simuleringen: 9 liv og Run ×1 / Search ×4 i startdækket. Nyt: sjældne fund og låste gemmesteder. Nu mangler playtest med rigtige spillere.
+- **Playtest-skema:** https://claude.ai/artifact/1WDft2tZ33fJ1oLQLTExcQ (del med testerne som Contributor)
 - **Balancerapport:** [docs/balance-report.md](docs/balance-report.md) (lavet af `npm run sim`)
 
 ## Sådan kører du spillet lokalt

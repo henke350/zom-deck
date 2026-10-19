@@ -648,3 +648,28 @@
   flex-wrap: wrap;
   gap: 0.4rem;
 }
+
+/* Playtest result line on the end screen */
+.result-code {
+  margin-top: 1rem;
+}
+.result-code p {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+}
+.result-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.result-row code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+}

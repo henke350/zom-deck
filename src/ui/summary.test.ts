@@ -3,7 +3,7 @@ import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
 import type { ExpeditionResult, Outcome, Stats } from '../game'
 import { emptyStats } from '../game/stats'
-import { endSummary } from './summary'
+import { endSummary, resultCode } from './summary'
 
 function result(outcome: Outcome, packs: number, stats: Partial<Stats> = {}): ExpeditionResult {
   return {
@@ -69,5 +69,12 @@ describe('end summary', () => {
     const { stats } = endSummary(result(home(1), 2, { cardsTaken: ['axe', 'bandage'] }), balance)
     const taken = stats.find((row) => row.label === texts.end.stats.cardsTaken)
     expect(taken?.value).toBe('Axe, Bandage')
+  })
+
+  it('sums up a result in one line for the playtest form', () => {
+    const r = result(home(2), 3, { cardsTaken: ['axe'], stashesOpened: 1 })
+    expect(resultCode(r, 4711, 9)).toBe(
+      'OMB seed 4711 | home ** | turn 6 | hp 0/9 | packs 3 | stashes 1 | finds Axe',
+    )
   })
 })

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
 import type { ExpeditionResult } from '../../game'
-import { endSummary } from '../summary'
+import { endSummary, resultCode } from '../summary'
 import { Dialog } from './Dialog'
 
 interface GameOverPanelProps {
@@ -29,6 +29,26 @@ export function GameOverPanel({
   const end = texts.end
   const { outcome } = result
   const summary = endSummary(result, balance)
+  const code = resultCode(result, seed, balance.maxHp)
+  const codeRef = useRef<HTMLElement>(null)
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopyState('copied')
+    } catch {
+      // Some hosts refuse the clipboard. Select the line so the player can copy it.
+      const el = codeRef.current
+      const selection = window.getSelection()
+      if (el && selection) {
+        const range = document.createRange()
+        range.selectNodeContents(el)
+        selection.removeAllRanges()
+        selection.addRange(range)
+      }
+      setCopyState('failed')
+    }
+  }
 
   return (
     <Dialog labelledBy="game-over-title" wide>
@@ -72,6 +92,17 @@ export function GameOverPanel({
         </dl>
       </section>
       <p className="muted end-seed">{end.seed(seed)}</p>
+      <section className="result-code" aria-label={end.resultHeading}>
+        <h3 className="eyebrow">{end.resultHeading}</h3>
+        <p className="muted">{end.resultHint}</p>
+        <div className="result-row">
+          <code ref={codeRef}>{code}</code>
+          <button type="button" className="btn btn-small" onClick={copy}>
+            {copyState === 'copied' ? end.copied : end.copy}
+          </button>
+        </div>
+        {copyState === 'failed' && <p className="reason">{end.copyFailed}</p>}
+      </section>
     </Dialog>
   )
 }
