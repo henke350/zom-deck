@@ -2,10 +2,11 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { balance as standard } from '../data/balance'
 import { defaultContent } from '../data/content'
+import { bots } from './bots'
 import { fuzz } from './fuzz'
 import { applyOverrides } from './overrides'
 import { consoleSummary, renderReport } from './report'
-import { runBots, runVariants } from './simulate'
+import { runBots, runVariants, traceGame } from './simulate'
 
 /**
  * The simulator's command line (runs in Node, see vite.sim.config.ts):
@@ -14,6 +15,7 @@ import { runBots, runVariants } from './simulate'
  *   npm run sim -- --games 200          fewer games
  *   npm run sim -- --set maxHp=12       try a balance change (report goes to .sim/)
  *   npm run sim -- --variant-games 0    skip the "what if" section (faster)
+ *   npm run sim -- trace greedy 7       one game, action by action
  *   npm run fuzz                        10 000 random games, every rule checked after every action
  */
 function main(argv: readonly string[]): number {
@@ -31,7 +33,18 @@ function main(argv: readonly string[]): number {
     for (const p of result.problems) console.log(`  ${p}`)
     return result.problems.length === 0 ? 0 : 1
   }
-  if (command !== 'report') throw new Error(`Unknown command "${command}" (use report or fuzz)`)
+  if (command === 'trace') {
+    // npm run sim -- trace <bot id> <seed>: every action and what happened, for one game.
+    const [botId = 'rush', seedText = '1'] = rest.filter((a) => !a.startsWith('--'))
+    const info = bots.find((b) => b.bot.id === botId)
+    if (!info) throw new Error(`Unknown bot "${botId}"`)
+    const balance = applyOverrides(standard, options(rest, '--set'))
+    console.log(traceGame(info.bot, Number(seedText), balance).join('\n'))
+    return 0
+  }
+  if (command !== 'report') {
+    throw new Error(`Unknown command "${command}" (use report, fuzz or trace)`)
+  }
 
   const overrides = options(rest, '--set')
   const balance = applyOverrides(standard, overrides)

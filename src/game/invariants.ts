@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { cityContent } from './city'
 import { listActions } from './actions'
 import { totalCount } from './deck'
 import { starsFor } from './rules'
@@ -8,7 +9,8 @@ import type { Content, GameState } from './types'
  * Things that must always hold in a game started with `newGame`. Returns what is wrong
  * (empty when all is well). Used by the fuzz tests and the simulator.
  */
-export function checkInvariants(state: GameState, content: Content = defaultContent): string[] {
+export function checkInvariants(state: GameState, baseContent: Content = defaultContent): string[] {
+  const content = cityContent(state, baseContent)
   const problems: string[] = []
   const fail = (what: string) => problems.push(what)
   const { piles, player, balance, stats } = state

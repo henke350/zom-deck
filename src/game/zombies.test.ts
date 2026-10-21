@@ -4,7 +4,7 @@ import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import { applyAction } from './engine'
 import { newGame } from './setup'
-import { cardsIn, makeState, type StateSpec } from './testkit'
+import { classicBalance, cardsIn, makeState, type StateSpec } from './testkit'
 import type { Action, GameEvent, GameState } from './types'
 import { validate } from './validate'
 import { addNoise, noisePreview, previewEndTurn, zombieInfo, zombiesAt } from './zombies'
@@ -28,7 +28,7 @@ describe('starting zombies', () => {
   it('are rolled inside each building’s range and nowhere else (500 seeds)', () => {
     const seen: Record<string, Set<number>> = {}
     for (let seed = 1; seed <= 500; seed++) {
-      const state = newGame(seed)
+      const state = newGame(seed, { balance: classicBalance })
       for (const loc of Object.values(defaultContent.locations)) {
         const count = zombiesAt(state, loc.id).length
         if (!loc.startZombies) {
@@ -48,7 +48,7 @@ describe('starting zombies', () => {
   })
 
   it('can be raised for every building with the extra start zombies knob', () => {
-    const more = { ...balance, extraStartZombies: 1 }
+    const more = { ...classicBalance, extraStartZombies: 1 }
     for (let seed = 1; seed <= 100; seed++) {
       const state = newGame(seed, { balance: more })
       expect(zombiesAt(state, 'police').length).toBeGreaterThanOrEqual(3)
@@ -64,7 +64,7 @@ describe('starting zombies', () => {
     expect(zombieInfo(state, defaultContent, 'pharmacy')).toEqual({ known: false, min: 1, max: 2 })
     const visited = { ...state, visited: [...state.visited, 'pharmacy'] }
     expect(zombieInfo(visited, defaultContent, 'pharmacy')).toEqual({ known: true, count: 1 })
-    const open = { ...state, balance: { ...balance, hiddenDanger: false } }
+    const open = { ...state, balance: { ...classicBalance, hiddenDanger: false } }
     expect(zombieInfo(open, defaultContent, 'pharmacy')).toEqual({ known: true, count: 1 })
     expect(zombieInfo(state, defaultContent, 'street')).toEqual({ known: true, count: 0 })
   })

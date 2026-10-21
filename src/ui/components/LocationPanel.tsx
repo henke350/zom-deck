@@ -7,7 +7,7 @@ import type {
   OpenStashAction,
   Validation,
 } from '../../game'
-import { distance, freeMoveCost, zombieInfo, zombiesAt } from '../../game'
+import { buildingKnown, distance, freeMoveCost, zombieInfo, zombiesAt } from '../../game'
 import { cardText, locationText } from '../names'
 import { siteSummary } from '../sites'
 
@@ -63,6 +63,20 @@ export function LocationPanel({
     : cost > 0
       ? ui.freeMoveCosts(cost)
       : ui.freeMoveAvailable
+
+  if (!buildingKnown(state, content, location)) {
+    return (
+      <section className="panel location-panel" aria-label={ui.location} aria-live="polite">
+        <p className="eyebrow">{texts.locationKinds.building}</p>
+        <h2>{ui.unknownBuilding}</h2>
+        <p className="muted">{ui.unknownDescription}</p>
+        <p className="where">{ui.stepsAway(steps)}</p>
+        {!info.known && <p className="zombie-info">{ui.zombiesUnknown(info.min, info.max)}</p>}
+        {moveCheck && !moveCheck.ok && <p className="reason">{moveCheck.reason}</p>}
+        <p className="free-move">{freeMoveStatus}</p>
+      </section>
+    )
+  }
 
   return (
     <section className="panel location-panel" aria-label={ui.location} aria-live="polite">

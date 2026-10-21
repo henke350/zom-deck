@@ -2,6 +2,7 @@ import { balance as defaultBalance, type Balance } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
 import { normalizeSeed, shuffle } from './rng'
+import { contentForCity, maybeRollCity } from './city'
 import { placePacks } from './search'
 import { emptyStats } from './stats'
 import { setupZombies } from './zombies'
@@ -36,8 +37,10 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   const instances: CardInstance[] = deckIds.map((card, i) => ({ uid: `c${i + 1}`, card }))
   const normalized = normalizeSeed(seed)
   const [draw, afterDeck] = shuffle(instances, normalized)
-  const [sites, afterPacks] = placePacks(content, balance, afterDeck)
-  const [zombies, nextZombieUid, rng] = setupZombies(content, balance, afterPacks)
+  const [city, afterCity] = maybeRollCity(content, balance, afterDeck)
+  const here = city ? contentForCity(city, content) : content
+  const [sites, afterPacks] = placePacks(here, balance, afterCity)
+  const [zombies, nextZombieUid, rng] = setupZombies(here, balance, afterPacks)
 
   const startHp = options.setup?.startHp ?? balance.maxHp
   const initial: GameState = {
@@ -63,6 +66,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     nextZombieUid,
     noise: 0,
     visited: [content.startLocation],
+    ...(city ? { city } : {}),
     stats: emptyStats(startHp, instances.length),
   }
   const events: GameEvent[] = []

@@ -23,14 +23,20 @@ export const texts = {
   locations: {
     shelter: { name: 'Shelter', description: 'Your safe base. Come back with supplies to win.' },
     street: { name: 'Street', description: 'A hub with routes to five places. Nothing to search.' },
-    houseA: { name: 'House A', description: 'A quiet home close to the shelter.' },
-    houseB: { name: 'House B', description: 'A home between the pharmacy and the street.' },
+    houseA: { name: 'House A', description: 'A quiet family home.' },
+    houseB: { name: 'House B', description: 'A home with a garage full of junk.' },
     supermarket: { name: 'Supermarket', description: 'Always holds one supply pack.' },
     pharmacy: { name: 'Pharmacy', description: 'Medicine, bandages, and a place to patch up.' },
     workshop: { name: 'Workshop', description: 'Tools, and a bench to dismantle junk.' },
     police: {
       name: 'Police Station',
-      description: 'The best gear, the most danger, the longest walk.',
+      description: 'The best gear and the most danger.',
+    },
+    gasStation: { name: 'Gas Station', description: 'Fuel, snacks and a few tools.' },
+    school: { name: 'School', description: 'Long corridors. Maps, first aid and lockers.' },
+    hospital: {
+      name: 'Hospital',
+      description: 'Plenty of medicine, plenty of the dead. You can patch up here.',
     },
   },
 
@@ -119,6 +125,10 @@ export const texts = {
     chooseTrashTarget: 'Choose a card in your hand to trash.',
     useService: (name: string, cost: number) => `${name} (${cost} AP)`,
     rare: 'Rare',
+    unknownBuilding: 'Unknown building',
+    unknownShort: '?',
+    unknownMapName: 'Unknown',
+    unknownDescription: 'Walk next to it to see what it is. A District Map shows it from afar.',
     stashHeading: 'Locked stash',
     stashText: 'Rare finds inside. Open it with a Tool card, or force it open.',
     openStashWith: (name: string, cost: number) => `Open with ${name} (${cost} AP)`,
@@ -173,6 +183,16 @@ export const texts = {
         items: [
           `Find at least ${b.packsToWin} supply packs and walk back into the Shelter before the end of turn ${b.turnLimit}.`,
           `More packs give more stars: ${b.starThresholds.map((n, i) => `${'★'.repeat(i + 1)} for ${n}`).join(', ')}. You decide when to go home.`,
+          ...(b.randomCity
+            ? [
+                'Every city is different: the roads stay, but the buildings are picked and placed at random, and some buildings are missing.',
+              ]
+            : []),
+          ...(b.hiddenBuildings
+            ? [
+                'A building shows as Unknown until you stand next to it. The Supermarket always has a pack, but first you have to find it.',
+              ]
+            : []),
         ],
       },
       {

@@ -2,6 +2,7 @@ export { cardOptions, freeMoveTargets, listActions, targetKindOf } from './actio
 export type { ModeOption, TargetKind } from './actions'
 export { ownedCount, totalCount } from './deck'
 export { applyAction, previewOutcome } from './engine'
+export { buildingKnown, cityContent } from './city'
 export { distance, distancesFrom, neighbors } from './map'
 export { freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
 export { newGame, starterDeck } from './setup'

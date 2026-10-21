@@ -23,19 +23,20 @@ npm run dev      # starter spillet på http://localhost:5173
 ## Sådan prøver du spillet (M6)
 
 1. Klik **Start expedition**. Første gang vises reglerne på én side. Du kan altid åbne dem igen med **How to play** på forsiden eller **Rules** i toplinjen.
-2. Klik på et af de stiplede nabosteder på kortet for at gå dertil gratis (én gang pr. tur).
-3. Spil kort med **Play**. Kort som Run beder dig vælge et sted på kortet; Toolbox beder dig vælge et kort at fjerne.
-4. Klik **Keep** på ét kort for at gemme det til næste tur, og klik **End turn**.
-5. Stå i en bygning og spil **Search**, eller brug **Quick search** i sidepanelet (2 AP, ingen kort). Vælg ét fund, skrot et kort fra hånden, eller tag ingenting.
-6. Supermarket har altid en forsyningspakke; tre andre ligger tilfældigt. Hver pakke lægger et Heavy Load i dit dæk.
-7. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★). Spillet spørger først **Go home now?**, så du kan vælge at tage én bygning mere.
-8. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger ét skridt efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol).
-9. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
-10. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
-11. Grå knapper viser altid, hvorfor de ikke kan bruges.
-12. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
-13. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
-14. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
+2. **Hver by er ny:** bygningerne vælges og placeres tilfældigt, og en bygning står som _Unknown_, indtil du har stået ved siden af den. Find Supermarket – den har altid en pakke.
+3. Klik på et af de stiplede nabosteder på kortet for at gå dertil gratis (én gang pr. tur).
+4. Spil kort med **Play**. Kort som Run beder dig vælge et sted på kortet; Toolbox beder dig vælge et kort at fjerne.
+5. Klik **Keep** på ét kort for at gemme det til næste tur, og klik **End turn**.
+6. Stå i en bygning og spil **Search**, eller brug **Quick search** i sidepanelet (2 AP, ingen kort). Vælg ét fund, skrot et kort fra hånden, eller tag ingenting.
+7. Supermarket har altid en forsyningspakke; tre andre ligger tilfældigt. Hver pakke lægger et Heavy Load i dit dæk.
+8. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★). Spillet spørger først **Go home now?**, så du kan vælge at tage én bygning mere.
+9. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger ét skridt efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol).
+10. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
+11. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
+12. Grå knapper viser altid, hvorfor de ikke kan bruges.
+13. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
+14. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
+15. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 

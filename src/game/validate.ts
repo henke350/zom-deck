@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { cityContent } from './city'
 import { texts } from '../data/texts.en'
 import { ownedCount } from './deck'
 import { distance, neighbors } from './map'
@@ -37,8 +38,9 @@ const findChoices: ReadonlySet<Action['type']> = new Set(['takeFind', 'scrapCard
 export function validate(
   state: GameState,
   action: Action,
-  content: Content = defaultContent,
+  baseContent: Content = defaultContent,
 ): Validation {
+  const content = cityContent(state, baseContent)
   if (state.phase === 'gameOver') return no(texts.reasons.gameOver)
   const isFindChoice = findChoices.has(action.type)
   if (state.phase === 'chooseFind' && !isFindChoice) return no(texts.reasons.chooseFindFirst)
@@ -78,8 +80,9 @@ export function validate(
 /** Can the service where you stand be used at all right now? For the UI's button. */
 export function validateServiceHere(
   state: GameState,
-  content: Content = defaultContent,
+  baseContent: Content = defaultContent,
 ): Validation {
+  const content = cityContent(state, baseContent)
   if (state.phase === 'gameOver') return no(texts.reasons.gameOver)
   if (state.phase === 'chooseFind') return no(texts.reasons.chooseFindFirst)
   const service = content.locations[state.player.location]?.service

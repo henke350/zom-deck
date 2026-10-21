@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
 import { chooseFind, openStash, performSearch } from './search'
@@ -34,8 +35,9 @@ import type {
 export function applyAction(
   state: GameState,
   action: Action,
-  content: Content = defaultContent,
+  baseContent: Content = defaultContent,
 ): StepResult {
+  const content = cityContent(state, baseContent)
   const validation = validate(state, action, content)
   if (!validation.ok) throw new Error(`Illegal action ${action.type}: ${validation.reason}`)
 
@@ -51,8 +53,9 @@ export function applyAction(
 export function previewOutcome(
   state: GameState,
   action: Action,
-  content: Content = defaultContent,
+  baseContent: Content = defaultContent,
 ): Outcome | undefined {
+  const content = cityContent(state, baseContent)
   if (!validate(state, action, content).ok) return undefined
   return applyAction(state, action, content).state.outcome
 }

@@ -6,7 +6,7 @@ import { ownedCount } from './deck'
 import { applyAction } from './engine'
 import { drawFinds, placePacks } from './search'
 import { newGame } from './setup'
-import { cardsIn, makeState } from './testkit'
+import { classicBalance, cardsIn, makeState } from './testkit'
 import type { Action, GameState } from './types'
 import { validate } from './validate'
 
@@ -27,7 +27,7 @@ describe('pack placement', () => {
   it('always places 4 packs, one in the Supermarket, never in Shelter or Street (1,000 seeds)', () => {
     const counts: Record<string, number> = {}
     for (let seed = 1; seed <= 1000; seed++) {
-      const { sites } = newGame(seed)
+      const { sites } = newGame(seed, { balance: classicBalance })
       const withPack = Object.entries(sites)
         .filter(([, s]) => s.hasPack)
         .map(([id]) => id)
@@ -263,7 +263,7 @@ describe('supply packs', () => {
   })
 
   it('wait in the Supermarket in every real game', () => {
-    const start = newGame(4711)
+    const start = newGame(4711, { balance: classicBalance })
     const there = { ...start, player: { ...start.player, location: 'supermarket' } }
     expect(play(there, { type: 'quickSearch' }).player.packs).toBe(1)
   })

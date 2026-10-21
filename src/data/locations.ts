@@ -97,6 +97,53 @@ export const locations = {
 
 export type KnownLocationId = keyof typeof locations
 
+/**
+ * Buildings a random city can use besides the classic ones. A city has as many buildings as
+ * the classic map has building slots, so some buildings are left out of every city.
+ */
+export const extraBuildings = {
+  gasStation: {
+    id: 'gasStation',
+    kind: 'building',
+    startZombies: { min: 0, max: 2 },
+    lootPool: [
+      { card: 'molotov', weight: 3 },
+      { card: 'runningShoes', weight: 2 },
+      { card: 'travelLight', weight: 2 },
+      { card: 'flashlight', weight: 2 },
+      { card: 'toolbox', weight: 1 },
+      { card: 'bicycle', weight: 1 },
+    ],
+  },
+  school: {
+    id: 'school',
+    kind: 'building',
+    startZombies: { min: 1, max: 2 },
+    lootPool: [
+      { card: 'districtMap', weight: 3 },
+      { card: 'flashlight', weight: 2 },
+      { card: 'alarmClock', weight: 2 },
+      { card: 'bandage', weight: 2 },
+      { card: 'baseballBat', weight: 2 },
+      { card: 'softSoles', weight: 1 },
+    ],
+  },
+  hospital: {
+    id: 'hospital',
+    kind: 'building',
+    startZombies: { min: 2, max: 3 },
+    service: { id: 'patchUp', filter: 'junk' },
+    lootPool: [
+      { card: 'bandage', weight: 3 },
+      { card: 'painkillers', weight: 2 },
+      { card: 'adrenaline', weight: 2 },
+      { card: 'alarmClock', weight: 1 },
+      { card: 'kevlarVest', weight: 1 },
+      { card: 'firstAidKit', weight: 1 },
+    ],
+  },
+} as const satisfies Record<string, Omit<LocationDef, 'mapPos'>>
+
 /** Two-way connections. Neighbours are derived from this list, so they always match. */
 export const connections = [
   ['shelter', 'street'],

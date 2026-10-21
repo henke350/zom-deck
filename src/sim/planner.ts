@@ -1,5 +1,7 @@
 import {
   applyAction,
+  buildingKnown,
+  cityContent,
   distancesFrom,
   freeMoveCost,
   listActions,
@@ -17,6 +19,7 @@ import type {
   LocationId,
   PlayCardAction,
 } from '../game'
+import { buildingPool } from '../game/city'
 import type { Bot } from './bot'
 import { expectedZombies, packChance } from './view'
 
@@ -101,7 +104,8 @@ interface Ctx {
 export function plannerBot(o: PlannerOptions): Bot {
   return {
     id: o.id,
-    next(state, content) {
+    next(state, baseContent) {
+      const content = cityContent(state, baseContent)
       if (state.phase === 'chooseFind') return chooseFind(o, state, content)
       const home = shelterOf(content)
       const plan = makePlan(o, state, content, home)
@@ -181,7 +185,22 @@ function buildingValue(o: PlannerOptions, state: GameState, content: Content, id
 
 /** Average value of a building's finds for this bot. */
 function lootValue(o: PlannerOptions, state: GameState, content: Content, id: LocationId) {
-  const pool = content.locations[id]?.lootPool ?? []
+  // An unknown building could be any of them: average over every building there is.
+  if (!buildingKnown(state, content, id)) {
+    const all = Object.keys(buildingPool(content))
+    const values = all.map((b) => poolValue(o, state, content, buildingPool(content)[b]?.lootPool))
+    return values.reduce((a, b) => a + b, 0) / (values.length || 1)
+  }
+  return poolValue(o, state, content, content.locations[id]?.lootPool)
+}
+
+function poolValue(
+  o: PlannerOptions,
+  state: GameState,
+  content: Content,
+  lootPool: readonly { readonly card: string; readonly weight: number }[] | undefined,
+): number {
+  const pool = lootPool ?? []
   const total = pool.reduce((sum, entry) => sum + entry.weight, 0)
   if (total === 0) return 0
   return pool.reduce((sum, e) => sum + e.weight * findValue(o, state, content, e.card), 0) / total

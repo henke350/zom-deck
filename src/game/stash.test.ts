@@ -4,7 +4,7 @@ import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import { applyAction } from './engine'
 import { newGame } from './setup'
-import { cardsIn, makeState } from './testkit'
+import { classicBalance, cardsIn, makeState } from './testkit'
 import type { Action, GameState } from './types'
 import { validate } from './validate'
 
@@ -27,7 +27,7 @@ describe('locked stashes', () => {
   it('are hidden in exactly the set number of buildings (300 seeds)', () => {
     const seen = new Set<string>()
     for (let seed = 1; seed <= 300; seed++) {
-      const sites = Object.entries(newGame(seed).sites)
+      const sites = Object.entries(newGame(seed, { balance: classicBalance }).sites)
       const stashes = sites.filter(([, s]) => s.stash !== 'none')
       expect(stashes).toHaveLength(balance.stashesOnMap)
       for (const [id, s] of stashes) {
@@ -35,7 +35,7 @@ describe('locked stashes', () => {
         seen.add(id)
       }
     }
-    expect(seen.size).toBe(Object.keys(newGame(1).sites).length)
+    expect(seen.size).toBe(Object.keys(newGame(1, { balance: classicBalance }).sites).length)
   })
 
   it('are found by the first search there', () => {

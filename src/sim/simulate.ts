@@ -1,4 +1,8 @@
 import type { Balance } from '../data/balance'
+import { defaultContent } from '../data/content'
+import { applyAction, cityContent, newGame } from '../game'
+import type { Bot } from './bot'
+import { makeRandom } from './random'
 import { bots, type BotInfo } from './bots'
 import { applyOverrides } from './overrides'
 import { playGame } from './play'
@@ -31,6 +35,11 @@ export const variants: readonly Variant[] = [
     name: 'Som i M6: 10 liv, Run ×2 og Search ×3',
     overrides: ['maxHp=10', 'starterDeck.run=2', 'starterDeck.search=3'],
   },
+  {
+    name: 'Klassisk kort, alt synligt (før 21. okt.)',
+    overrides: ['randomCity=false', 'hiddenBuildings=false'],
+  },
+  { name: 'Tilfældig by, alt synligt', overrides: ['hiddenBuildings=false'] },
   { name: '10 liv', overrides: ['maxHp=10'] },
   { name: '8 liv', overrides: ['maxHp=8'] },
   { name: 'Zombier giver 2 skade', overrides: ['zombie.damage=2'] },
@@ -53,4 +62,36 @@ export function runVariants(
     variant,
     summaries: runBots(applyOverrides(balance, variant.overrides), games, thinking),
   }))
+}
+
+/** One game as text lines: where the bot stood, its hand, the action and the events. */
+export function traceGame(bot: Bot, seed: number, balance: Balance): string[] {
+  let state = newGame(seed, { balance })
+  const city = cityContent(state, defaultContent)
+  const random = makeRandom(seed * 7919 + 13)
+  const lines = [
+    `city: ${Object.keys(state.sites).join(', ')}`,
+    `packs: ${Object.entries(state.sites)
+      .filter(([, s]) => s.hasPack)
+      .map(([id]) => id)
+      .join(', ')}`,
+    `zombies: ${state.zombies.map((z) => z.location).join(', ')}`,
+  ]
+  for (let i = 0; i < 400 && state.phase !== 'gameOver'; i++) {
+    const action = bot.next(state, city, random)
+    const hand = state.piles.hand.map((c) => c.card).join(',')
+    const { state: next, events } = applyAction(state, action, city)
+    const what = events
+      .filter((e) => e.type !== 'cardsDrawn' && e.type !== 'deckShuffled')
+      .map(
+        (e) => e.type + ('location' in e ? `@${e.location}` : '') + ('to' in e ? `>${e.to}` : ''),
+      )
+    lines.push(
+      `T${state.turn} hp${state.player.hp} ap${state.player.ap} @${state.player.location} [${hand}] ` +
+        `${JSON.stringify(action)} -> ${what.join(' ')}`,
+    )
+    state = next
+  }
+  lines.push(JSON.stringify(state.outcome))
+  return lines
 }

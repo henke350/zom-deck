@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { cityContent } from './city'
 import { texts } from '../data/texts.en'
 import { activeEffects, moveStepsOf, needsZombieTarget, scoutRangeOf, trashFilterOf } from './rules'
 import { zombiesAt } from './zombies'
@@ -46,7 +47,8 @@ function candidatesFor(
  * Every legal action right now. Used by tests, the UI and, later, by the
  * bots (M6).
  */
-export function listActions(state: GameState, content: Content = defaultContent): Action[] {
+export function listActions(state: GameState, baseContent: Content = defaultContent): Action[] {
+  const content = cityContent(state, baseContent)
   if (state.phase === 'gameOver') return []
   const candidates: Action[] = []
   const { hand } = state.piles
@@ -89,8 +91,9 @@ export interface ModeOption {
 export function cardOptions(
   state: GameState,
   uid: string,
-  content: Content = defaultContent,
+  baseContent: Content = defaultContent,
 ): ModeOption[] {
+  const content = cityContent(state, baseContent)
   const instance = state.piles.hand.find((c) => c.uid === uid)
   const def = instance && content.cards[instance.card]
   if (!def || def.modes.length === 0) {
@@ -116,7 +119,11 @@ export function cardOptions(
 }
 
 /** For the UI: where the free move can go right now. */
-export function freeMoveTargets(state: GameState, content: Content = defaultContent): LocationId[] {
+export function freeMoveTargets(
+  state: GameState,
+  baseContent: Content = defaultContent,
+): LocationId[] {
+  const content = cityContent(state, baseContent)
   return Object.keys(content.locations).filter(
     (to) => validate(state, { type: 'freeMove', to }, content).ok,
   )

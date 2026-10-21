@@ -32,6 +32,10 @@ export interface Balance {
   readonly zombieFollow: ZombieFollow
   /** Unvisited buildings show a zombie range instead of the exact count. */
   readonly hiddenDanger: boolean
+  /** Each new city picks its buildings at random and places them in random slots. */
+  readonly randomCity: boolean
+  /** A building shows as unknown until the player has stood next to it (or scouted it). */
+  readonly hiddenBuildings: boolean
   readonly heavyLoadPerPack: number
   /** AP cost of a location service (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly locationServiceCost: number
@@ -77,6 +81,8 @@ export const balance: Balance = {
   extraStartZombies: 0,
   zombieFollow: 'chase',
   hiddenDanger: true,
+  randomCity: true,
+  hiddenBuildings: true,
   heavyLoadPerPack: 1,
   locationServiceCost: 1,
   rareFindWeight: 0.25,

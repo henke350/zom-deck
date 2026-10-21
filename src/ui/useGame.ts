@@ -1,6 +1,7 @@
 import { useCallback, useReducer } from 'react'
 import { applyAction, newGame, validate } from '../game'
 import type { Action, ExpeditionSetup, GameState } from '../game'
+import type { Balance } from '../data/balance'
 import { formatEvent } from './format'
 
 export interface LogEntry {
@@ -17,13 +18,14 @@ interface GameModel {
 
 interface GameStart {
   readonly seed: number
+  readonly balance?: Balance
   readonly setup?: ExpeditionSetup
   /** Start from this exact state instead (used by tests). */
   readonly initialState?: GameState
 }
 
-function init({ seed, setup, initialState }: GameStart): GameModel {
-  const state = initialState ?? newGame(seed, { setup })
+function init({ seed, balance, setup, initialState }: GameStart): GameModel {
+  const state = initialState ?? newGame(seed, { setup, balance })
   const opening = [
     formatEvent({ type: 'turnStarted', turn: state.turn }, state),
     formatEvent({ type: 'cardsDrawn', uids: state.piles.hand.map((c) => c.uid) }, state),
@@ -48,8 +50,13 @@ function reducer(model: GameModel, action: Action): GameModel {
 }
 
 /** Holds one expedition: the engine state, a readable log, and a dispatch function. */
-export function useGame(seed: number, setup?: ExpeditionSetup, initialState?: GameState) {
-  const [model, send] = useReducer(reducer, { seed, setup, initialState }, init)
+export function useGame(
+  seed: number,
+  setup?: ExpeditionSetup,
+  initialState?: GameState,
+  balance?: Balance,
+) {
+  const [model, send] = useReducer(reducer, { seed, balance, setup, initialState }, init)
   const dispatch = useCallback((action: Action) => send(action), [])
   return { state: model.state, log: model.log, dispatch }
 }

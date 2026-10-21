@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
 import { newGame, zombiesAt, type GameState } from '../game'
-import { makeState } from '../game/testkit'
+import { classicBalance, makeState } from '../game/testkit'
 import { GameScreen } from './GameScreen'
 
 afterEach(cleanup)
@@ -15,7 +15,9 @@ const startDeck = ['run', 'search', 'toolbox', 'nerves', 'bandage']
 
 function renderGame() {
   const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
-  const view = render(<GameScreen seed={7} setup={{ startDeck }} {...handlers} />)
+  const view = render(
+    <GameScreen seed={7} setup={{ startDeck }} balance={classicBalance} {...handlers} />,
+  )
   const card = (id: string) => {
     const el = view.container.querySelector<HTMLElement>(`[data-card="${id}"]`)
     if (!el) throw new Error(`Card ${id} is not in hand`)
@@ -111,7 +113,7 @@ describe('GameScreen: searching', () => {
   /** First seed where House A has (or lacks) a pack and holds this many zombies. */
   function seedWhere(houseAHasPack: boolean, zombies: number, startDeck: string[]) {
     for (let seed = 1; seed < 500; seed++) {
-      const game = newGame(seed, { setup: { startDeck } })
+      const game = newGame(seed, { setup: { startDeck }, balance: classicBalance })
       if (
         game.sites.houseA?.hasPack === houseAHasPack &&
         zombiesAt(game, 'houseA').length === zombies
@@ -125,7 +127,9 @@ describe('GameScreen: searching', () => {
   function renderAt(houseAHasPack: boolean, zombies = 0, startDeck = deck) {
     const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
     const seed = seedWhere(houseAHasPack, zombies, startDeck)
-    const view = render(<GameScreen seed={seed} setup={{ startDeck }} {...handlers} />)
+    const view = render(
+      <GameScreen seed={seed} setup={{ startDeck }} balance={classicBalance} {...handlers} />,
+    )
     const log = () => within(screen.getByRole('region', { name: texts.ui.log }))
     const houseA = () => screen.getByRole('button', { name: /^House A/ })
     return { view, log, houseA, user: userEvent.setup() }

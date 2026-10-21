@@ -1,4 +1,5 @@
 import type { Balance } from '../data/balance'
+import { buildingKnown, cityContent } from './city'
 import { gainCard } from './deck'
 import { distance, neighbors } from './map'
 import { nextInt } from './rng'
@@ -50,8 +51,25 @@ export type ZombieInfo =
   | { readonly known: true; readonly count: number }
   | { readonly known: false; readonly min: number; readonly max: number }
 
-export function zombieInfo(state: GameState, content: Content, location: LocationId): ZombieInfo {
+export function zombieInfo(
+  state: GameState,
+  baseContent: Content,
+  location: LocationId,
+): ZombieInfo {
+  const content = cityContent(state, baseContent)
   const def = content.locations[location]
+  // A building the player cannot see yet: only the range any building might hold.
+  if (!buildingKnown(state, content, location)) {
+    const ranges = Object.values(content.locations).flatMap((l) => {
+      const r = startZombieRange(l, state.balance)
+      return r ? [r] : []
+    })
+    return {
+      known: false,
+      min: Math.min(...ranges.map((r) => r.min)),
+      max: Math.max(...ranges.map((r) => r.max)),
+    }
+  }
   const hidden =
     state.balance.hiddenDanger &&
     def?.kind === 'building' &&
@@ -236,7 +254,8 @@ export interface EndTurnPreview {
 }
 
 /** What ending the turn now would do. Uses the same rules as the real zombie phase. */
-export function previewEndTurn(state: GameState, content: Content): EndTurnPreview {
+export function previewEndTurn(state: GameState, baseContent: Content): EndTurnPreview {
+  const content = cityContent(state, baseContent)
   const events: GameEvent[] = []
   const after = zombiePhase(state, content, events)
   const count = (type: GameEvent['type']) => events.filter((e) => e.type === type).length

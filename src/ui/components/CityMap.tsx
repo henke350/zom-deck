@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Content, GameState, LocationId } from '../../game'
-import { zombieInfo, zombiesAt } from '../../game'
+import { buildingKnown, zombieInfo, zombiesAt } from '../../game'
 import { locationText } from '../names'
 import { siteSummary } from '../sites'
 
@@ -92,12 +92,14 @@ export function CityMap({
         </g>
         {Object.values(content.locations).map((loc) => {
           const { x, y } = loc.mapPos
-          const name = locationText(loc.id).name
+          const known = buildingKnown(state, content, loc.id)
+          const name = known ? locationText(loc.id).name : texts.ui.unknownMapName
           const isHere = loc.id === here
           const isDest = destinations.has(loc.id)
           const classes = [
             'node',
             `node-${loc.kind}`,
+            !known && 'node-unknown',
             isHere && 'node-here',
             isDest && 'node-dest',
             selected === loc.id && 'node-selected',
@@ -132,7 +134,9 @@ export function CityMap({
               </text>
               <ZombieMarks state={state} content={content} id={loc.id} />
               <text className="node-kind" x={x} y={y + 8} textAnchor="middle">
-                {siteSummary(state, content, loc.id)?.short ?? texts.locationKinds[loc.kind]}
+                {known
+                  ? (siteSummary(state, content, loc.id)?.short ?? texts.locationKinds[loc.kind])
+                  : texts.ui.unknownShort}
               </text>
             </g>
           )

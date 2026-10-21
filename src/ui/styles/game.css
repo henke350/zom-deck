@@ -212,6 +212,13 @@
 .node-street rect {
   stroke-dasharray: 4 3;
 }
+.node-unknown rect {
+  stroke-dasharray: 2 4;
+  fill: var(--surface);
+}
+.node-unknown .node-name {
+  fill: var(--muted);
+}
 .node-name {
   fill: var(--ink);
   font-size: 14px;

@@ -135,7 +135,18 @@ export interface Content {
   readonly packCard: CardId
   /** The junk card added by a heavy zombie attack when the Wound variant is on. */
   readonly woundCard: CardId
+  /**
+   * More buildings that a random city can use instead of the ones on the classic map.
+   * Their map position comes from the building slot they are placed in.
+   */
+  readonly extraBuildings?: Readonly<Record<LocationId, Omit<LocationDef, 'mapPos'>>>
 }
+
+/**
+ * A random city: which building stands in each building slot of the classic map. Slots are
+ * named after the classic building that stands there (e.g. the "police" slot is top right).
+ */
+export type City = Readonly<Record<LocationId, LocationId>>
 
 /** One physical card. Two copies of the same card have different uids. */
 export interface CardInstance {
@@ -195,6 +206,8 @@ export interface GameState {
   readonly noise: number
   /** Places the player has been this expedition (hidden danger is revealed there). */
   readonly visited: readonly LocationId[]
+  /** The buildings of this city and where they stand. Absent: the classic map. */
+  readonly city?: City
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
