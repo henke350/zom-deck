@@ -753,6 +753,22 @@ Skrevet ind 19. oktober 2026. Idéerne bruger samme materialer og forbedringer s
 
 **Fravalgt:** mange slags råvarer og opskrifter (_This War of Mine_) og zombiekort, der blandes ind i dækket (_After the Virus_). Det første bryder kompleksitetsbudgettet; det andet giver to slags zombier, fordi vores zombier allerede er på bykortet.
 
+### Idé: den overlevende vokser – og kan knække (fra _Cthulhu: Death May Die_)
+
+Skrevet ind 23. oktober 2026 efter brugerens ønske. **Kun en idé, ikke besluttet**, og ikke en del af ekspeditionen (prototypen).
+
+I _Death May Die_ bliver figurerne stærkere i løbet af spillet, men det samme spor gør dem også mere sindssyge, så den, der presser sig for langt, kan knække. Kernen er, at **det, der gør dig stærk, også gør dig sårbar**.
+
+| Del               | Forslag                                                                                                                                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Erfaringsspor** | Hver overlevende har et spor (fx 0–6). Man rykker frem ved at vende hjem med pakker, dræbe zombier eller åbne gemmesteder.                                                                                                                |
+| **Evner**         | Ved bestemte felter låser man en evne op, fx _Steady Hands_ (første Search hver dag koster 0 AP) eller _Tough_ (+1 liv). Dækket nulstilles stadig hver morgen; væksten sidder i figuren, ikke i dækket. Så holder kompleksitetsbudgettet. |
+| **Stress**        | Samme spor giver stress: fra et vist felt starter hver ekspedition med et _Shaken_-kort (som Nerves, men det kan ikke skrottes), og senere to. Hvile en hel dag på basen fjerner ét.                                                      |
+| **Knækket**       | Når sporet når toppen, knækker den overlevende: figuren går tabt for kampagnen eller må hvile i flere dage. Spilleren vælger selv, om evnerne er risikoen værd.                                                                           |
+| **Brætspil**      | Passer godt til et fysisk spil: et figurkort med et spor og en brik, hvor felterne viser både evne og stress.                                                                                                                             |
+
+Hænger sammen med _Overlevende_ og _Forskellige overlevende_ (afsnit 8). Afprøves tidligst efter K4, når kampagnen i sig selv er sjov.
+
 ### Nye valg
 
 - **Kort eller materiale?** En stærkere ekspedition i dag eller en bedre base i morgen.
