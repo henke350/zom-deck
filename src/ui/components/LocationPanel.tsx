@@ -8,6 +8,7 @@ import type {
   Validation,
 } from '../../game'
 import { buildingKnown, distance, freeMoveCost, zombieInfo, zombiesAt } from '../../game'
+import { locationImages } from '../locationImages'
 import { cardText, locationText } from '../names'
 import { siteSummary } from '../sites'
 
@@ -80,6 +81,9 @@ export function LocationPanel({
 
   return (
     <section className="panel location-panel" aria-label={ui.location} aria-live="polite">
+      {locationImages[location] && (
+        <img className="location-art" src={locationImages[location]} alt="" />
+      )}
       <p className="eyebrow">{def ? texts.locationKinds[def.kind] : ''}</p>
       <h2>{name}</h2>
       <p className="muted">{description}</p>

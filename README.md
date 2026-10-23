@@ -62,6 +62,13 @@ npm run check    # alt det, den automatiske kontrol på GitHub tjekker
 Den automatiske kontrol (GitHub Actions) kører lint, formatering, typekontrol, tests og
 build ved hvert push.
 
+## Illustrationer
+
+Kort- og stedillustrationerne er lavet med en AI-billedgenerator ud fra prompts i `docs/`
+(`card-art-prompt.md`, `card-art/cards.json` og `location-art/prompt.md`). Spillet bruger små
+WebP-filer i `src/assets/cards/` og `src/assets/locations/`; originalerne ligger i `art-source/`.
+Filnavnet er kortets eller stedets id, så et nyt billede findes automatisk.
+
 ## Teknik
 
 TypeScript, React og Vite. Vitest til tests, oxlint og Prettier til kodekvalitet.
