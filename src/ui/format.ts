@@ -42,6 +42,8 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       )
     case 'zombieScreamed':
       return log.zombieScreamed(event.noise)
+    case 'dangerRose':
+      return log.dangerRose(event.level, event.reason)
     case 'zombieFollowed':
       return log.zombieFollowed(locationText(event.to).name, kindName(state, event.uid))
     case 'zombieLostTrack':

@@ -208,7 +208,8 @@ describe('GameScreen: searching', () => {
     const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
     expect(within(dialog).getByText(texts.ui.findNoise(1, 0))).toBeTruthy()
     await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
-    expect(screen.getByText(`1/${balance.noiseThreshold}`)).toBeTruthy()
+    const noiseStat = screen.getByText(texts.ui.noiseLabel).parentElement!
+    expect(within(noiseStat).getByText(`1/${balance.noiseThreshold}`)).toBeTruthy()
   })
 })
 

@@ -43,6 +43,8 @@ export interface StateSpec {
     readonly alerted?: boolean
     readonly neutralized?: boolean
   }[]
+  /** Danger level. Default: 1. */
+  readonly danger?: number
   readonly noise?: number
   /** Places already visited. Default: the shelter and the player's location. */
   readonly visited?: readonly LocationId[]
@@ -110,6 +112,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     zombies,
     nextZombieUid: zombies.length + 1,
     noise: spec.noise ?? 0,
+    danger: spec.danger ?? 1,
     visited: spec.visited ?? [...new Set(['shelter', location])],
     tagsPlayedThisTurn: spec.tags ?? [],
     nextUid: 1000,

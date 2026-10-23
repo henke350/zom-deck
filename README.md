@@ -32,11 +32,12 @@ npm run dev      # starter spillet på http://localhost:5173
 8. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★). Spillet spørger først **Go home now?**, så du kan vælge at tage én bygning mere.
 9. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol). Der er fire typer, vist med et bogstav i prikken: **W**alker (følger 1 skridt), **R**unner (hurtig, følger 2 skridt, 1 liv), **B**rute (4 liv, slår for 2, følger aldrig) og **S**creamer (bider ikke, men skriger og laver støj).
 10. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
-11. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
-12. Grå knapper viser altid, hvorfor de ikke kan bruges.
-13. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
-14. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
-15. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
+11. **Fare (Danger):** Starter på 1 og stiger for hver pakke og hvert sjældent fund (op til 4). Hver gang kommer en zombie ud på Street, og nye zombier bliver hurtigere og hårdere.
+12. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
+13. Grå knapper viser altid, hvorfor de ikke kan bruges.
+14. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
+15. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
+16. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 

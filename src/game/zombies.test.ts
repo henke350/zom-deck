@@ -433,3 +433,70 @@ describe('end-turn preview', () => {
     })
   })
 })
+
+describe('danger meter', () => {
+  const kinds = (state: GameState) => state.zombies.map((z) => z.kind)
+
+  it('rises with a pack and brings a horde to the street', () => {
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'] })
+    const { state: next, events } = applyAction(state, { type: 'quickSearch' })
+    expect(next.danger).toBe(2)
+    expect(events).toContainEqual({ type: 'dangerRose', level: 2, reason: 'pack' })
+    expect(zombiesAt(next, 'street')).toHaveLength(balance.danger.hordeSize)
+    expect(next.stats.dangerReached).toBe(2)
+  })
+
+  it('rises when you take a rare find, not a common one', () => {
+    const base = makeState({ location: 'police' })
+    const choosing = (card: 'shotgun' | 'bandage'): GameState => ({
+      ...base,
+      phase: 'chooseFind',
+      pendingFind: { location: 'police', options: [card], packFound: false, noise: 0 },
+    })
+    expect(play(choosing('shotgun'), { type: 'takeFind', card: 'shotgun' }).danger).toBe(2)
+    expect(play(choosing('bandage'), { type: 'takeFind', card: 'bandage' }).danger).toBe(1)
+  })
+
+  it('stops at the last level, with no more hordes', () => {
+    const top = balance.danger.levels.length
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], danger: top })
+    const next = play(state, { type: 'quickSearch' })
+    expect(next.danger).toBe(top)
+    expect(next.zombies).toHaveLength(0)
+  })
+
+  it('brings Walkers only at level 1, and more zombies per full meter higher up', () => {
+    const low = addNoise(makeState({ location: 'street' }), 40, defaultContent, 'noise', [])
+    expect(new Set(kinds(low))).toEqual(new Set(['walker']))
+    const top = balance.danger.levels.at(-1)!
+    const high = makeState({ location: 'street', danger: balance.danger.levels.length })
+    const next = addNoise(high, top.noiseThreshold, defaultContent, 'noise', [])
+    expect(next.zombies).toHaveLength(top.arrivals)
+    expect(noisePreview(high, top.noiseThreshold).arrivals).toBe(top.arrivals)
+  })
+
+  it('a lower noise threshold at the new level can bring a zombie at once', () => {
+    const [two, three] = [balance.danger.levels[1]!, balance.danger.levels[2]!]
+    expect(three.noiseThreshold).toBeLessThan(two.noiseThreshold)
+    const state = makeState({
+      location: 'pharmacy',
+      packsAt: ['pharmacy'],
+      danger: 2,
+      noise: three.noiseThreshold,
+    })
+    const { state: next, events } = applyAction(state, { type: 'quickSearch' })
+    expect(next.danger).toBe(3)
+    expect(next.noise).toBe(0)
+    expect(events.filter((e) => e.type === 'zombieArrived' && e.reason === 'noise')).toHaveLength(
+      three.arrivals,
+    )
+  })
+
+  it('can be switched off', () => {
+    const off = { ...classicBalance, danger: { ...classicBalance.danger, enabled: false } }
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], balance: off })
+    const next = play(state, { type: 'quickSearch' })
+    expect(next.danger).toBe(1)
+    expect(next.zombies).toHaveLength(0)
+  })
+})

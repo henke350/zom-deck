@@ -107,6 +107,7 @@ export function resultCode(result: ExpeditionResult, seed: number, maxHp: number
     `hp ${result.hpLeft}/${maxHp}`,
     `packs ${result.packs}`,
     `stashes ${stats.stashesOpened}`,
+    `danger ${stats.dangerReached}`,
     `finds ${finds}`,
   ].join(' | ')
 }

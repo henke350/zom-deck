@@ -16,12 +16,15 @@ describe('balance overrides', () => {
       'wounds.enabled=true',
       'zombieFollow=gentle',
       'starThresholds=3,4,5',
+      'danger.levels.3.arrivals=1',
     ])
     expect(b.maxHp).toBe(12)
     expect(b.zombies.walker).toEqual({ ...balance.zombies.walker, damage: 2 })
     expect(b.wounds.enabled).toBe(true)
     expect(b.zombieFollow).toBe('gentle')
     expect(b.starThresholds).toEqual([3, 4, 5])
+    expect(Array.isArray(b.danger.levels)).toBe(true)
+    expect(b.danger.levels[3]).toEqual({ ...balance.danger.levels[3], arrivals: 1 })
     expect(balance).toEqual(before)
   })
 

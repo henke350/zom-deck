@@ -2,7 +2,7 @@ import { texts } from '../data/texts.en'
 import type { Balance } from '../data/balance'
 import { gainCard, withoutCard } from './deck'
 import { nextFloat, shuffle } from './rng'
-import { addNoise, zombiesAt } from './zombies'
+import { addNoise, raiseDanger, zombiesAt } from './zombies'
 import type {
   CardId,
   Content,
@@ -164,6 +164,7 @@ export function performSearch(
     for (let i = 0; i < state.balance.heavyLoadPerPack; i++) {
       next = gainCard(next, content.packCard, 'pack', events)
     }
+    next = raiseDanger(next, content, 'pack', events)
   }
   return next
 }
@@ -230,6 +231,7 @@ export function chooseFind(
     events.push({ type: 'findDeclined' })
   } else if ('take' in choice) {
     next = gainCard(next, choice.take, 'find', events)
+    if (content.cards[choice.take]?.rare) next = raiseDanger(next, content, 'rare', events)
   } else {
     const target = state.piles.hand.find((c) => c.uid === choice.scrap)
     if (!target) throw new Error('chooseFind: validated scrap target is missing')

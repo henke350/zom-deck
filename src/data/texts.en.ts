@@ -69,6 +69,7 @@ export const texts = {
     mapSearches: (left: number, max: number) => `${left}/${max} searches`,
     burnedShort: 'Burned',
     noiseLabel: 'Noise',
+    dangerLabel: 'Danger',
     noiseBadge: (n: number, arrivals: number) =>
       arrivals > 0 ? `+${n} noise · zombie!` : `+${n} noise`,
     zombiesRange: (min: number, max: number) => (min === max ? `${min}?` : `${min}–${max}?`),
@@ -246,6 +247,18 @@ export const texts = {
           `Dusk starts on turn ${b.duskFromTurn}: from then on every turn adds ${b.duskNoise} noise.`,
         ],
       },
+      ...(b.danger.enabled
+        ? [
+            {
+              heading: 'Danger',
+              items: [
+                `The city gets wilder the better you do. Danger starts at 1 and rises by one for every pack and every rare find you take, up to ${b.danger.levels.length}.`,
+                `Each time it rises, ${b.danger.hordeSize === 1 ? 'a zombie gathers' : `${b.danger.hordeSize} zombies gather`} on the street. ${b.danger.levels.map((l, i) => `Danger ${i + 1}: ${l.arrivals === 1 ? 'a zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise`).join('. ')}.`,
+                'At low danger the noise brings Walkers; higher up come Runners, Screamers and at last Brutes.',
+              ],
+            },
+          ]
+        : []),
       {
         heading: 'Your deck',
         items: [
@@ -364,12 +377,16 @@ export const texts = {
     cardScrapped: (name: string) => `You scrap ${name} for good.`,
     findDeclined: 'You leave the finds behind.',
     noiseAdded: (amount: number) => `Noise +${amount}.`,
-    zombieArrived: (place: string, reason: 'noise' | 'dusk' | 'scream', kind: string) =>
+    zombieArrived: (place: string, reason: 'noise' | 'dusk' | 'scream' | 'horde', kind: string) =>
       reason === 'dusk'
         ? `Dusk falls: a ${kind} arrives at ${place}.`
         : reason === 'scream'
           ? `The shrieking draws a ${kind} to ${place}!`
-          : `The noise draws a ${kind} to ${place}!`,
+          : reason === 'horde'
+            ? `A ${kind} gathers at ${place}.`
+            : `The noise draws a ${kind} to ${place}!`,
+    dangerRose: (level: number, reason: 'pack' | 'rare') =>
+      `${reason === 'pack' ? 'Word of your haul spreads' : 'Your lucky find draws attention'}: danger rises to ${level}.`,
     zombieFollowed: (place: string, kind: string) => `A ${kind} follows you to ${place}.`,
     zombieLostTrack: (kind: string) => `A ${kind} loses track of you.`,
     zombieAttacked: (damage: number, kind: string) => `A ${kind} attacks you (${damage} damage).`,

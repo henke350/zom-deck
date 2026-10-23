@@ -147,7 +147,12 @@ export interface Content {
   /** The junk card added by a heavy zombie attack when the Wound variant is on. */
   readonly woundCard: CardId
   /** The kinds of zombie that noise and dusk bring. Default: only Walkers. */
-  readonly arrivals?: { readonly noise: ZombieMix; readonly dusk: ZombieMix }
+  readonly arrivals?: {
+    readonly noise: ZombieMix
+    readonly dusk: ZombieMix
+    /** With the danger meter: what noise, screams and hordes bring at each level (level 1 first). */
+    readonly byDanger?: readonly ZombieMix[]
+  }
   /**
    * More buildings that a random city can use instead of the ones on the classic map.
    * Their map position comes from the building slot they are placed in.
@@ -215,8 +220,10 @@ export interface GameState {
   readonly nextUid: number
   readonly zombies: readonly Zombie[]
   readonly nextZombieUid: number
-  /** The noise meter. A zombie arrives every time it reaches the balance threshold. */
+  /** The noise meter. Zombies arrive every time it reaches the threshold of the danger level. */
   readonly noise: number
+  /** The danger meter, from 1. Rises with packs and rare finds (see `balance.danger`). */
+  readonly danger: number
   /** Places the player has been this expedition (hidden danger is revealed there). */
   readonly visited: readonly LocationId[]
   /** The buildings of this city and where they stand. Absent: the classic map. */
@@ -250,6 +257,10 @@ export interface Stats {
   readonly zombiesFromDusk: number
   /** Zombies brought by Screamers' noise. */
   readonly zombiesFromScreams: number
+  /** Zombies brought by the danger meter's hordes. */
+  readonly zombiesFromHordes: number
+  /** The highest danger level reached. */
+  readonly dangerReached: number
   readonly zombiesKilled: number
   /** Wound variant: Wounds added by heavy attacks. */
   readonly woundsGained: number
@@ -382,6 +393,7 @@ export type GameEvent =
       readonly reason: NoiseReason
     }
   | { readonly type: 'zombieScreamed'; readonly uid: string; readonly noise: number }
+  | { readonly type: 'dangerRose'; readonly level: number; readonly reason: DangerReason }
   | {
       readonly type: 'zombieArrived'
       readonly uid: string
@@ -434,7 +446,9 @@ export type GameEvent =
   | { readonly type: 'gameOver'; readonly outcome: Outcome }
 
 /** Where noise comes from: the player, dusk, or a Screamer that has seen the player. */
-export type NoiseReason = 'noise' | 'dusk' | 'scream'
+export type NoiseReason = 'noise' | 'dusk' | 'scream' | 'horde'
+
+export type DangerReason = 'pack' | 'rare'
 
 export type Validation = { readonly ok: true } | { readonly ok: false; readonly reason: string }
 

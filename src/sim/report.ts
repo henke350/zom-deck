@@ -33,6 +33,8 @@ export interface BotSummary {
   readonly avgNoiseZombies: number
   readonly avgDuskZombies: number
   readonly avgScreamZombies: number
+  readonly avgHordeZombies: number
+  readonly avgDanger: number
   readonly avgKills: number
   /** Finds taken per 100 games, by card. */
   readonly taken: Readonly<Record<string, number>>
@@ -95,6 +97,8 @@ export function summarize(
     avgNoiseZombies: avg((r) => r.result.stats.zombiesFromNoise),
     avgDuskZombies: avg((r) => r.result.stats.zombiesFromDusk),
     avgScreamZombies: avg((r) => r.result.stats.zombiesFromScreams),
+    avgHordeZombies: avg((r) => r.result.stats.zombiesFromHordes),
+    avgDanger: avg((r) => r.result.stats.dangerReached),
     avgKills: avg((r) => r.result.stats.zombiesKilled),
     taken: per100(taken),
     plays: per100(plays),
@@ -171,13 +175,13 @@ export function renderReport(input: ReportInput): string {
   lines.push('## Hvor kommer faren fra?')
   lines.push('')
   lines.push(
-    '| Bot | Død på vej hjem | Skade fra forfølgere | Skade fra zombier på stedet | Zombier fra støj | Zombier fra skumring | Zombier fra skrig | Dræbte zombier |',
+    '| Bot | Død på vej hjem | Skade fra forfølgere | Skade fra zombier på stedet | Zombier fra støj | Zombier fra skumring | Zombier fra skrig | Zombier fra horder | Fare ved slut | Dræbte zombier |',
   )
-  lines.push('| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |')
+  lines.push('| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |')
   for (const s of summaries) {
     lines.push(
       `| ${s.name} | ${pct(s.killedWithWin, s.games)} | ${num(s.avgDamageFollowers)} | ${num(s.avgDamageThere)} | ` +
-        `${num(s.avgNoiseZombies)} | ${num(s.avgDuskZombies)} | ${num(s.avgScreamZombies)} | ${num(s.avgKills)} |`,
+        `${num(s.avgNoiseZombies)} | ${num(s.avgDuskZombies)} | ${num(s.avgScreamZombies)} | ${num(s.avgHordeZombies)} | ${num(s.avgDanger)} | ${num(s.avgKills)} |`,
     )
   }
   lines.push('')

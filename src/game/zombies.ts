@@ -1,10 +1,11 @@
-import type { Balance, ZombieKind, ZombieStats } from '../data/balance'
+import type { Balance, DangerLevel, ZombieKind, ZombieStats } from '../data/balance'
 import { buildingKnown, cityContent } from './city'
 import { gainCard } from './deck'
 import { distance, neighbors } from './map'
 import { nextFloat, nextInt } from './rng'
 import type {
   Content,
+  DangerReason,
   GameEvent,
   GameState,
   LocationDef,
@@ -164,15 +165,41 @@ function arrivalLocation(state: GameState, content: Content): LocationId {
   return options.find((id) => content.locations[id]?.kind === 'street') ?? options[0] ?? here
 }
 
+/** The current step of the danger meter. Without the meter, the balance's plain noise threshold. */
+export function dangerLevel(state: GameState): DangerLevel {
+  const { danger } = state.balance
+  const fallback = { noiseThreshold: state.balance.noiseThreshold, arrivals: 1 }
+  if (!danger.enabled) return fallback
+  return danger.levels[Math.min(state.danger, danger.levels.length) - 1] ?? fallback
+}
+
+/** The noise that brings zombies right now. */
+export function noiseThreshold(state: GameState): number {
+  return dangerLevel(state).noiseThreshold
+}
+
+function arrivalMix(
+  state: GameState,
+  content: Content,
+  reason: NoiseReason,
+): ZombieMix | undefined {
+  if (reason === 'dusk') return content.arrivals?.dusk
+  const byDanger = content.arrivals?.byDanger
+  if (state.balance.danger.enabled && byDanger && byDanger.length > 0) {
+    return byDanger[Math.min(state.danger, byDanger.length) - 1]
+  }
+  return content.arrivals?.noise
+}
+
 function spawnZombie(
   state: GameState,
   content: Content,
   reason: NoiseReason,
   events: GameEvent[],
+  at?: LocationId,
 ): GameState {
-  const location = arrivalLocation(state, content)
-  const mix = reason === 'dusk' ? content.arrivals?.dusk : content.arrivals?.noise
-  const [kind, rng] = rollKind(mix, state.rng)
+  const location = at ?? arrivalLocation(state, content)
+  const [kind, rng] = rollKind(arrivalMix(state, content, reason), state.rng)
   const zombie: Zombie = {
     uid: `z${state.nextZombieUid}`,
     kind,
@@ -199,15 +226,55 @@ export function addNoise(
   events: GameEvent[],
 ): GameState {
   if (amount <= 0) return state
-  const threshold = state.balance.noiseThreshold
-  let noise = state.noise + amount
-  events.push({ type: 'noiseAdded', amount, total: noise, reason })
+  events.push({ type: 'noiseAdded', amount, total: state.noise + amount, reason })
+  return settleNoise({ ...state, noise: state.noise + amount }, content, reason, events)
+}
+
+/** While the meter is at or over the threshold, zombies arrive and the meter drops by the threshold. */
+function settleNoise(
+  state: GameState,
+  content: Content,
+  reason: NoiseReason,
+  events: GameEvent[],
+): GameState {
+  const { noiseThreshold: threshold, arrivals } = dangerLevel(state)
+  let noise = state.noise
   let next: GameState = state
   while (noise >= threshold) {
     noise -= threshold
-    next = spawnZombie(next, content, reason, events)
+    for (let i = 0; i < arrivals; i++) next = spawnZombie(next, content, reason, events)
   }
   return { ...next, noise }
+}
+
+/** The street where hordes gather: the first street on the map. */
+function hordeLocation(state: GameState, content: Content): LocationId {
+  const street = Object.values(content.locations).find((l) => l.kind === 'street')
+  return street?.id ?? arrivalLocation(state, content)
+}
+
+/**
+ * Raises the danger meter after a pack or a rare find. Each level brings a horde to the
+ * street, and a lower noise threshold at the new level can bring zombies at once.
+ */
+export function raiseDanger(
+  state: GameState,
+  content: Content,
+  reason: DangerReason,
+  events: GameEvent[],
+): GameState {
+  const { danger } = state.balance
+  const steps = reason === 'pack' ? danger.perPack : danger.perRareFind
+  if (!danger.enabled || steps <= 0) return state
+  const level = Math.min(state.danger + steps, danger.levels.length)
+  if (level <= state.danger) return state
+  events.push({ type: 'dangerRose', level, reason })
+  let next: GameState = { ...state, danger: level }
+  const at = hordeLocation(next, content)
+  for (let i = 0; i < danger.hordeSize * (level - state.danger); i++) {
+    next = spawnZombie(next, content, 'horde', events, at)
+  }
+  return settleNoise(next, content, 'noise', events)
 }
 
 export interface NoisePreview {
@@ -218,12 +285,12 @@ export interface NoisePreview {
 
 /** What adding `amount` noise would do, without changing anything. */
 export function noisePreview(state: GameState, amount: number): NoisePreview {
-  const threshold = state.balance.noiseThreshold
+  const { noiseThreshold: threshold, arrivals } = dangerLevel(state)
   const total = state.noise + Math.max(0, amount)
   return {
     before: state.noise,
     after: total % threshold,
-    arrivals: Math.floor(total / threshold),
+    arrivals: Math.floor(total / threshold) * arrivals,
   }
 }
 

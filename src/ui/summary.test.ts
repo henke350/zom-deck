@@ -74,7 +74,7 @@ describe('end summary', () => {
   it('sums up a result in one line for the playtest form', () => {
     const r = result(home(2), 3, { cardsTaken: ['axe'], stashesOpened: 1 })
     expect(resultCode(r, 4711, 9)).toBe(
-      'OMB seed 4711 | home ** | turn 6 | hp 0/9 | packs 3 | stashes 1 | finds Axe',
+      'OMB seed 4711 | home ** | turn 6 | hp 0/9 | packs 3 | stashes 1 | danger 1 | finds Axe',
     )
   })
 })

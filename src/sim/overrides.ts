@@ -2,7 +2,7 @@ import type { Balance } from '../data/balance'
 
 /**
  * Changes one balance value from the command line: "maxHp=12", "zombieFollow=gentle",
- * "wounds.enabled=true", "starThresholds=3,4,5". Unknown names are an error, so a typo
+ * "wounds.enabled=true", "starThresholds=3,4,5", "danger.levels.3.arrivals=1". Unknown names are an error, so a typo
  * can't silently test the standard balance.
  */
 export function applyOverride(balance: Balance, assignment: string): Balance {
@@ -23,6 +23,8 @@ export function applyOverride(balance: Balance, assignment: string): Balance {
     if (!(key in obj)) throw new Error(`Unknown balance value "${path}"`)
     const value =
       i === keys.length - 1 ? parse(obj[key]) : set(obj[key] as Record<string, unknown>, i + 1)
+    // Keep lists as lists, so "danger.levels.3.arrivals=1" changes one level.
+    if (Array.isArray(obj)) return Object.assign([...obj], { [key]: value })
     return { ...obj, [key]: value }
   }
   return set(balance as unknown as Record<string, unknown>, 0) as unknown as Balance
