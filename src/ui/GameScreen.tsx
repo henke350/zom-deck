@@ -3,6 +3,7 @@ import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import {
   cardOptions,
+  cityContent,
   expeditionResult,
   freeMoveTargets,
   listActions,
@@ -19,6 +20,7 @@ import type {
   ModeOption,
   Validation,
 } from '../game'
+import type { Balance } from '../data/balance'
 import { CityMap } from './components/CityMap'
 import { ConfirmHomeDialog } from './components/ConfirmHomeDialog'
 import { EventLog } from './components/EventLog'
@@ -38,6 +40,8 @@ interface GameScreenProps {
   readonly setup?: ExpeditionSetup
   /** Start from this exact state (used by tests). */
   readonly initialState?: GameState
+  /** Other balance values (used by tests). */
+  readonly balance?: Balance
   /** Open the rules as soon as the game starts (first expedition on this device). */
   readonly showRulesOnStart?: boolean
   readonly onNewExpedition: () => void
@@ -45,18 +49,19 @@ interface GameScreenProps {
   readonly onExit: () => void
 }
 
-const content = defaultContent
-
 export function GameScreen({
   seed,
   setup,
   initialState,
+  balance,
   showRulesOnStart = false,
   onNewExpedition,
   onRestart,
   onExit,
 }: GameScreenProps) {
-  const { state, log, dispatch } = useGame(seed, setup, initialState)
+  const { state, log, dispatch } = useGame(seed, setup, initialState, balance)
+  // The buildings of this city, where they stand and how the roads connect them.
+  const content = useMemo(() => cityContent(state, defaultContent), [state])
   const [rulesOpen, setRulesOpen] = useState(showRulesOnStart)
   // A move that would end the expedition by walking home, waiting for the player to confirm.
   const [homeMove, setHomeMove] = useState<Action | null>(null)
@@ -69,7 +74,7 @@ export function GameScreen({
 
   const optionsByUid = useMemo(
     () => new Map(state.piles.hand.map((c) => [c.uid, cardOptions(state, c.uid, content)])),
-    [state],
+    [state, content],
   )
 
   // What a click on the map does right now: a pending card move, or the free move.
@@ -83,7 +88,7 @@ export function GameScreen({
       for (const to of freeMoveTargets(state, content)) result.set(to, { type: 'freeMove', to })
     }
     return result
-  }, [pending, serviceOpen, state])
+  }, [pending, serviceOpen, state, content])
 
   // Cards you can pick right now to trash, with the action each pick makes.
   const trashTargets = useMemo((): ReadonlyMap<string, Action> | null => {
@@ -98,7 +103,7 @@ export function GameScreen({
       )
     }
     return null
-  }, [pending, serviceOpen, state])
+  }, [pending, serviceOpen, state, content])
 
   const act = (action: Action, confirmed = false) => {
     setPending(null)
@@ -112,6 +117,15 @@ export function GameScreen({
   }
 
   const serviceCheck = validateServiceHere(state, content)
+  const stashActions = useMemo(
+    () =>
+      listActions(state, content)
+        .filter((a) => a.type === 'openStash')
+        // Quiet ways first: with a Tool card, then by force.
+        .sort((a, b) => Number(a.uid === undefined) - Number(b.uid === undefined)),
+    [state, content],
+  )
+  const forceCheck = validate(state, { type: 'openStash' }, content)
   const openService = () => {
     setPending(null)
     setServiceOpen(true)
@@ -219,6 +233,8 @@ export function GameScreen({
               onTarget={act}
               serviceCheck={serviceCheck}
               onService={openService}
+              stashActions={stashActions}
+              forceCheck={forceCheck}
             />
             {peek && (
               <div className="location-peek">
@@ -233,6 +249,8 @@ export function GameScreen({
                   onTarget={act}
                   serviceCheck={serviceCheck}
                   onService={openService}
+                  stashActions={stashActions}
+                  forceCheck={forceCheck}
                 />
               </div>
             )}

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { balance } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { newGame } from '../game'
-import { makeState } from '../game/testkit'
+import { classicBalance, makeState } from '../game/testkit'
 import type { GameState } from '../game'
 import { bots } from './bots'
 import { playGame } from './play'
@@ -31,7 +31,10 @@ describe('bots', () => {
   })
 
   it('head for the Supermarket first, where a pack is sure', () => {
-    expect(next('rush', newGame(3))).toEqual({ type: 'freeMove', to: 'street' })
+    expect(next('rush', newGame(3, { balance: classicBalance }))).toEqual({
+      type: 'freeMove',
+      to: 'street',
+    })
   })
 
   it('walk home once they carry the packs they want', () => {

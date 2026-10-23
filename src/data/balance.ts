@@ -32,9 +32,23 @@ export interface Balance {
   readonly zombieFollow: ZombieFollow
   /** Unvisited buildings show a zombie range instead of the exact count. */
   readonly hiddenDanger: boolean
+  /** Each new city picks its buildings at random and places them in random slots. */
+  readonly randomCity: boolean
+  /** A building shows as unknown until the player has stood next to it (or scouted it). */
+  readonly hiddenBuildings: boolean
   readonly heavyLoadPerPack: number
   /** AP cost of a location service (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly locationServiceCost: number
+  /** Rare finds count this much of their loot weight in an ordinary search (0–1). */
+  readonly rareFindWeight: number
+  /** Buildings that hide a locked stash of rare finds (placed at random). */
+  readonly stashesOnMap: number
+  /** Rare finds to choose from in an opened stash. */
+  readonly stashOptions: number
+  /** AP to open a stash with a Tool card. */
+  readonly stashToolCost: number
+  /** Forcing a stash open without a Tool card. */
+  readonly stashForce: { readonly cost: number; readonly noise: number }
   /** Variant: losing this much health in one zombie phase adds a Wound to your deck. */
   readonly wounds: { readonly enabled: boolean; readonly damageInOnePhase: number }
   readonly starterDeck: {
@@ -67,8 +81,15 @@ export const balance: Balance = {
   extraStartZombies: 0,
   zombieFollow: 'chase',
   hiddenDanger: true,
+  randomCity: true,
+  hiddenBuildings: true,
   heavyLoadPerPack: 1,
   locationServiceCost: 1,
+  rareFindWeight: 0.25,
+  stashesOnMap: 2,
+  stashOptions: 2,
+  stashToolCost: 1,
+  stashForce: { cost: 2, noise: 2 },
   wounds: { enabled: false, damageInOnePhase: 2 },
   starterDeck: { search: 4, crowbar: 2, run: 1, sneak: 1, nerves: 2 },
 }

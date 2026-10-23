@@ -49,6 +49,8 @@ export interface CardDef {
   readonly requires?: CardCondition
   /** Heavy Load: while this card is in hand, the free move costs this much AP. */
   readonly freeMoveCostWhileInHand?: number
+  /** A rare find: seldom in searches, always in locked stashes. */
+  readonly rare?: boolean
 }
 
 export type LocationId = string
@@ -93,7 +95,12 @@ export interface SiteState {
   readonly scouted: boolean
   /** A Molotov burned it: it can't be searched again. */
   readonly burned: boolean
+  /** A locked stash with rare finds: hidden until the first search, then found, then opened. */
+  readonly stash: StashState
 }
+
+/** none: no stash here. lost: it burned with the building. */
+export type StashState = 'none' | 'hidden' | 'found' | 'opened' | 'lost'
 
 export interface Zombie {
   readonly uid: string
@@ -112,6 +119,10 @@ export interface PendingFind {
   readonly packFound: boolean
   /** Noise from the search, added once the player has chosen. */
   readonly noise: number
+  /** The finds come from an opened stash, not a search. */
+  readonly fromStash?: boolean
+  /** This search also uncovered a locked stash. */
+  readonly stashFound?: boolean
 }
 
 export interface Content {
@@ -124,7 +135,18 @@ export interface Content {
   readonly packCard: CardId
   /** The junk card added by a heavy zombie attack when the Wound variant is on. */
   readonly woundCard: CardId
+  /**
+   * More buildings that a random city can use instead of the ones on the classic map.
+   * Their map position comes from the building slot they are placed in.
+   */
+  readonly extraBuildings?: Readonly<Record<LocationId, Omit<LocationDef, 'mapPos'>>>
 }
+
+/**
+ * A random city: which building stands in each building slot of the classic map. Slots are
+ * named after the classic building that stands there (e.g. the "police" slot is top right).
+ */
+export type City = Readonly<Record<LocationId, LocationId>>
 
 /** One physical card. Two copies of the same card have different uids. */
 export interface CardInstance {
@@ -184,6 +206,8 @@ export interface GameState {
   readonly noise: number
   /** Places the player has been this expedition (hidden danger is revealed there). */
   readonly visited: readonly LocationId[]
+  /** The buildings of this city and where they stand. Absent: the classic map. */
+  readonly city?: City
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
@@ -214,6 +238,7 @@ export interface Stats {
   readonly zombiesKilled: number
   /** Wound variant: Wounds added by heavy attacks. */
   readonly woundsGained: number
+  readonly stashesOpened: number
 }
 
 /** The outcome of one expedition. The version-2 campaign builds on this. */
@@ -266,6 +291,13 @@ export interface ScrapCardAction {
   readonly uid: string
 }
 
+/** Open the locked stash where you stand: with a Tool card from hand, or by force (more AP, noise). */
+export interface OpenStashAction {
+  readonly type: 'openStash'
+  /** A Tool card used to open it. Without it, the stash is forced open. */
+  readonly uid?: string
+}
+
 /** Use the service where you stand (Dismantle, Patch up) on a card in your hand. */
 export interface UseServiceAction {
   readonly type: 'useService'
@@ -290,6 +322,7 @@ export type Action =
   | ScrapCardAction
   | DeclineFindAction
   | UseServiceAction
+  | OpenStashAction
   | EndTurnAction
 
 export type GameEvent =
@@ -369,6 +402,14 @@ export type GameEvent =
   | { readonly type: 'hpLost'; readonly amount: number; readonly source: 'zombies' | 'card' }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'serviceUsed'; readonly service: ServiceId; readonly location: LocationId }
+  | { readonly type: 'stashFound'; readonly location: LocationId }
+  | {
+      readonly type: 'stashOpened'
+      readonly location: LocationId
+      /** The Tool card used, or 'force'. */
+      readonly by: CardId | 'force'
+      readonly options: readonly CardId[]
+    }
   | { readonly type: 'searchBonusAdded'; readonly amount: number }
   | { readonly type: 'blockAdded'; readonly amount: number }
   | { readonly type: 'cardsKept'; readonly uids: readonly string[] }

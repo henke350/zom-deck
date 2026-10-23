@@ -6,7 +6,7 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
 - **Current milestone:** M0–M6 done (M5 waits only for the user's own three playthroughs).
-  **M7 – playtest and tuning** is in progress: tuning 1 (9 health, Run ×1, Search ×4) is in;
+  **M7 – playtest and tuning** is in progress: tuning 1 (9 health, Run ×1, Search ×4) and rare finds with locked stashes are in;
   the playtest is next. Balance changes are the user's call; show them the effect with
   `npm run sim -- --set …` first.
   Work one milestone at a time and meet its "done" criteria before moving on.
@@ -58,8 +58,13 @@ src/sim/   bots and balance reports (from M6), run in Node
   what a player sees (`view.ts`), never hidden packs or unvisited zombie counts. `npm run sim`
   writes `docs/balance-report.md` (generated, never edit by hand); `npm run fuzz` plays 10 000
   random games. Built by `vite.sim.config.ts`, typechecked by `tsconfig.sim.json`.
+- Random cities live in `src/game/city.ts`: `state.city` places buildings in the classic map's
+  building slots; every engine entry point first calls `cityContent(state, content)`.
+  `buildingKnown` hides buildings the player has not been next to. `makeState` and
+  `classicBalance` (testkit) use the classic map so tests can name places.
 - Search lives in `src/game/search.ts`: pack placement, weighted finds, the
-  `chooseFind` phase (take / scrap / decline). A search is always the last effect
+  `chooseFind` phase (take / scrap / decline), rare finds (`rare` on the card, weight scaled by
+  `rareFindWeight`) and locked stashes (`openStash`). A search is always the last effect
   of a card mode, because the game then waits for the player.
 - Zombies live in `src/game/zombies.ts`: start zombies, noticing, noise and arrivals,
   the zombie phase (follow → attack), `previewEndTurn` and `zombieInfo` (hidden

@@ -22,12 +22,13 @@ export function CardFace({ card, state, content, showFollowUp = false }: CardFac
     showFollowUp && (def?.modes.some((m) => isFollowUpActive(state, m)) ?? false)
 
   return (
-    <div className="card-face">
+    <div className={`card-face${def?.rare ? ' card-face-rare' : ''}`}>
       <div className="card-head">
         <span className="cost" aria-label={texts.ui.cost(def?.cost ?? 0)}>
           {def?.kind === 'junk' ? '–' : (def?.cost ?? 0)}
         </span>
         <h3>{info.name}</h3>
+        {def?.rare && <span className="rare-badge">{texts.ui.rare}</span>}
         {noise > 0 && (
           <span className="noise">
             {texts.ui.noiseBadge(noise, noisePreview(state, noise).arrivals)}

@@ -1,8 +1,15 @@
 import { texts } from '../../data/texts.en'
-import type { Action, Content, GameState, LocationId, Validation } from '../../game'
-import { distance, freeMoveCost, zombieInfo, zombiesAt } from '../../game'
+import type {
+  Action,
+  Content,
+  GameState,
+  LocationId,
+  OpenStashAction,
+  Validation,
+} from '../../game'
+import { buildingKnown, distance, freeMoveCost, zombieInfo, zombiesAt } from '../../game'
 import { locationImages } from '../locationImages'
-import { locationText } from '../names'
+import { cardText, locationText } from '../names'
 import { siteSummary } from '../sites'
 
 interface LocationPanelProps {
@@ -20,6 +27,9 @@ interface LocationPanelProps {
   /** Can you use the service where you stand (Dismantle, Patch up)? */
   readonly serviceCheck: Validation
   readonly onService: () => void
+  /** Legal ways to open the stash where you stand, and why forcing it is not possible. */
+  readonly stashActions: readonly OpenStashAction[]
+  readonly forceCheck: Validation
 }
 
 export function LocationPanel({
@@ -33,6 +43,8 @@ export function LocationPanel({
   onTarget,
   serviceCheck,
   onService,
+  stashActions,
+  forceCheck,
 }: LocationPanelProps) {
   const def = content.locations[location]
   const { name, description } = locationText(location)
@@ -53,6 +65,20 @@ export function LocationPanel({
       ? ui.freeMoveCosts(cost)
       : ui.freeMoveAvailable
 
+  if (!buildingKnown(state, content, location)) {
+    return (
+      <section className="panel location-panel" aria-label={ui.location} aria-live="polite">
+        <p className="eyebrow">{texts.locationKinds.building}</p>
+        <h2>{ui.unknownBuilding}</h2>
+        <p className="muted">{ui.unknownDescription}</p>
+        <p className="where">{ui.stepsAway(steps)}</p>
+        {!info.known && <p className="zombie-info">{ui.zombiesUnknown(info.min, info.max)}</p>}
+        {moveCheck && !moveCheck.ok && <p className="reason">{moveCheck.reason}</p>}
+        <p className="free-move">{freeMoveStatus}</p>
+      </section>
+    )
+  }
+
   return (
     <section className="panel location-panel" aria-label={ui.location} aria-live="polite">
       {locationImages[location] && (
@@ -66,6 +92,7 @@ export function LocationPanel({
         <ul className="site-facts">
           <li>{site.searches}</li>
           <li>{site.pack}</li>
+          {site.stash && <li>{site.stash}</li>}
         </ul>
       )}
 
@@ -115,6 +142,30 @@ export function LocationPanel({
             {ui.quickSearch(quickCost, quickOptions)}
           </button>
           {!quickSearch.ok && <p className="reason">{quickSearch.reason}</p>}
+        </div>
+      )}
+      {isHere && state.sites[location]?.stash === 'found' && (
+        <div className="service stash">
+          <h3 className="eyebrow">{ui.stashHeading}</h3>
+          <p>{ui.stashText}</p>
+          <div className="stash-buttons">
+            {stashActions.map((a) => {
+              const tool = state.piles.hand.find((c) => c.uid === a.uid)
+              return (
+                <button
+                  key={a.uid ?? 'force'}
+                  type="button"
+                  className="btn"
+                  onClick={() => onTarget(a)}
+                >
+                  {tool
+                    ? ui.openStashWith(cardText(tool.card).name, state.balance.stashToolCost)
+                    : ui.forceStash(state.balance.stashForce.cost, state.balance.stashForce.noise)}
+                </button>
+              )
+            })}
+          </div>
+          {!forceCheck.ok && <p className="reason">{forceCheck.reason}</p>}
         </div>
       )}
       {def?.service && (

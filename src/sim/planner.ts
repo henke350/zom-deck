@@ -1,5 +1,7 @@
 import {
   applyAction,
+  buildingKnown,
+  cityContent,
   distancesFrom,
   freeMoveCost,
   listActions,
@@ -17,6 +19,7 @@ import type {
   LocationId,
   PlayCardAction,
 } from '../game'
+import { buildingPool } from '../game/city'
 import type { Bot } from './bot'
 import { expectedZombies, packChance } from './view'
 
@@ -60,6 +63,10 @@ const baseValue: Readonly<Record<string, number>> = {
   districtMap: 3,
   bandage: 5,
   painkillers: 4,
+  shotgun: 8,
+  chainsaw: 8,
+  bicycle: 8,
+  firstAidKit: 7,
 }
 
 const styleBonus: Readonly<Record<Style, (id: string, def: CardDef) => number>> = {
@@ -97,7 +104,8 @@ interface Ctx {
 export function plannerBot(o: PlannerOptions): Bot {
   return {
     id: o.id,
-    next(state, content) {
+    next(state, baseContent) {
+      const content = cityContent(state, baseContent)
       if (state.phase === 'chooseFind') return chooseFind(o, state, content)
       const home = shelterOf(content)
       const plan = makePlan(o, state, content, home)
@@ -105,6 +113,7 @@ export function plannerBot(o: PlannerOptions): Bot {
       return (
         tempo(ctx) ??
         fight(ctx) ??
+        stash(ctx) ??
         search(ctx) ??
         move(ctx) ??
         defend(ctx) ??
@@ -176,7 +185,22 @@ function buildingValue(o: PlannerOptions, state: GameState, content: Content, id
 
 /** Average value of a building's finds for this bot. */
 function lootValue(o: PlannerOptions, state: GameState, content: Content, id: LocationId) {
-  const pool = content.locations[id]?.lootPool ?? []
+  // An unknown building could be any of them: average over every building there is.
+  if (!buildingKnown(state, content, id)) {
+    const all = Object.keys(buildingPool(content))
+    const values = all.map((b) => poolValue(o, state, content, buildingPool(content)[b]?.lootPool))
+    return values.reduce((a, b) => a + b, 0) / (values.length || 1)
+  }
+  return poolValue(o, state, content, content.locations[id]?.lootPool)
+}
+
+function poolValue(
+  o: PlannerOptions,
+  state: GameState,
+  content: Content,
+  lootPool: readonly { readonly card: string; readonly weight: number }[] | undefined,
+): number {
+  const pool = lootPool ?? []
   const total = pool.reduce((sum, entry) => sum + entry.weight, 0)
   if (total === 0) return 0
   return pool.reduce((sum, e) => sum + e.weight * findValue(o, state, content, e.card), 0) / total
@@ -296,6 +320,28 @@ function fight(ctx: Ctx): Action | undefined {
     }
   }
   return best
+}
+
+/** A found stash where you stand: open it with the least useful Tool card, or force it if quiet enough. */
+function stash(ctx: Ctx): Action | undefined {
+  const { o, state, content } = ctx
+  const opens = ctx.actions.filter((a) => a.type === 'openStash')
+  if (opens.length === 0 || state.player.packs >= o.targetPacks) return undefined
+  const withTool = opens
+    .filter((a) => a.uid !== undefined)
+    .sort((a, b) => toolValue(state, content, a.uid) - toolValue(state, content, b.uid))
+  if (withTool[0]) return withTool[0]
+  const force = opens.find((a) => a.uid === undefined)
+  const quietEnough = state.noise + state.balance.stashForce.noise < state.balance.noiseThreshold
+  return force && (quietEnough || !o.careful) ? force : undefined
+}
+
+/** How much the bot would miss a card used as a key: Search cards matter most. */
+function toolValue(state: GameState, content: Content, uid: string | undefined): number {
+  const def = defOf(state, content, uid)
+  if (!def) return 0
+  const searches = def.modes.some((m) => m.effects.some((e) => e.kind === 'search'))
+  return (searches ? 10 : 0) + (baseValue[def.id] ?? 3)
 }
 
 function search(ctx: Ctx): Action | undefined {

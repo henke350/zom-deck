@@ -65,7 +65,8 @@ describe('city map data', () => {
   })
 
   it('has a name and description for every place', () => {
-    expect(Object.keys(texts.locations).sort()).toEqual([...ids].sort())
+    const all = [...ids, ...Object.keys(defaultContent.extraBuildings ?? {})]
+    expect(Object.keys(texts.locations).sort()).toEqual(all.sort())
   })
 
   it('reports no path as Infinity', () => {

@@ -25,6 +25,9 @@ export interface BotSummary {
   readonly avgQuickSearches: number
   readonly avgIdleTurns: number
   readonly avgServices: number
+  readonly avgStashes: number
+  /** Rare finds taken per game (from searches and stashes). */
+  readonly avgRareTaken: number
   readonly avgDamageFollowers: number
   readonly avgDamageThere: number
   readonly avgNoiseZombies: number
@@ -84,6 +87,8 @@ export function summarize(
     avgQuickSearches: avg((r) => r.quickSearches),
     avgIdleTurns: avg((r) => r.idleTurns),
     avgServices: avg((r) => r.servicesUsed),
+    avgStashes: avg((r) => r.result.stats.stashesOpened),
+    avgRareTaken: avg((r) => r.rareTaken),
     avgDamageFollowers: avg((r) => split(r, true)),
     avgDamageThere: avg((r) => split(r, false)),
     avgNoiseZombies: avg((r) => r.result.stats.zombiesFromNoise),
@@ -179,19 +184,21 @@ export function renderReport(input: ReportInput): string {
   )
   lines.push('')
 
-  lines.push('## Døde hænder og tjenester')
+  lines.push('## Døde hænder, tjenester og gemmesteder')
   lines.push('')
   lines.push(
-    '| Bot | Hastesøgninger pr. spil | Tomme ture pr. spil | Dismantle/Patch up pr. spil |',
+    '| Bot | Hastesøgninger pr. spil | Tomme ture pr. spil | Dismantle/Patch up pr. spil | Gemmesteder åbnet | Sjældne fund taget |',
   )
-  lines.push('| --- | ---: | ---: | ---: |')
+  lines.push('| --- | ---: | ---: | ---: | ---: | ---: |')
   for (const s of summaries) {
     lines.push(
-      `| ${s.name} | ${num(s.avgQuickSearches)} | ${num(s.avgIdleTurns)} | ${num(s.avgServices)} |`,
+      `| ${s.name} | ${num(s.avgQuickSearches)} | ${num(s.avgIdleTurns)} | ${num(s.avgServices)} | ${num(s.avgStashes)} | ${num(s.avgRareTaken)} |`,
     )
   }
   lines.push('')
-  lines.push('_Tom tur_: en tur, der sluttede uden at spille et kort, gå eller søge.')
+  lines.push(
+    '_Tom tur_: en tur, der sluttede uden at spille et kort, gå eller søge. Gemmesteder og sjældne fund er gennemsnit pr. spil.',
+  )
   lines.push('')
 
   lines.push('## Fundkort')

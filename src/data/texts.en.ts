@@ -23,14 +23,20 @@ export const texts = {
   locations: {
     shelter: { name: 'Shelter', description: 'Your safe base. Come back with supplies to win.' },
     street: { name: 'Street', description: 'A hub with routes to five places. Nothing to search.' },
-    houseA: { name: 'House A', description: 'A quiet home close to the shelter.' },
-    houseB: { name: 'House B', description: 'A home between the pharmacy and the street.' },
+    houseA: { name: 'House A', description: 'A quiet family home.' },
+    houseB: { name: 'House B', description: 'A home with a garage full of junk.' },
     supermarket: { name: 'Supermarket', description: 'Always holds one supply pack.' },
     pharmacy: { name: 'Pharmacy', description: 'Medicine, bandages, and a place to patch up.' },
     workshop: { name: 'Workshop', description: 'Tools, and a bench to dismantle junk.' },
     police: {
       name: 'Police Station',
-      description: 'The best gear, the most danger, the longest walk.',
+      description: 'The best gear and the most danger.',
+    },
+    gasStation: { name: 'Gas Station', description: 'Fuel, snacks and a few tools.' },
+    school: { name: 'School', description: 'Long corridors. Maps, first aid and lockers.' },
+    hospital: {
+      name: 'Hospital',
+      description: 'Plenty of medicine, plenty of the dead. You can patch up here.',
     },
   },
 
@@ -118,6 +124,24 @@ export const texts = {
     chooseDestination: 'Choose where to go on the map.',
     chooseTrashTarget: 'Choose a card in your hand to trash.',
     useService: (name: string, cost: number) => `${name} (${cost} AP)`,
+    rare: 'Rare',
+    unknownBuilding: 'Unknown building',
+    unknownShort: '?',
+    unknownMapName: 'Unknown',
+    unknownDescription: 'Walk next to it to see what it is. A District Map shows it from afar.',
+    stashHeading: 'Locked stash',
+    stashText: 'Rare finds inside. Open it with a Tool card, or force it open.',
+    openStashWith: (name: string, cost: number) => `Open with ${name} (${cost} AP)`,
+    forceStash: (cost: number, noise: number) => `Force it open (${cost} AP, +${noise} noise)`,
+    stashStatus: {
+      found: 'Locked stash: found, still closed',
+      opened: 'Locked stash: opened',
+      lost: 'Locked stash: lost in the fire',
+      scouted: 'Locked stash: yes (scouted)',
+    },
+    stashBanner: 'You also found a locked stash! Open it from the side panel.',
+    stashTitle: 'Inside the stash',
+    stashIntro: 'Take one rare find, or scrap a card instead.',
     youAreHere: 'You are here',
     stepsAway: (n: number) => `${n} step${n === 1 ? '' : 's'} away`,
     freeMoveAvailable: 'Free move available: click a highlighted neighbour.',
@@ -159,6 +183,16 @@ export const texts = {
         items: [
           `Find at least ${b.packsToWin} supply packs and walk back into the Shelter before the end of turn ${b.turnLimit}.`,
           `More packs give more stars: ${b.starThresholds.map((n, i) => `${'★'.repeat(i + 1)} for ${n}`).join(', ')}. You decide when to go home.`,
+          ...(b.randomCity
+            ? [
+                'Every city is different: the roads stay, but the buildings are picked and placed at random, and some buildings are missing.',
+              ]
+            : []),
+          ...(b.hiddenBuildings
+            ? [
+                'A building shows as Unknown until you stand next to it. The Supermarket always has a pack, but first you have to find it.',
+              ]
+            : []),
         ],
       },
       {
@@ -175,6 +209,7 @@ export const texts = {
           `Play Search in a building to see ${b.searchOptions} finds, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Take one into your deck, scrap a card from your hand for good, or take nothing.`,
           `No Search card? A quick search costs ${b.quickSearch.cost} AP and shows ${b.quickSearch.options} finds. Each building can be searched ${b.searchesPerBuilding} times.`,
           `The first search in a building that hides a pack gives you the pack and a Heavy Load card that clogs your deck. The Supermarket always has a pack.`,
+          `Rare finds (marked Rare) seldom turn up. ${b.stashesOnMap} buildings hide a locked stash, found by searching there: open it with a Tool card for ${b.stashToolCost} AP, or force it for ${b.stashForce.cost} AP and +${b.stashForce.noise} noise, and pick 1 of ${b.stashOptions} rare finds.`,
         ],
       },
       {
@@ -280,6 +315,11 @@ export const texts = {
       none: 'none',
     },
     seed: (seed: number) => `City seed ${seed}. "Same city again" replays this map.`,
+    resultHeading: 'Playtest result',
+    resultHint: 'Copy this line into the playtest form.',
+    copy: 'Copy',
+    copied: 'Copied',
+    copyFailed: 'Select the line and copy it yourself.',
   },
 
   log: {
@@ -295,6 +335,9 @@ export const texts = {
     hpLost: (n: number) => `You lose ${n} health.`,
     cardTrashed: (name: string) => `You trash ${name}.`,
     serviceUsed: (service: string, place: string) => `You use ${service} at the ${place}.`,
+    stashFound: (place: string) => `You find a locked stash in ${place}.`,
+    stashOpened: (tool: string) =>
+      tool ? `You open the stash with ${tool}.` : 'You force the stash open.',
     woundGained: 'The attack leaves a Wound in your discard pile.',
     searchBonusAdded: (n: number) => `Your next search reveals +${n}.`,
     blockAdded: (n: number) => `You will block ${n} damage this turn.`,
@@ -397,6 +440,14 @@ export const texts = {
       text: 'Heal 1. Use up: heal 3 instead.',
       modes: ['Heal 1', 'Use up: heal 3'],
     },
+    shotgun: { name: 'Shotgun', text: 'Deal 2 damage to every zombie here. +2 noise.' },
+    chainsaw: { name: 'Chainsaw', text: 'Deal 4 damage to every zombie here. +3 noise.' },
+    bicycle: { name: 'Bicycle', text: 'Move up to 3.' },
+    firstAidKit: {
+      name: 'First Aid Kit',
+      text: 'Heal 3. Use up: heal 6 instead.',
+      modes: ['Heal 3', 'Use up: heal 6'],
+    },
     painkillers: {
       name: 'Painkillers',
       text: 'Trash a Nerves or Wound from your hand. Draw 1 card.',
@@ -423,6 +474,8 @@ export const texts = {
     keepNotInHand: 'You can only keep cards from your hand.',
     noTrashTarget: 'You have no card in hand that this can trash.',
     noServiceHere: 'There is nothing to use here.',
+    noStashHere: 'There is no locked stash here to open.',
+    notATool: 'Only a Tool card can open a stash.',
     nothingToSearch: 'There is nothing to search here.',
     searchedOut: 'This building has no searches left.',
     chooseFindFirst: 'Choose a find first: take one, scrap a card, or take nothing.',

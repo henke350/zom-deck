@@ -30,12 +30,19 @@ export function FindDialog({ state, content, find, onChoose }: FindDialogProps) 
         aria-labelledby="find-title"
       >
         <h2 id="find-title" ref={heading} tabIndex={-1}>
-          {ui.findTitle}
+          {find.fromStash ? ui.stashTitle : ui.findTitle}
         </h2>
-        <p className="muted">{ui.findIntro(locationText(find.location).name)}</p>
+        <p className="muted">
+          {find.fromStash ? ui.stashIntro : ui.findIntro(locationText(find.location).name)}
+        </p>
         {find.packFound && (
           <p className="pack-banner" role="status">
             {ui.packBanner(state.player.packs)}
+          </p>
+        )}
+        {find.stashFound && (
+          <p className="pack-banner stash-banner" role="status">
+            {ui.stashBanner}
           </p>
         )}
 

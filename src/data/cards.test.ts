@@ -61,10 +61,17 @@ describe('card catalog', () => {
     }
   })
 
-  it('has 16 find cards', () => {
+  it('has 16 find cards and 4 rare finds', () => {
     const starters = new Set<string>(starterCardIds)
-    const finds = all.filter(([id, def]) => def.kind === 'action' && !starters.has(id))
-    expect(finds).toHaveLength(16)
+    const defs: readonly [string, CardDef][] = all
+    const finds = defs.filter(([id, def]) => def.kind === 'action' && !starters.has(id))
+    expect(finds.filter(([, def]) => !def.rare)).toHaveLength(16)
+    expect(finds.filter(([, def]) => def.rare).map(([id]) => id)).toEqual([
+      'shotgun',
+      'chainsaw',
+      'bicycle',
+      'firstAidKit',
+    ])
   })
 
   it('makes Heavy Load impossible to trash and slow to carry', () => {

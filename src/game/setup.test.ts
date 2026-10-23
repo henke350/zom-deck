@@ -57,6 +57,6 @@ describe('newGame', () => {
   })
 
   it('rejects unknown cards in the start deck', () => {
-    expect(() => newGame(1, { setup: { startDeck: ['chainsaw'] } })).toThrow(/chainsaw/)
+    expect(() => newGame(1, { setup: { startDeck: ['jetpack'] } })).toThrow(/jetpack/)
   })
 })

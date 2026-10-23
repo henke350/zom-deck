@@ -21,6 +21,8 @@ export interface StateSpec {
   readonly seed?: number
   /** Buildings that hide a pack. Default: none. */
   readonly packsAt?: readonly LocationId[]
+  /** Buildings with a locked stash, and how far it is: hidden (default), found or opened. */
+  readonly stashAt?: Readonly<Record<LocationId, 'hidden' | 'found' | 'opened'>>
   /** Override searches left per building. */
   readonly searchesLeft?: Readonly<Record<LocationId, number>>
   /** Zombies, with uids z1, z2, … in this order. Default: none. */
@@ -39,8 +41,15 @@ function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] 
   return ids.map((card, i) => ({ uid: `${prefix}${i + 1}`, card }))
 }
 
+/** The balance file, but on the classic map with every building in view. Tests use it by default. */
+export const classicBalance: Balance = {
+  ...defaultBalance,
+  randomCity: false,
+  hiddenBuildings: false,
+}
+
 export function makeState(spec: StateSpec = {}): GameState {
-  const balance = spec.balance ?? defaultBalance
+  const balance = spec.balance ?? classicBalance
   const location = spec.location ?? 'shelter'
   const zombies: Zombie[] = (spec.zombies ?? []).map((z, i) => ({
     uid: `z${i + 1}`,
@@ -58,6 +67,7 @@ export function makeState(spec: StateSpec = {}): GameState {
       packTaken: false,
       scouted: false,
       burned: false,
+      stash: spec.stashAt?.[loc.id] ?? 'none',
     }
   }
   const piles = {

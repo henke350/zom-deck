@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
 import { newGame, zombiesAt, type GameState } from '../game'
-import { makeState } from '../game/testkit'
+import { classicBalance, makeState } from '../game/testkit'
 import { GameScreen } from './GameScreen'
 
 afterEach(cleanup)
@@ -15,7 +15,9 @@ const startDeck = ['run', 'search', 'toolbox', 'nerves', 'bandage']
 
 function renderGame() {
   const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
-  const view = render(<GameScreen seed={7} setup={{ startDeck }} {...handlers} />)
+  const view = render(
+    <GameScreen seed={7} setup={{ startDeck }} balance={classicBalance} {...handlers} />,
+  )
   const card = (id: string) => {
     const el = view.container.querySelector<HTMLElement>(`[data-card="${id}"]`)
     if (!el) throw new Error(`Card ${id} is not in hand`)
@@ -111,7 +113,7 @@ describe('GameScreen: searching', () => {
   /** First seed where House A has (or lacks) a pack and holds this many zombies. */
   function seedWhere(houseAHasPack: boolean, zombies: number, startDeck: string[]) {
     for (let seed = 1; seed < 500; seed++) {
-      const game = newGame(seed, { setup: { startDeck } })
+      const game = newGame(seed, { setup: { startDeck }, balance: classicBalance })
       if (
         game.sites.houseA?.hasPack === houseAHasPack &&
         zombiesAt(game, 'houseA').length === zombies
@@ -125,7 +127,9 @@ describe('GameScreen: searching', () => {
   function renderAt(houseAHasPack: boolean, zombies = 0, startDeck = deck) {
     const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
     const seed = seedWhere(houseAHasPack, zombies, startDeck)
-    const view = render(<GameScreen seed={seed} setup={{ startDeck }} {...handlers} />)
+    const view = render(
+      <GameScreen seed={seed} setup={{ startDeck }} balance={classicBalance} {...handlers} />,
+    )
     const log = () => within(screen.getByRole('region', { name: texts.ui.log }))
     const houseA = () => screen.getByRole('button', { name: /^House A/ })
     return { view, log, houseA, user: userEvent.setup() }
@@ -273,6 +277,27 @@ describe('GameScreen: rules and the end of an expedition', () => {
     expect(log.getByText(texts.log.serviceUsed(name, 'Workshop'))).toBeTruthy()
     expect(log.getByText(texts.log.cardTrashed('Nerves'))).toBeTruthy()
     expect(document.querySelector('[data-card="nerves"]')).toBeNull()
+  })
+
+  it('opens a found stash with a Tool card and shows rare finds', async () => {
+    const state = makeState({
+      draw,
+      location: 'houseA',
+      hand: ['crowbar', 'run'],
+      stashAt: { houseA: 'found' },
+    })
+    const { user } = renderState(state)
+    expect(screen.getByText(texts.ui.stashStatus.found)).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: texts.ui.forceStash(2, 2) }).hasAttribute('disabled'),
+    ).toBe(false)
+    await user.click(screen.getByRole('button', { name: texts.ui.openStashWith('Crowbar', 1) }))
+    const dialog = screen.getByRole('dialog', { name: texts.ui.stashTitle })
+    expect(within(dialog).getAllByText(texts.ui.rare)).toHaveLength(2)
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.stashOpened('Crowbar'))).toBeTruthy()
+    await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
+    expect(screen.getByText(texts.ui.stashStatus.opened)).toBeTruthy()
   })
 
   it('explains why a service cannot be used', () => {

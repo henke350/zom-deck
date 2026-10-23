@@ -1,4 +1,4 @@
-import { zombieInfo } from '../game'
+import { buildingKnown, zombieInfo } from '../game'
 import type { Content, GameState, LocationId } from '../game'
 
 /**
@@ -21,22 +21,20 @@ export function packChance(state: GameState, content: Content, id: LocationId): 
   if (site.packTaken || site.burned || site.searchesLeft <= 0) return 0
   if (wasSearched(state, id)) return 0 // the first search always finds the pack
   if (site.scouted) return site.hasPack ? 1 : 0
-  if (def.alwaysHasPack) return 1
+  const known = buildingKnown(state, content, id)
+  if (known && def.alwaysHasPack) return 1
 
-  // The other packs are spread at random over the buildings without a fixed pack.
-  const randomBuildings = Object.values(content.locations).filter(
-    (l) => l.kind === 'building' && !l.alwaysHasPack,
-  )
-  const fixed = Object.values(content.locations).filter((l) => l.alwaysHasPack).length
-  let packsLeft = state.balance.packsOnMap - fixed
-  let unknown = 0
-  for (const l of randomBuildings) {
-    const s = state.sites[l.id]
-    if (!s) continue
+  // Packs the player can't place yet are spread over every building that might hold one.
+  let packsLeft = state.balance.packsOnMap
+  let open = 0
+  for (const [other, s] of Object.entries(state.sites)) {
+    const otherDef = content.locations[other]
+    const otherKnown = buildingKnown(state, content, other)
     if (s.packTaken || (s.scouted && s.hasPack)) packsLeft--
-    else if (!s.scouted && !wasSearched(state, l.id)) unknown++
+    else if (otherKnown && otherDef?.alwaysHasPack && !wasSearched(state, other)) packsLeft--
+    else if (!s.scouted && !wasSearched(state, other)) open++
   }
-  return unknown > 0 ? Math.min(1, Math.max(0, packsLeft / unknown)) : 0
+  return open > 0 ? Math.min(1, Math.max(0, packsLeft / open)) : 0
 }
 
 function wasSearched(state: GameState, id: LocationId): boolean {

@@ -241,6 +241,13 @@
 .node-street rect {
   stroke-dasharray: 4 3;
 }
+.node-unknown rect {
+  stroke-dasharray: 2 4;
+  fill: var(--surface);
+}
+.node-unknown .node-name {
+  fill: var(--muted);
+}
 .node-name {
   fill: var(--ink);
   font-size: 14px;
@@ -675,4 +682,53 @@
 .end-seed {
   margin: 0.75rem 0 0;
   font-size: 0.8rem;
+}
+
+/* Rare finds and locked stashes */
+.rare-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--amber);
+  border-radius: 3px;
+  padding: 0.05rem 0.35rem;
+}
+.card:has(.card-face-rare) {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber);
+}
+.stash-banner {
+  border-left-color: var(--amber);
+}
+.stash-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Playtest result line on the end screen */
+.result-code {
+  margin-top: 1rem;
+}
+.result-code p {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+}
+.result-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.result-row code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
 }

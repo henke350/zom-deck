@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { cityContent } from './city'
 import { listActions } from './actions'
 import { totalCount } from './deck'
 import { starsFor } from './rules'
@@ -8,7 +9,8 @@ import type { Content, GameState } from './types'
  * Things that must always hold in a game started with `newGame`. Returns what is wrong
  * (empty when all is well). Used by the fuzz tests and the simulator.
  */
-export function checkInvariants(state: GameState, content: Content = defaultContent): string[] {
+export function checkInvariants(state: GameState, baseContent: Content = defaultContent): string[] {
+  const content = cityContent(state, baseContent)
   const problems: string[] = []
   const fail = (what: string) => problems.push(what)
   const { piles, player, balance, stats } = state
@@ -37,6 +39,18 @@ export function checkInvariants(state: GameState, content: Content = defaultCont
       fail(`searches left out of range at ${id}`)
     }
     if (site.packTaken && site.hasPack) fail(`pack both taken and hidden at ${id}`)
+    const searched = site.searchesLeft < balance.searchesPerBuilding
+    if ((site.stash === 'found' || site.stash === 'opened') && !searched) {
+      fail(`stash found at ${id} before any search`)
+    }
+    if (site.stash === 'lost' && !site.burned) fail(`stash lost at ${id} without a fire`)
+  }
+  const stashes = Object.values(state.sites).filter((s) => s.stash !== 'none').length
+  if (stashes !== balance.stashesOnMap) fail('locked stashes do not add up')
+  if (
+    stats.stashesOpened !== Object.values(state.sites).filter((s) => s.stash === 'opened').length
+  ) {
+    fail('opened stashes do not match the stats')
   }
 
   // Zombies and noise.
