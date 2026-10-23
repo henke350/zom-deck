@@ -33,7 +33,7 @@ describe('expedition stats', () => {
     expect(state.stats).toMatchObject({
       attacksByFollowers: 1,
       attacksByZombiesThere: 1,
-      damageFromZombies: 2 * balance.zombie.damage,
+      damageFromZombies: 2 * balance.zombies.walker.damage,
     })
   })
 
@@ -43,7 +43,7 @@ describe('expedition stats', () => {
       { type: 'playCard', uid: 'h1' },
       { type: 'endTurn' },
     )
-    expect(state.stats.damageBlocked).toBe(balance.zombie.damage)
+    expect(state.stats.damageBlocked).toBe(balance.zombies.walker.damage)
     expect(state.stats.damageFromZombies).toBe(0)
   })
 

@@ -35,13 +35,21 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
     case 'noiseAdded':
       return log.noiseAdded(event.amount)
     case 'zombieArrived':
-      return log.zombieArrived(locationText(event.location).name, event.reason === 'dusk')
+      return log.zombieArrived(
+        locationText(event.location).name,
+        event.reason,
+        texts.zombieKinds[event.kind].name,
+      )
+    case 'zombieScreamed':
+      return log.zombieScreamed(event.noise)
+    case 'dangerRose':
+      return log.dangerRose(event.level, event.reason)
     case 'zombieFollowed':
-      return log.zombieFollowed(locationText(event.to).name)
+      return log.zombieFollowed(locationText(event.to).name, kindName(state, event.uid))
     case 'zombieLostTrack':
-      return log.zombieLostTrack
+      return log.zombieLostTrack(kindName(state, event.uid))
     case 'zombieAttacked':
-      return log.zombieAttacked(event.damage)
+      return log.zombieAttacked(event.damage, kindName(state, event.uid))
     case 'damageBlocked':
       return log.damageBlocked(event.amount)
     case 'zombieHit':
@@ -81,4 +89,10 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
     case 'gameOver':
       return texts.ui.outcomeTitle[event.outcome.cause]
   }
+}
+
+/** The kind of a zombie still in play, for log lines ("Runner"); "zombie" if it is gone. */
+function kindName(state: GameState, uid: string): string {
+  const z = state.zombies.find((zombie) => zombie.uid === uid)
+  return z ? texts.zombieKinds[z.kind].name : 'zombie'
 }

@@ -40,9 +40,16 @@ export const variants: readonly Variant[] = [
     overrides: ['randomCity=false', 'hiddenBuildings=false'],
   },
   { name: 'Tilfældig by, alt synligt', overrides: ['hiddenBuildings=false'] },
+  { name: 'Uden faremeter (før 23. okt.)', overrides: ['danger.enabled=false'] },
+  { name: 'Faremeter uden horder', overrides: ['danger.hordeSize=0'] },
+  { name: 'Sjældne fund hæver ikke faren', overrides: ['danger.perRareFind=0'] },
+  {
+    name: 'Mildere top (fare 4: 1 zombie pr. 3 støj)',
+    overrides: ['danger.levels.3.arrivals=1'],
+  },
   { name: '10 liv', overrides: ['maxHp=10'] },
   { name: '8 liv', overrides: ['maxHp=8'] },
-  { name: 'Zombier giver 2 skade', overrides: ['zombie.damage=2'] },
+  { name: 'Zombier giver 2 skade', overrides: ['zombies.walker.damage=2'] },
   { name: '+1 startzombie i hver bygning', overrides: ['extraStartZombies=1'] },
   { name: '8 ture (skumring fra tur 6)', overrides: ['turnLimit=8', 'duskFromTurn=6'] },
 ]

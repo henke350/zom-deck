@@ -5,6 +5,41 @@
 
 export type ZombieFollow = 'chase' | 'gentle' | 'off'
 
+export type ZombieKind = 'walker' | 'runner' | 'brute' | 'screamer'
+
+export interface ZombieStats {
+  readonly hp: number
+  readonly damage: number
+  /** How far it follows a player it has seen (0: it never leaves its place). */
+  readonly followSteps: number
+  /** Noise it makes at the end of each turn while it has seen you. */
+  readonly screamNoise: number
+}
+
+/** One step of the danger meter. */
+export interface DangerLevel {
+  /** Noise that brings zombies at this level. */
+  readonly noiseThreshold: number
+  /** Zombies that arrive each time the noise meter fills. */
+  readonly arrivals: number
+}
+
+/**
+ * The danger meter: the better you do, the wilder the city gets. It starts at level 1 and
+ * rises one level for every pack and every rare find you take (up to the last level). Each
+ * rise brings a horde to the street. Which kinds arrive at each level is content
+ * (`arrivals.byDanger`).
+ */
+export interface DangerBalance {
+  readonly enabled: boolean
+  /** Level 1 first. */
+  readonly levels: readonly DangerLevel[]
+  readonly perPack: number
+  readonly perRareFind: number
+  /** Zombies that arrive on the street each time the level rises. */
+  readonly hordeSize: number
+}
+
 export interface Balance {
   readonly maxHp: number
   readonly handSize: number
@@ -26,7 +61,8 @@ export interface Balance {
   readonly packsOnMap: number
   /** Packs needed for ★, ★★ and ★★★. */
   readonly starThresholds: readonly [number, number, number]
-  readonly zombie: { readonly hp: number; readonly damage: number }
+  readonly zombies: Readonly<Record<ZombieKind, ZombieStats>>
+  readonly danger: DangerBalance
   /** Added to the start-zombie range of every building that has one (a tuning knob). */
   readonly extraStartZombies: number
   readonly zombieFollow: ZombieFollow
@@ -77,7 +113,24 @@ export const balance: Balance = {
   packsToWin: 2,
   packsOnMap: 4,
   starThresholds: [2, 3, 4],
-  zombie: { hp: 2, damage: 1 },
+  zombies: {
+    walker: { hp: 2, damage: 1, followSteps: 1, screamNoise: 0 },
+    runner: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0 },
+    brute: { hp: 4, damage: 2, followSteps: 0, screamNoise: 0 },
+    screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2 },
+  },
+  danger: {
+    enabled: true,
+    levels: [
+      { noiseThreshold: 4, arrivals: 1 },
+      { noiseThreshold: 4, arrivals: 1 },
+      { noiseThreshold: 3, arrivals: 1 },
+      { noiseThreshold: 3, arrivals: 2 },
+    ],
+    perPack: 1,
+    perRareFind: 1,
+    hordeSize: 1,
+  },
   extraStartZombies: 0,
   zombieFollow: 'chase',
   hiddenDanger: true,

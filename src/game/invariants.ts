@@ -3,6 +3,7 @@ import { cityContent } from './city'
 import { listActions } from './actions'
 import { totalCount } from './deck'
 import { starsFor } from './rules'
+import { noiseThreshold } from './zombies'
 import type { Content, GameState } from './types'
 
 /**
@@ -54,11 +55,16 @@ export function checkInvariants(state: GameState, baseContent: Content = default
   }
 
   // Zombies and noise.
-  if (state.noise < 0 || state.noise >= balance.noiseThreshold) fail('noise meter out of range')
+  if (state.noise < 0 || state.noise >= noiseThreshold(state)) fail('noise meter out of range')
+  const maxDanger = balance.danger.enabled ? balance.danger.levels.length : 1
+  if (state.danger < 1 || state.danger > maxDanger) fail('danger level out of range')
+  if (stats.dangerReached !== state.danger) fail('danger level does not match the stats')
   const zombieUids = state.zombies.map((z) => z.uid)
   if (new Set(zombieUids).size !== zombieUids.length) fail('two zombies share a uid')
   for (const z of state.zombies) {
-    if (z.hp <= 0 || z.hp > balance.zombie.hp) fail(`zombie ${z.uid} has impossible health`)
+    if (z.hp <= 0 || z.hp > balance.zombies[z.kind].hp) {
+      fail(`zombie ${z.uid} has impossible health`)
+    }
     if (!content.locations[z.location]) fail(`zombie ${z.uid} is nowhere`)
     if (content.locations[z.location]?.kind === 'shelter') fail(`zombie ${z.uid} is in the Shelter`)
   }

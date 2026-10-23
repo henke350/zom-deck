@@ -229,20 +229,29 @@
   cursor: pointer;
   outline: none;
 }
-.node rect {
+.node-fill {
   fill: var(--bg);
+}
+.node-band {
+  fill: var(--surface);
+  opacity: 0.92;
+}
+.node .node-box {
+  fill: none;
   stroke: var(--ink-2);
   stroke-width: 1.3;
 }
-.node-shelter rect {
+.node-shelter .node-box {
   stroke: var(--teal);
   stroke-width: 2;
 }
-.node-street rect {
+.node-street .node-box {
   stroke-dasharray: 4 3;
 }
-.node-unknown rect {
+.node-unknown .node-box {
   stroke-dasharray: 2 4;
+}
+.node-unknown .node-fill {
   fill: var(--surface);
 }
 .node-unknown .node-name {
@@ -257,21 +266,21 @@
   fill: var(--muted);
   font-size: 11px;
 }
-.node-here rect {
+.node-here .node-box {
   stroke: var(--ink);
   stroke-width: 3;
 }
-.node-dest rect {
+.node-dest .node-box {
   stroke: var(--amber);
   stroke-width: 2.5;
   stroke-dasharray: 6 4;
 }
-.node-selected rect,
-.node:focus-visible rect {
+.node-selected .node-box,
+.node:focus-visible .node-box {
   stroke: var(--amber);
   stroke-width: 3;
 }
-.node:hover rect {
+.node:hover .node-box {
   stroke: var(--amber);
 }
 .token circle {
@@ -731,4 +740,25 @@
   border: 1px solid var(--line);
   border-radius: 4px;
   padding: 0.35rem 0.5rem;
+}
+
+/* Zombie kinds on the map: a letter in each dot */
+.zletter {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  fill: var(--surface);
+  pointer-events: none;
+}
+.zdot-brute .zdot {
+  fill: var(--ink);
+}
+.zdot-screamer .zdot {
+  fill: var(--amber);
+}
+
+/* Light pill behind the zombie marks, so they read on top of an illustration */
+.zpill {
+  fill: var(--surface);
+  opacity: 0.85;
 }

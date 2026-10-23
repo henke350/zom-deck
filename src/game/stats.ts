@@ -20,6 +20,9 @@ export function emptyStats(startHp: number, startCards: number): Stats {
     zombiesFromDusk: 0,
     zombiesKilled: 0,
     woundsGained: 0,
+    zombiesFromScreams: 0,
+    zombiesFromHordes: 0,
+    dangerReached: 1,
     stashesOpened: 0,
   }
 }
@@ -68,7 +71,12 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
         break
       case 'zombieArrived':
         if (e.reason === 'dusk') s.zombiesFromDusk += 1
+        else if (e.reason === 'scream') s.zombiesFromScreams += 1
+        else if (e.reason === 'horde') s.zombiesFromHordes += 1
         else s.zombiesFromNoise += 1
+        break
+      case 'dangerRose':
+        s.dangerReached = Math.max(s.dangerReached, e.level)
         break
       case 'stashOpened':
         s.stashesOpened += 1

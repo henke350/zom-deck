@@ -12,6 +12,7 @@ export function EndTurnPreview({ preview }: { preview: Preview }) {
         ? p.attack(preview.attackers, preview.damage, preview.blocked)
         : p.safe,
     preview.wound && !preview.lethal ? p.wound : '',
+    preview.screamNoise > 0 ? p.scream(preview.screamNoise, preview.screamArrivals) : '',
     preview.duskNoise > 0 ? p.dusk(preview.duskNoise, preview.duskArrivals) : '',
   ].filter(Boolean)
   const tone = preview.lethal ? 'danger' : preview.attackers > 0 ? 'warn' : 'safe'

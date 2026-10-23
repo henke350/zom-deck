@@ -65,6 +65,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     zombies,
     nextZombieUid,
     noise: 0,
+    danger: 1,
     visited: [content.startLocation],
     ...(city ? { city } : {}),
     stats: emptyStats(startHp, instances.length),

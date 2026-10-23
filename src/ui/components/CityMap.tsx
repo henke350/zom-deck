@@ -2,6 +2,7 @@ import type { KeyboardEvent } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Content, GameState, LocationId } from '../../game'
 import { buildingKnown, zombieInfo, zombiesAt } from '../../game'
+import { locationImages } from '../locationImages'
 import { locationText } from '../names'
 import { siteSummary } from '../sites'
 
@@ -15,11 +16,13 @@ interface CityMapProps {
   readonly onFocusLocation: (id: LocationId | null) => void
 }
 
-const NODE_W = 128
-const NODE_H = 58
+const NODE_W = 156
+const NODE_H = 96
+/** Height of the caption band at the bottom of a place, below its illustration. */
+const BAND_H = 38
 const MAX_DOTS = 5
 
-/** Red dots for known zombies (ringed when they have seen you), or the range if unknown. */
+/** A lettered dot per known zombie (W, R, B, S; ringed when it has seen you), or the range if unknown. */
 function ZombieMarks({
   state,
   content,
@@ -32,30 +35,42 @@ function ZombieMarks({
   const pos = content.locations[id]?.mapPos
   if (!pos) return null
   const info = zombieInfo(state, content, id)
-  const y = pos.y + 20
+  const y = pos.y - NODE_H / 2 + 15
   if (!info.known) {
     return (
-      <text className="zrange" x={pos.x} y={y + 4} textAnchor="middle">
-        {texts.ui.zombiesRange(info.min, info.max)}
-      </text>
+      <g>
+        <rect className="zpill" x={pos.x - 26} y={y - 9} width={52} height={18} rx={9} />
+        <text className="zrange" x={pos.x} y={y + 4} textAnchor="middle">
+          {texts.ui.zombiesRange(info.min, info.max)}
+        </text>
+      </g>
     )
   }
   const zombies = zombiesAt(state, id)
+  if (zombies.length === 0) return null
   const shown = zombies.slice(0, MAX_DOTS)
-  const startX = pos.x - ((shown.length - 1) * 11) / 2
+  const step = 15
+  const startX = pos.x - ((shown.length - 1) * step) / 2
+  const pillW = (shown.length - 1) * step + 20 + (zombies.length > MAX_DOTS ? 18 : 0)
   return (
     <g>
+      <rect className="zpill" x={startX - 10} y={y - 9} width={pillW} height={18} rx={9} />
       {shown.map((z, i) => (
-        <circle
-          key={z.uid}
-          className={z.alerted ? 'zdot zdot-alert' : 'zdot'}
-          cx={startX + i * 11}
-          cy={y}
-          r={4.5}
-        />
+        <g key={z.uid} className={`zdot-${z.kind}`}>
+          <title>{texts.zombieKinds[z.kind].name}</title>
+          <circle
+            className={z.alerted ? 'zdot zdot-alert' : 'zdot'}
+            cx={startX + i * step}
+            cy={y}
+            r={6.5}
+          />
+          <text className="zletter" x={startX + i * step} y={y + 3.2} textAnchor="middle">
+            {texts.zombieKinds[z.kind].short}
+          </text>
+        </g>
       ))}
       {zombies.length > MAX_DOTS && (
-        <text className="zmore" x={startX + MAX_DOTS * 11} y={y + 4}>
+        <text className="zmore" x={startX + MAX_DOTS * step} y={y + 4}>
           +{zombies.length - MAX_DOTS}
         </text>
       )}
@@ -93,6 +108,9 @@ export function CityMap({
         {Object.values(content.locations).map((loc) => {
           const { x, y } = loc.mapPos
           const known = buildingKnown(state, content, loc.id)
+          const image = known ? locationImages[loc.id] : undefined
+          const top = y - NODE_H / 2
+          const bandTop = y + NODE_H / 2 - BAND_H
           const name = known ? locationText(loc.id).name : texts.ui.unknownMapName
           const isHere = loc.id === here
           const isDest = destinations.has(loc.id)
@@ -100,6 +118,7 @@ export function CityMap({
             'node',
             `node-${loc.kind}`,
             !known && 'node-unknown',
+            image && 'node-illustrated',
             isHere && 'node-here',
             isDest && 'node-dest',
             selected === loc.id && 'node-selected',
@@ -128,16 +147,55 @@ export function CityMap({
               onFocus={() => onFocusLocation(loc.id)}
               onBlur={() => onFocusLocation(null)}
             >
-              <rect x={x - NODE_W / 2} y={y - NODE_H / 2} width={NODE_W} height={NODE_H} rx={6} />
-              <text className="node-name" x={x} y={y - 8} textAnchor="middle">
+              <rect
+                className="node-fill"
+                x={x - NODE_W / 2}
+                y={top}
+                width={NODE_W}
+                height={NODE_H}
+                rx={6}
+              />
+              {image && (
+                <>
+                  <clipPath id={`map-clip-${loc.id}`}>
+                    <rect x={x - NODE_W / 2} y={top} width={NODE_W} height={NODE_H} rx={6} />
+                  </clipPath>
+                  <image
+                    href={image}
+                    x={x - NODE_W / 2}
+                    y={top}
+                    width={NODE_W}
+                    height={NODE_H - BAND_H + 6}
+                    preserveAspectRatio="xMidYMid slice"
+                    clipPath={`url(#map-clip-${loc.id})`}
+                  />
+                  <rect
+                    className="node-band"
+                    x={x - NODE_W / 2}
+                    y={bandTop}
+                    width={NODE_W}
+                    height={BAND_H}
+                    clipPath={`url(#map-clip-${loc.id})`}
+                  />
+                </>
+              )}
+              <text className="node-name" x={x} y={bandTop + 16} textAnchor="middle">
                 {name}
               </text>
-              <ZombieMarks state={state} content={content} id={loc.id} />
-              <text className="node-kind" x={x} y={y + 8} textAnchor="middle">
+              <text className="node-kind" x={x} y={bandTop + 31} textAnchor="middle">
                 {known
                   ? (siteSummary(state, content, loc.id)?.short ?? texts.locationKinds[loc.kind])
                   : texts.ui.unknownShort}
               </text>
+              <ZombieMarks state={state} content={content} id={loc.id} />
+              <rect
+                className="node-box"
+                x={x - NODE_W / 2}
+                y={top}
+                width={NODE_W}
+                height={NODE_H}
+                rx={6}
+              />
             </g>
           )
         })}

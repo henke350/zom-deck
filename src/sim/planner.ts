@@ -6,6 +6,7 @@ import {
   freeMoveCost,
   listActions,
   neighbors,
+  noiseThreshold,
   ownedCount,
   previewEndTurn,
   zombiesAt,
@@ -332,7 +333,7 @@ function stash(ctx: Ctx): Action | undefined {
     .sort((a, b) => toolValue(state, content, a.uid) - toolValue(state, content, b.uid))
   if (withTool[0]) return withTool[0]
   const force = opens.find((a) => a.uid === undefined)
-  const quietEnough = state.noise + state.balance.stashForce.noise < state.balance.noiseThreshold
+  const quietEnough = state.noise + state.balance.stashForce.noise < noiseThreshold(state)
   return force && (quietEnough || !o.careful) ? force : undefined
 }
 

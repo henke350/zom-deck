@@ -1,5 +1,6 @@
 import { texts } from '../../data/texts.en'
 import type { GameState } from '../../game'
+import { noiseThreshold } from '../../game'
 
 interface StatProps {
   readonly label: string
@@ -21,6 +22,7 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
   const { player, balance, piles, turn } = state
   const dusk = turn >= balance.duskFromTurn
   const lowHp = player.hp <= Math.ceil(balance.maxHp / 3)
+  const threshold = noiseThreshold(state)
   const ui = texts.ui
 
   return (
@@ -33,9 +35,22 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
       <Stat label={ui.ap} value={`${player.ap}/${balance.apPerTurn}`} />
       <Stat
         label={ui.noiseLabel}
-        value={`${state.noise}/${balance.noiseThreshold}`}
-        tone={state.noise >= balance.noiseThreshold - 1 ? 'warn' : undefined}
+        value={`${state.noise}/${threshold}`}
+        tone={state.noise >= threshold - 1 ? 'warn' : undefined}
       />
+      {balance.danger.enabled && (
+        <Stat
+          label={ui.dangerLabel}
+          value={`${state.danger}/${balance.danger.levels.length}`}
+          tone={
+            state.danger >= balance.danger.levels.length
+              ? 'danger'
+              : state.danger > 1
+                ? 'warn'
+                : undefined
+          }
+        />
+      )}
       <Stat
         label={dusk ? `${ui.turn} · ${ui.dusk}` : ui.turn}
         value={`${turn}/${balance.turnLimit}`}
