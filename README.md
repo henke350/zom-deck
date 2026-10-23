@@ -48,6 +48,7 @@ npm run sim                              # 7 bots spiller 1.000 spil hver → do
 npm run sim -- --set maxHp=8             # prøv et andet balancetal (rapporten havner i .sim/)
 npm run sim -- --set turnLimit=8 --set duskFromTurn=6
 npm run fuzz                             # 10.000 tilfældige spil; alle regler tjekkes efter hver handling
+npm run print                            # print-and-play-ark → print/print-and-play.html (udskriv eller gem som PDF)
 ```
 
 Navnene efter `--set` er dem i `src/data/balance.ts`. Botterne ser kun det, en spiller ser på

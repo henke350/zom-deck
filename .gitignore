@@ -28,3 +28,6 @@ coverage
 
 # Simulator build (npm run sim)
 .sim
+
+# Generated print-and-play sheets (npm run print)
+print/

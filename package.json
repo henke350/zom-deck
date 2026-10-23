@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "sim": "vite build --config vite.sim.config.ts && node .sim/main.js report",
     "fuzz": "vite build --config vite.sim.config.ts && node .sim/main.js fuzz",
+    "print": "vite build --config vite.sim.config.ts && node .sim/main.js print",
     "lint": "oxlint --deny-warnings",
     "typecheck": "tsc -b",
     "format": "prettier --write .",

@@ -1,10 +1,11 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { balance as standard } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { bots } from './bots'
 import { fuzz } from './fuzz'
 import { applyOverrides } from './overrides'
+import { renderPrintAndPlay } from './print'
 import { consoleSummary, renderReport } from './report'
 import { runBots, runVariants, traceGame } from './simulate'
 
@@ -17,6 +18,7 @@ import { runBots, runVariants, traceGame } from './simulate'
  *   npm run sim -- --variant-games 0    skip the "what if" section (faster)
  *   npm run sim -- trace greedy 7       one game, action by action
  *   npm run fuzz                        10 000 random games, every rule checked after every action
+ *   npm run print                       print-and-play sheets → print/print-and-play.html
  */
 function main(argv: readonly string[]): number {
   const [command = 'report', ...rest] = argv
@@ -42,8 +44,17 @@ function main(argv: readonly string[]): number {
     console.log(traceGame(info.bot, Number(seedText), balance).join('\n'))
     return 0
   }
+  if (command === 'print') {
+    const balance = applyOverrides(standard, options(rest, '--set'))
+    const images = { cards: artIn('src/assets/cards'), locations: artIn('src/assets/locations') }
+    const out = option(rest, '--out') ?? 'print/print-and-play.html'
+    mkdirSync(dirname(out), { recursive: true })
+    writeFileSync(out, renderPrintAndPlay(defaultContent, balance, images))
+    console.log(`Print-and-play: ${out} (åbn i en browser og udskriv, eller gem som PDF)`)
+    return 0
+  }
   if (command !== 'report') {
-    throw new Error(`Unknown command "${command}" (use report, fuzz or trace)`)
+    throw new Error(`Unknown command "${command}" (use report, fuzz, trace or print)`)
   }
 
   const overrides = options(rest, '--set')
@@ -71,6 +82,21 @@ function main(argv: readonly string[]): number {
   const problems = summaries.reduce((n, s) => n + s.problems.length, 0)
   if (problems > 0) console.log(`${problems} fejl fundet (se rapporten).`)
   return problems === 0 ? 0 : 1
+}
+
+/** Every image in a folder as a data URI, keyed by its file name without extension. */
+function artIn(folder: string): Record<string, string> {
+  if (!existsSync(folder)) return {}
+  const types: Record<string, string> = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg' }
+  return Object.fromEntries(
+    readdirSync(folder).flatMap((file) => {
+      const [id = '', ext = ''] = file.split('.')
+      const type = types[ext]
+      if (!type) return []
+      const data = readFileSync(join(folder, file)).toString('base64')
+      return [[id, `data:${type};base64,${data}`]]
+    }),
+  )
 }
 
 function option(args: readonly string[], name: string): string | undefined {

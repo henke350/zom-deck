@@ -5,3 +5,6 @@ package-lock.json
 .sim
 # Written by the simulator (npm run sim)
 docs/balance-report.md
+
+# Generated print-and-play sheets (npm run print)
+print/
