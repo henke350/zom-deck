@@ -19,6 +19,7 @@ import { runBots, runVariants, traceGame } from './simulate'
  *   npm run sim -- trace greedy 7       one game, action by action
  *   npm run fuzz                        10 000 random games, every rule checked after every action
  *   npm run print                       print-and-play sheets → print/print-and-play.html
+ *   npm run print -- --no-card-backs    the same without card backs (for opaque sleeves)
  */
 function main(argv: readonly string[]): number {
   const [command = 'report', ...rest] = argv
@@ -49,7 +50,8 @@ function main(argv: readonly string[]): number {
     const images = { cards: artIn('src/assets/cards'), locations: artIn('src/assets/locations') }
     const out = option(rest, '--out') ?? 'print/print-and-play.html'
     mkdirSync(dirname(out), { recursive: true })
-    writeFileSync(out, renderPrintAndPlay(defaultContent, balance, images))
+    const cardBacks = !rest.includes('--no-card-backs')
+    writeFileSync(out, renderPrintAndPlay(defaultContent, balance, images, { cardBacks }))
     console.log(`Print-and-play: ${out} (åbn i en browser og udskriv, eller gem som PDF)`)
     return 0
   }

@@ -52,5 +52,13 @@ describe('print and play', () => {
     expect(html.match(/class="card front/g)).toHaveLength(
       printDecks(defaultContent, balance).length,
     )
+    expect(html).toContain('class="card back')
+  })
+
+  it('can leave out the card backs for opaque sleeves, but keeps the tile backs', () => {
+    const images = { cards: {}, locations: {} }
+    const html = renderPrintAndPlay(defaultContent, balance, images, { cardBacks: false })
+    expect(html).not.toContain('class="card back')
+    expect(html).toContain('class="tile back')
   })
 })

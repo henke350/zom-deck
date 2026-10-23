@@ -429,7 +429,7 @@ function playerBoard(content: Content, balance: Balance): string {
 </section>`
 }
 
-function rulesPages(content: Content, balance: Balance): string {
+function rulesPages(content: Content, balance: Balance, cardBacks: boolean): string {
   const b = balance
   const slots = Object.values(content.locations).filter((l) => l.kind === 'building').length
   const pool = buildings(content).length
@@ -440,7 +440,7 @@ function rulesPages(content: Content, balance: Balance): string {
   <div class="cols">
   <h3>What to print</h3>
   <ul>
-    <li><b>Cards</b>, 63 × 88 mm: start deck, one find deck per building, rare deck, junk. Print double-sided (flip on long edge) or glue the backs on. Sleeves help.</li>
+    <li><b>Cards</b>, 63 × 88 mm: start deck, one find deck per building, rare deck, junk. ${cardBacks ? 'Print double-sided (flip on long edge) or glue the backs on. Sleeves help.' : 'No backs: use sleeves with opaque backs. Each card names its deck at the bottom.'}</li>
     <li><b>Building tiles</b>, 80 × 57 mm, ${pool} buildings with an "Unknown" back.</li>
     <li><b>Tokens</b>: zombies (back: <i>has seen you</i>), packs, stashes, search, damage, block, burned and +1 find markers.</li>
     <li><b>Board</b> and <b>player board</b> (A4 landscape).</li>
@@ -568,17 +568,24 @@ function artVariables(images: PrintImages): string {
 }
 
 /** The whole print-and-play file. */
+export interface PrintOptions {
+  /** Card back pages. Leave them out for opaque sleeves: the deck is also named on the front. */
+  readonly cardBacks?: boolean
+}
+
 export function renderPrintAndPlay(
   content: Content,
   balance: Balance,
   images: PrintImages,
+  options: PrintOptions = {},
 ): string {
+  const cardBacks = options.cardBacks ?? true
   const cards = printDecks(content, balance)
   const tiles = buildings(content)
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>One More Building – print and play</title>
 <style>${CSS}${artVariables(images)}</style></head><body>
-${rulesPages(content, balance)}
+${rulesPages(content, balance, cardBacks)}
 ${playerBoard(content, balance)}
 ${boardPage(content)}
 ${sheets(
@@ -586,7 +593,7 @@ ${sheets(
   3,
   9,
   (c) => cardFront(c, content, images),
-  (c) => cardBack(c, content),
+  cardBacks ? (c) => cardBack(c, content) : undefined,
   'cards',
   'Cards',
 )}
