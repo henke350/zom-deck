@@ -42,7 +42,7 @@ export const variants: readonly Variant[] = [
   { name: 'Tilfældig by, alt synligt', overrides: ['hiddenBuildings=false'] },
   { name: '10 liv', overrides: ['maxHp=10'] },
   { name: '8 liv', overrides: ['maxHp=8'] },
-  { name: 'Zombier giver 2 skade', overrides: ['zombie.damage=2'] },
+  { name: 'Zombier giver 2 skade', overrides: ['zombies.walker.damage=2'] },
   { name: '+1 startzombie i hver bygning', overrides: ['extraStartZombies=1'] },
   { name: '8 ture (skumring fra tur 6)', overrides: ['turnLimit=8', 'duskFromTurn=6'] },
 ]

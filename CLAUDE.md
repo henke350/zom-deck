@@ -66,7 +66,8 @@ src/sim/   bots and balance reports (from M6), run in Node
   `chooseFind` phase (take / scrap / decline), rare finds (`rare` on the card, weight scaled by
   `rareFindWeight`) and locked stashes (`openStash`). A search is always the last effect
   of a card mode, because the game then waits for the player.
-- Zombies live in `src/game/zombies.ts`: start zombies, noticing, noise and arrivals,
+- Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per
+  building in `startZombies.kinds` and `content.arrivals`), noticing, noise and arrivals,
   the zombie phase (follow → attack), `previewEndTurn` and `zombieInfo` (hidden
   danger). Previews must reuse the real rules, never re-implement them.
 - UI: `src/ui/GameScreen.tsx` composes `src/ui/components/*`; `useGame` holds the

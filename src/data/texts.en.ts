@@ -76,7 +76,7 @@ export const texts = {
     zombiesUnknown: (min: number, max: number) =>
       `Zombies: ${min === max ? min : `${min}–${max}`} (exact number unknown until you go in)`,
     zombiesNone: 'No zombies here.',
-    zombieLabel: (n: number) => `Zombie ${n}`,
+    zombieKindLabel: (kind: string, n: number) => `${kind} ${n}`,
     zombieHealth: (hp: number, max: number) => `${hp}/${max} health`,
     zombieSeenYou: 'has seen you',
     zombieDistracted: 'distracted this turn',
@@ -92,6 +92,8 @@ export const texts = {
       lethal: 'Ending the turn here will kill you!',
       wound: 'The attack will leave a Wound in your deck.',
       followers: (n: number) => `${n} zombie${n === 1 ? '' : 's'} will follow you.`,
+      scream: (noise: number, arrivals: number) =>
+        `Screamers: +${noise} noise${arrivals > 0 ? ', and a zombie arrives' : ''}.`,
       dusk: (noise: number, arrivals: number) =>
         `Dusk: +${noise} noise${arrivals > 0 ? ', and a zombie arrives' : ''}.`,
     },
@@ -166,6 +168,17 @@ export const texts = {
     outcomeStars: (stars: number, max: number) => `${'★'.repeat(stars)} (${stars} of ${max})`,
   },
 
+  zombieKinds: {
+    walker: { name: 'Walker', short: 'W', text: 'Follows you one step.' },
+    runner: { name: 'Runner', short: 'R', text: 'Fast and fragile: follows you up to two steps.' },
+    brute: { name: 'Brute', short: 'B', text: 'Tough and hits for 2, but never leaves its place.' },
+    screamer: {
+      name: 'Screamer',
+      short: 'S',
+      text: 'Does not bite, but while it has seen you it shrieks: +2 noise every turn.',
+    },
+  },
+
   services: {
     dismantle: { name: 'Dismantle', text: 'Trash a card from your hand.' },
     patchUp: { name: 'Patch up', text: 'Trash a Nerves or Wound from your hand.' },
@@ -215,7 +228,8 @@ export const texts = {
       {
         heading: 'Zombies',
         items: [
-          `When you end your turn, zombies that have seen you follow you one step. Then every zombie where you stand attacks for ${b.zombie.damage} health. Block soaks up damage.`,
+          `When you end your turn, zombies that have seen you follow you. Then every zombie where you stand attacks. Block soaks up damage.`,
+          `Walker: ${b.zombies.walker.hp} health, hits for ${b.zombies.walker.damage}, follows ${b.zombies.walker.followSteps} step. Runner: ${b.zombies.runner.hp} health, follows up to ${b.zombies.runner.followSteps} steps. Brute: ${b.zombies.brute.hp} health, hits for ${b.zombies.brute.damage}, never follows. Screamer: does not bite, but adds ${b.zombies.screamer.screamNoise} noise every turn while it has seen you.`,
           'Zombies two steps away lose track of you, and they never enter the Shelter.',
           "A building's zombies are only a guess until you go in or scout it. Next to the End turn button you can see who will attack.",
           ...(b.wounds.enabled
@@ -350,11 +364,16 @@ export const texts = {
     cardScrapped: (name: string) => `You scrap ${name} for good.`,
     findDeclined: 'You leave the finds behind.',
     noiseAdded: (amount: number) => `Noise +${amount}.`,
-    zombieArrived: (place: string, dusk: boolean) =>
-      dusk ? `Dusk falls: a zombie arrives at ${place}.` : `The noise draws a zombie to ${place}!`,
-    zombieFollowed: (place: string) => `A zombie follows you to ${place}.`,
-    zombieLostTrack: 'A zombie loses track of you.',
-    zombieAttacked: (damage: number) => `A zombie attacks you (${damage} damage).`,
+    zombieArrived: (place: string, reason: 'noise' | 'dusk' | 'scream', kind: string) =>
+      reason === 'dusk'
+        ? `Dusk falls: a ${kind} arrives at ${place}.`
+        : reason === 'scream'
+          ? `The shrieking draws a ${kind} to ${place}!`
+          : `The noise draws a ${kind} to ${place}!`,
+    zombieFollowed: (place: string, kind: string) => `A ${kind} follows you to ${place}.`,
+    zombieLostTrack: (kind: string) => `A ${kind} loses track of you.`,
+    zombieAttacked: (damage: number, kind: string) => `A ${kind} attacks you (${damage} damage).`,
+    zombieScreamed: (noise: number) => `A Screamer shrieks: +${noise} noise.`,
     damageBlocked: (n: number) => `You block ${n} damage.`,
     zombieHit: (damage: number, hpLeft: number) =>
       hpLeft > 0

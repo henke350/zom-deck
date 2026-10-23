@@ -1,4 +1,9 @@
-import type { Balance } from '../data/balance'
+import type { Balance, ZombieKind } from '../data/balance'
+
+export type { ZombieKind }
+
+/** A weighted choice of zombie kinds (relative chances). */
+export type ZombieMix = readonly { readonly kind: ZombieKind; readonly weight: number }[]
 
 export type CardId = string
 
@@ -66,7 +71,12 @@ export interface LocationDef {
   /** This building always holds a supply pack (the Supermarket). */
   readonly alwaysHasPack?: boolean
   /** Zombies here at the start, rolled between min and max. Shown as a range until you visit. */
-  readonly startZombies?: { readonly min: number; readonly max: number }
+  readonly startZombies?: {
+    readonly min: number
+    readonly max: number
+    /** Which kinds start here. Default: only Walkers. */
+    readonly kinds?: ZombieMix
+  }
   /** Something you can do here for AP (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly service?: LocationService
 }
@@ -104,6 +114,7 @@ export type StashState = 'none' | 'hidden' | 'found' | 'opened' | 'lost'
 
 export interface Zombie {
   readonly uid: string
+  readonly kind: ZombieKind
   readonly location: LocationId
   readonly hp: number
   /** It has seen the player and will follow one step. */
@@ -135,6 +146,8 @@ export interface Content {
   readonly packCard: CardId
   /** The junk card added by a heavy zombie attack when the Wound variant is on. */
   readonly woundCard: CardId
+  /** The kinds of zombie that noise and dusk bring. Default: only Walkers. */
+  readonly arrivals?: { readonly noise: ZombieMix; readonly dusk: ZombieMix }
   /**
    * More buildings that a random city can use instead of the ones on the classic map.
    * Their map position comes from the building slot they are placed in.
@@ -235,6 +248,8 @@ export interface Stats {
   readonly noiseMade: number
   readonly zombiesFromNoise: number
   readonly zombiesFromDusk: number
+  /** Zombies brought by Screamers' noise. */
+  readonly zombiesFromScreams: number
   readonly zombiesKilled: number
   /** Wound variant: Wounds added by heavy attacks. */
   readonly woundsGained: number
@@ -364,13 +379,15 @@ export type GameEvent =
       readonly type: 'noiseAdded'
       readonly amount: number
       readonly total: number
-      readonly reason: 'noise' | 'dusk'
+      readonly reason: NoiseReason
     }
+  | { readonly type: 'zombieScreamed'; readonly uid: string; readonly noise: number }
   | {
       readonly type: 'zombieArrived'
       readonly uid: string
+      readonly kind: ZombieKind
       readonly location: LocationId
-      readonly reason: 'noise' | 'dusk'
+      readonly reason: NoiseReason
     }
   | {
       readonly type: 'zombieFollowed'
@@ -415,6 +432,9 @@ export type GameEvent =
   | { readonly type: 'cardsKept'; readonly uids: readonly string[] }
   | { readonly type: 'turnEnded'; readonly turn: number }
   | { readonly type: 'gameOver'; readonly outcome: Outcome }
+
+/** Where noise comes from: the player, dusk, or a Screamer that has seen the player. */
+export type NoiseReason = 'noise' | 'dusk' | 'scream'
 
 export type Validation = { readonly ok: true } | { readonly ok: false; readonly reason: string }
 

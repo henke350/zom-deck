@@ -22,7 +22,16 @@ describe('invariant checker', () => {
     const broken: GameState = {
       ...fresh,
       player: { ...fresh.player, hp: fresh.player.hp - 1 },
-      zombies: [{ uid: 'z99', location: 'shelter', hp: 2, alerted: false, neutralized: false }],
+      zombies: [
+        {
+          uid: 'z99',
+          kind: 'walker',
+          location: 'shelter',
+          hp: 2,
+          alerted: false,
+          neutralized: false,
+        },
+      ],
     }
     expect(checkInvariants(broken)).toEqual(
       expect.arrayContaining([

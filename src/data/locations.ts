@@ -22,7 +22,14 @@ export const locations = {
     id: 'workshop',
     kind: 'building',
     mapPos: { x: 120, y: 70 },
-    startZombies: { min: 0, max: 1 },
+    startZombies: {
+      min: 0,
+      max: 1,
+      kinds: [
+        { kind: 'walker', weight: 3 },
+        { kind: 'brute', weight: 1 },
+      ],
+    },
     service: { id: 'dismantle', filter: 'any' },
     lootPool: [
       { card: 'toolbox', weight: 3 },
@@ -37,7 +44,14 @@ export const locations = {
     id: 'police',
     kind: 'building',
     mapPos: { x: 520, y: 70 },
-    startZombies: { min: 2, max: 3 },
+    startZombies: {
+      min: 2,
+      max: 3,
+      kinds: [
+        { kind: 'walker', weight: 2 },
+        { kind: 'brute', weight: 2 },
+      ],
+    },
     lootPool: [
       { card: 'pistol', weight: 3 },
       { card: 'kevlarVest', weight: 3 },
@@ -51,7 +65,14 @@ export const locations = {
     id: 'houseA',
     kind: 'building',
     mapPos: { x: 120, y: 200 },
-    startZombies: { min: 0, max: 1 },
+    startZombies: {
+      min: 0,
+      max: 1,
+      kinds: [
+        { kind: 'walker', weight: 4 },
+        { kind: 'screamer', weight: 1 },
+      ],
+    },
     lootPool: houseLoot,
   },
   street: { id: 'street', kind: 'street', mapPos: { x: 320, y: 200 } },
@@ -59,7 +80,14 @@ export const locations = {
     id: 'supermarket',
     kind: 'building',
     mapPos: { x: 520, y: 200 },
-    startZombies: { min: 1, max: 1 },
+    startZombies: {
+      min: 1,
+      max: 1,
+      kinds: [
+        { kind: 'walker', weight: 3 },
+        { kind: 'runner', weight: 1 },
+      ],
+    },
     alwaysHasPack: true,
     lootPool: [
       { card: 'runningShoes', weight: 2 },
@@ -75,7 +103,14 @@ export const locations = {
     id: 'pharmacy',
     kind: 'building',
     mapPos: { x: 320, y: 330 },
-    startZombies: { min: 1, max: 2 },
+    startZombies: {
+      min: 1,
+      max: 2,
+      kinds: [
+        { kind: 'walker', weight: 2 },
+        { kind: 'screamer', weight: 1 },
+      ],
+    },
     service: { id: 'patchUp', filter: 'junk' },
     lootPool: [
       { card: 'bandage', weight: 3 },
@@ -90,7 +125,14 @@ export const locations = {
     id: 'houseB',
     kind: 'building',
     mapPos: { x: 520, y: 330 },
-    startZombies: { min: 0, max: 1 },
+    startZombies: {
+      min: 0,
+      max: 1,
+      kinds: [
+        { kind: 'walker', weight: 4 },
+        { kind: 'screamer', weight: 1 },
+      ],
+    },
     lootPool: houseLoot,
   },
 } as const satisfies Record<string, LocationDef>
@@ -105,7 +147,15 @@ export const extraBuildings = {
   gasStation: {
     id: 'gasStation',
     kind: 'building',
-    startZombies: { min: 0, max: 2 },
+    startZombies: {
+      min: 0,
+      max: 2,
+      kinds: [
+        { kind: 'walker', weight: 2 },
+        { kind: 'runner', weight: 1 },
+        { kind: 'screamer', weight: 1 },
+      ],
+    },
     lootPool: [
       { card: 'molotov', weight: 3 },
       { card: 'runningShoes', weight: 2 },
@@ -118,7 +168,14 @@ export const extraBuildings = {
   school: {
     id: 'school',
     kind: 'building',
-    startZombies: { min: 1, max: 2 },
+    startZombies: {
+      min: 1,
+      max: 2,
+      kinds: [
+        { kind: 'runner', weight: 2 },
+        { kind: 'walker', weight: 1 },
+      ],
+    },
     lootPool: [
       { card: 'districtMap', weight: 3 },
       { card: 'flashlight', weight: 2 },
@@ -131,7 +188,15 @@ export const extraBuildings = {
   hospital: {
     id: 'hospital',
     kind: 'building',
-    startZombies: { min: 2, max: 3 },
+    startZombies: {
+      min: 2,
+      max: 3,
+      kinds: [
+        { kind: 'walker', weight: 2 },
+        { kind: 'brute', weight: 1 },
+        { kind: 'screamer', weight: 1 },
+      ],
+    },
     service: { id: 'patchUp', filter: 'junk' },
     lootPool: [
       { card: 'bandage', weight: 3 },

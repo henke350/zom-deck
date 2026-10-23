@@ -1,12 +1,37 @@
-import type { Balance } from '../data/balance'
+import type { Balance, ZombieKind, ZombieStats } from '../data/balance'
 import { buildingKnown, cityContent } from './city'
 import { gainCard } from './deck'
 import { distance, neighbors } from './map'
-import { nextInt } from './rng'
-import type { Content, GameEvent, GameState, LocationDef, LocationId, Zombie } from './types'
+import { nextFloat, nextInt } from './rng'
+import type {
+  Content,
+  GameEvent,
+  GameState,
+  LocationDef,
+  LocationId,
+  NoiseReason,
+  Zombie,
+  ZombieMix,
+} from './types'
 
 export function zombiesAt(state: GameState, location: LocationId): Zombie[] {
   return state.zombies.filter((z) => z.location === location)
+}
+
+export function zombieStats(balance: Balance, kind: ZombieKind): ZombieStats {
+  return balance.zombies[kind]
+}
+
+/** Picks a kind from a weighted mix (only Walkers when the mix is empty). */
+export function rollKind(mix: ZombieMix | undefined, rng: number): [kind: ZombieKind, rng: number] {
+  const options = (mix ?? []).filter((m) => m.weight > 0)
+  if (options.length === 0) return ['walker', rng]
+  const total = options.reduce((sum, m) => sum + m.weight, 0)
+  const [r, next] = nextFloat(rng)
+  let acc = 0
+  const roll = r * total
+  const picked = options.find((m) => (acc += m.weight) > roll) ?? options[options.length - 1]
+  return [picked?.kind ?? 'walker', next]
 }
 
 /** A building's start-zombie range, including the balance file's extra zombies. */
@@ -34,10 +59,13 @@ export function setupZombies(
     const [extra, next] = nextInt(state, max - min + 1)
     state = next
     for (let i = 0; i < min + extra; i++) {
+      const [kind, afterKind] = rollKind(loc.startZombies?.kinds, state)
+      state = afterKind
       zombies.push({
         uid: `z${zombies.length + 1}`,
+        kind,
         location: loc.id,
-        hp: balance.zombie.hp,
+        hp: zombieStats(balance, kind).hp,
         alerted: false,
         neutralized: false,
       })
@@ -139,19 +167,27 @@ function arrivalLocation(state: GameState, content: Content): LocationId {
 function spawnZombie(
   state: GameState,
   content: Content,
-  reason: 'noise' | 'dusk',
+  reason: NoiseReason,
   events: GameEvent[],
 ): GameState {
   const location = arrivalLocation(state, content)
+  const mix = reason === 'dusk' ? content.arrivals?.dusk : content.arrivals?.noise
+  const [kind, rng] = rollKind(mix, state.rng)
   const zombie: Zombie = {
     uid: `z${state.nextZombieUid}`,
+    kind,
     location,
-    hp: state.balance.zombie.hp,
+    hp: zombieStats(state.balance, kind).hp,
     alerted: location === state.player.location,
     neutralized: false,
   }
-  events.push({ type: 'zombieArrived', uid: zombie.uid, location, reason })
-  return { ...state, zombies: [...state.zombies, zombie], nextZombieUid: state.nextZombieUid + 1 }
+  events.push({ type: 'zombieArrived', uid: zombie.uid, kind, location, reason })
+  return {
+    ...state,
+    rng,
+    zombies: [...state.zombies, zombie],
+    nextZombieUid: state.nextZombieUid + 1,
+  }
 }
 
 /** Adds noise. Each time the meter reaches the threshold, a zombie arrives and the meter drops by the threshold. */
@@ -159,7 +195,7 @@ export function addNoise(
   state: GameState,
   amount: number,
   content: Content,
-  reason: 'noise' | 'dusk',
+  reason: NoiseReason,
   events: GameEvent[],
 ): GameState {
   if (amount <= 0) return state
@@ -192,11 +228,27 @@ export function noisePreview(state: GameState, amount: number): NoisePreview {
 }
 
 /**
- * The zombie phase at the end of a turn: zombies that have seen you follow one
- * step (or lose track), then every zombie at your location attacks. Block
- * prevents damage. The caller checks for death afterwards.
+ * The zombie phase at the end of a turn: zombies that have seen you follow (as far as their
+ * kind goes) or lose track, then every zombie at your location attacks for its kind's damage.
+ * Block prevents damage. Last, every Screamer that has seen you shrieks and makes noise. The
+ * caller checks for death afterwards.
  */
 export function zombiePhase(state: GameState, content: Content, events: GameEvent[]): GameState {
+  return screams(attacks(state, content, events), content, events)
+}
+
+function screams(state: GameState, content: Content, events: GameEvent[]): GameState {
+  let next = state
+  for (const z of state.zombies) {
+    const noise = zombieStats(state.balance, z.kind).screamNoise
+    if (noise <= 0 || !z.alerted || z.neutralized) continue
+    events.push({ type: 'zombieScreamed', uid: z.uid, noise })
+    next = addNoise(next, noise, content, 'scream', events)
+  }
+  return next
+}
+
+function attacks(state: GameState, content: Content, events: GameEvent[]): GameState {
   const here = state.player.location
   const mode = state.balance.zombieFollow
   const atShelter = content.locations[here]?.kind === 'shelter'
@@ -206,7 +258,8 @@ export function zombiePhase(state: GameState, content: Content, events: GameEven
   if (mode !== 'off') {
     next = updateZombies(next, (z) => {
       if (!z.alerted || z.location === here) return z
-      if (!atShelter && distance(content, z.location, here) === 1) {
+      const reach = zombieStats(state.balance, z.kind).followSteps
+      if (!atShelter && distance(content, z.location, here) <= reach) {
         events.push({ type: 'zombieFollowed', uid: z.uid, from: z.location, to: here })
         followed.add(z.uid)
         return { ...z, location: here }
@@ -217,16 +270,25 @@ export function zombiePhase(state: GameState, content: Content, events: GameEven
   }
 
   if (atShelter) return next
+  const damageOf = (z: Zombie) => zombieStats(state.balance, z.kind).damage
   const attackers = next.zombies.filter(
-    (z) => z.location === here && !z.neutralized && !(mode === 'gentle' && followed.has(z.uid)),
+    (z) =>
+      z.location === here &&
+      !z.neutralized &&
+      damageOf(z) > 0 &&
+      !(mode === 'gentle' && followed.has(z.uid)),
   )
   if (attackers.length === 0) return next
 
-  const damage = state.balance.zombie.damage
   for (const z of attackers) {
-    events.push({ type: 'zombieAttacked', uid: z.uid, damage, followed: followed.has(z.uid) })
+    events.push({
+      type: 'zombieAttacked',
+      uid: z.uid,
+      damage: damageOf(z),
+      followed: followed.has(z.uid),
+    })
   }
-  const total = attackers.length * damage
+  const total = attackers.reduce((sum, z) => sum + damageOf(z), 0)
   const blocked = Math.min(next.player.block, total)
   if (blocked > 0) events.push({ type: 'damageBlocked', amount: blocked })
   const lost = total - blocked
@@ -251,6 +313,9 @@ export interface EndTurnPreview {
   readonly duskArrivals: number
   /** Wound variant: the attack would add a Wound to your deck. */
   readonly wound: boolean
+  /** Noise from Screamers that have seen you, and how many zombies it brings. */
+  readonly screamNoise: number
+  readonly screamArrivals: number
 }
 
 /** What ending the turn now would do. Uses the same rules as the real zombie phase. */
@@ -271,5 +336,8 @@ export function previewEndTurn(state: GameState, baseContent: Content): EndTurnP
     duskNoise,
     duskArrivals: noisePreview(after, duskNoise).arrivals,
     wound: events.some((e) => e.type === 'cardGained' && e.reason === 'wound'),
+    screamNoise: events.reduce((sum, e) => (e.type === 'zombieScreamed' ? sum + e.noise : sum), 0),
+    screamArrivals: events.filter((e) => e.type === 'zombieArrived' && e.reason === 'scream')
+      .length,
   }
 }

@@ -1,7 +1,16 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { emptyStats } from './stats'
-import type { CardId, CardInstance, GameState, LocationId, SiteState, Tag, Zombie } from './types'
+import type {
+  CardId,
+  CardInstance,
+  GameState,
+  LocationId,
+  SiteState,
+  Tag,
+  Zombie,
+  ZombieKind,
+} from './types'
 
 /** Builds a game state with exact piles, for tests. Uids show the pile: h1 (hand), d1 (draw), x1 (discard). */
 export interface StateSpec {
@@ -28,6 +37,8 @@ export interface StateSpec {
   /** Zombies, with uids z1, z2, … in this order. Default: none. */
   readonly zombies?: readonly {
     readonly at: LocationId
+    /** Default: Walker. */
+    readonly kind?: ZombieKind
     readonly hp?: number
     readonly alerted?: boolean
     readonly neutralized?: boolean
@@ -53,8 +64,9 @@ export function makeState(spec: StateSpec = {}): GameState {
   const location = spec.location ?? 'shelter'
   const zombies: Zombie[] = (spec.zombies ?? []).map((z, i) => ({
     uid: `z${i + 1}`,
+    kind: z.kind ?? 'walker',
     location: z.at,
-    hp: z.hp ?? balance.zombie.hp,
+    hp: z.hp ?? balance.zombies[z.kind ?? 'walker'].hp,
     alerted: z.alerted ?? z.at === location,
     neutralized: z.neutralized ?? false,
   }))

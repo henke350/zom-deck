@@ -186,7 +186,8 @@ describe('GameScreen: searching', () => {
     expect(houseA().textContent).toContain(texts.ui.zombiesRange(0, 1))
     await user.click(houseA())
     expect(houseA().textContent).not.toContain('?')
-    expect(screen.getByText(texts.ui.zombieLabel(1))).toBeTruthy()
+    const labels = Object.values(texts.zombieKinds).map((k) => texts.ui.zombieKindLabel(k.name, 1))
+    expect(screen.getAllByText((text) => labels.includes(text)).length).toBeGreaterThan(0)
   })
 
   it('previews the attack and lets you hit the zombie', async () => {

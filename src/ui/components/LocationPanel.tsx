@@ -57,7 +57,6 @@ export function LocationPanel({
   const zombies = zombiesAt(state, location)
   const ui = texts.ui
   const { cost: quickCost, options: quickOptions } = state.balance.quickSearch
-  const maxHp = state.balance.zombie.hp
 
   const freeMoveStatus = state.player.freeMoveUsed
     ? ui.freeMoveUsed
@@ -107,7 +106,7 @@ export function LocationPanel({
             {zombies.map((z, i) => {
               const target = zombieTargets?.get(z.uid)
               const status = [
-                ui.zombieHealth(z.hp, maxHp),
+                ui.zombieHealth(z.hp, state.balance.zombies[z.kind].hp),
                 z.alerted ? ui.zombieSeenYou : '',
                 z.neutralized ? ui.zombieDistracted : '',
               ]
@@ -116,13 +115,16 @@ export function LocationPanel({
               return (
                 <li key={z.uid} data-zombie={z.uid}>
                   <span>
-                    <b>{ui.zombieLabel(i + 1)}</b> {status}
+                    <b title={texts.zombieKinds[z.kind].text}>
+                      {ui.zombieKindLabel(texts.zombieKinds[z.kind].name, i + 1)}
+                    </b>{' '}
+                    {status}
                   </span>
                   {target && (
                     <button
                       type="button"
                       className="btn btn-danger"
-                      aria-label={`${ui.target} ${ui.zombieLabel(i + 1)}`}
+                      aria-label={`${ui.target} ${ui.zombieKindLabel(texts.zombieKinds[z.kind].name, i + 1)}`}
                       onClick={() => onTarget(target)}
                     >
                       {ui.target}

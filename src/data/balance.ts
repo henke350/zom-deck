@@ -5,6 +5,17 @@
 
 export type ZombieFollow = 'chase' | 'gentle' | 'off'
 
+export type ZombieKind = 'walker' | 'runner' | 'brute' | 'screamer'
+
+export interface ZombieStats {
+  readonly hp: number
+  readonly damage: number
+  /** How far it follows a player it has seen (0: it never leaves its place). */
+  readonly followSteps: number
+  /** Noise it makes at the end of each turn while it has seen you. */
+  readonly screamNoise: number
+}
+
 export interface Balance {
   readonly maxHp: number
   readonly handSize: number
@@ -26,7 +37,7 @@ export interface Balance {
   readonly packsOnMap: number
   /** Packs needed for ★, ★★ and ★★★. */
   readonly starThresholds: readonly [number, number, number]
-  readonly zombie: { readonly hp: number; readonly damage: number }
+  readonly zombies: Readonly<Record<ZombieKind, ZombieStats>>
   /** Added to the start-zombie range of every building that has one (a tuning knob). */
   readonly extraStartZombies: number
   readonly zombieFollow: ZombieFollow
@@ -77,7 +88,12 @@ export const balance: Balance = {
   packsToWin: 2,
   packsOnMap: 4,
   starThresholds: [2, 3, 4],
-  zombie: { hp: 2, damage: 1 },
+  zombies: {
+    walker: { hp: 2, damage: 1, followSteps: 1, screamNoise: 0 },
+    runner: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0 },
+    brute: { hp: 4, damage: 2, followSteps: 0, screamNoise: 0 },
+    screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2 },
+  },
   extraStartZombies: 0,
   zombieFollow: 'chase',
   hiddenDanger: true,

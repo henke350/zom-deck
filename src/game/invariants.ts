@@ -58,7 +58,9 @@ export function checkInvariants(state: GameState, baseContent: Content = default
   const zombieUids = state.zombies.map((z) => z.uid)
   if (new Set(zombieUids).size !== zombieUids.length) fail('two zombies share a uid')
   for (const z of state.zombies) {
-    if (z.hp <= 0 || z.hp > balance.zombie.hp) fail(`zombie ${z.uid} has impossible health`)
+    if (z.hp <= 0 || z.hp > balance.zombies[z.kind].hp) {
+      fail(`zombie ${z.uid} has impossible health`)
+    }
     if (!content.locations[z.location]) fail(`zombie ${z.uid} is nowhere`)
     if (content.locations[z.location]?.kind === 'shelter') fail(`zombie ${z.uid} is in the Shelter`)
   }

@@ -12,13 +12,13 @@ describe('balance overrides', () => {
     const before = structuredClone(balance)
     const b = applyOverrides(balance, [
       'maxHp=12',
-      'zombie.damage=2',
+      'zombies.walker.damage=2',
       'wounds.enabled=true',
       'zombieFollow=gentle',
       'starThresholds=3,4,5',
     ])
     expect(b.maxHp).toBe(12)
-    expect(b.zombie).toEqual({ hp: balance.zombie.hp, damage: 2 })
+    expect(b.zombies.walker).toEqual({ ...balance.zombies.walker, damage: 2 })
     expect(b.wounds.enabled).toBe(true)
     expect(b.zombieFollow).toBe('gentle')
     expect(b.starThresholds).toEqual([3, 4, 5])
