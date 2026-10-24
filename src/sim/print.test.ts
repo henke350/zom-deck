@@ -48,7 +48,7 @@ describe('print and play', () => {
     const html = renderPrintAndPlay(defaultContent, balance, { cards: {}, locations: {} })
     expect(html).toContain('Police Station deck')
     expect(html).toContain('Gas Station')
-    expect(html).toContain('Danger: noise, screams and hordes')
+    expect(html).toContain('Danger: what noise brings')
     expect(html.match(/class="card front/g)).toHaveLength(
       printDecks(defaultContent, balance).length,
     )

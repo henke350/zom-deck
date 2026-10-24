@@ -70,6 +70,7 @@ export const texts = {
     burnedShort: 'Burned',
     noiseLabel: 'Noise',
     dangerLabel: 'Danger',
+    dangerBonus: (finds: number) => `Danger · +${finds} find`,
     noiseBadge: (n: number, arrivals: number) =>
       arrivals > 0 ? `+${n} noise · zombie!` : `+${n} noise`,
     zombiesRange: (min: number, max: number) => (min === max ? `${min}?` : `${min}–${max}?`),
@@ -252,9 +253,14 @@ export const texts = {
             {
               heading: 'Danger',
               items: [
-                `The city gets wilder the better you do. Danger starts at 1 and rises by one for every pack and every rare find you take, up to ${b.danger.levels.length}.`,
-                `Each time it rises, ${b.danger.hordeSize === 1 ? 'a zombie gathers' : `${b.danger.hordeSize} zombies gather`} on the street. ${b.danger.levels.map((l, i) => `Danger ${i + 1}: ${l.arrivals === 1 ? 'a zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise`).join('. ')}.`,
-                'At low danger the noise brings Walkers; higher up come Runners, Screamers and at last Brutes.',
+                `The city gets wilder the better you do, and richer. Danger starts at 1 and rises by one for every pack and every rare find you take, up to ${b.danger.levels.length}.`,
+                `${b.danger.levels.map((l, i) => `Danger ${i + 1}: ${l.arrivals === 1 ? 'a zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise${l.extraFinds > 0 ? `, +${l.extraFinds} find in every search` : ''}`).join('. ')}.`,
+                'At low danger the noise brings Walkers; higher up come Runners, Screamers and at last Brutes. Rare finds turn up more often the higher the danger.',
+                ...(b.danger.hordeSize > 0
+                  ? [
+                      `Each time danger rises, ${b.danger.hordeSize === 1 ? 'a zombie gathers' : `${b.danger.hordeSize} zombies gather`} on the street.`,
+                    ]
+                  : []),
               ],
             },
           ]

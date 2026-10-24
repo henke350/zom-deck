@@ -1,6 +1,6 @@
 import { texts } from '../../data/texts.en'
 import type { GameState } from '../../game'
-import { noiseThreshold } from '../../game'
+import { dangerLevel, noiseThreshold } from '../../game'
 
 interface StatProps {
   readonly label: string
@@ -23,6 +23,7 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
   const dusk = turn >= balance.duskFromTurn
   const lowHp = player.hp <= Math.ceil(balance.maxHp / 3)
   const threshold = noiseThreshold(state)
+  const extraFinds = dangerLevel(state).extraFinds
   const ui = texts.ui
 
   return (
@@ -40,7 +41,7 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
       />
       {balance.danger.enabled && (
         <Stat
-          label={ui.dangerLabel}
+          label={extraFinds > 0 ? ui.dangerBonus(extraFinds) : ui.dangerLabel}
           value={`${state.danger}/${balance.danger.levels.length}`}
           tone={
             state.danger >= balance.danger.levels.length

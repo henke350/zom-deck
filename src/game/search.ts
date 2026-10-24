@@ -2,7 +2,7 @@ import { texts } from '../data/texts.en'
 import type { Balance } from '../data/balance'
 import { gainCard, withoutCard } from './deck'
 import { nextFloat, shuffle } from './rng'
-import { addNoise, raiseDanger, zombiesAt } from './zombies'
+import { addNoise, dangerLevel, raiseDanger, zombiesAt } from './zombies'
 import type {
   CardId,
   Content,
@@ -115,10 +115,11 @@ export function performSearch(
 ): GameState {
   const location = state.player.location
   const site = state.sites[location]
-  // Rare finds only count part of their weight in an ordinary search.
+  // Rare finds only count part of their weight in an ordinary search; more at higher danger.
+  const danger = dangerLevel(state)
   const pool = (content.locations[location]?.lootPool ?? []).map((entry) =>
     content.cards[entry.card]?.rare
-      ? { ...entry, weight: entry.weight * state.balance.rareFindWeight }
+      ? { ...entry, weight: entry.weight * danger.rareFindWeight }
       : entry,
   )
   if (!site) throw new Error(`performSearch: ${location} cannot be searched`)
@@ -128,7 +129,8 @@ export function performSearch(
     spec.base +
     spec.extra +
     state.player.searchBonus +
-    (peaceful ? state.balance.peacefulSearchBonus : 0)
+    (peaceful ? state.balance.peacefulSearchBonus : 0) +
+    danger.extraFinds
   const [options, rng] = drawFinds(pool, count, state.rng)
   events.push({ type: 'searched', location, options, quick: spec.quick })
   const stashFound = site.stash === 'hidden'
