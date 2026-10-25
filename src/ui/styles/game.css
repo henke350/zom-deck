@@ -898,3 +898,7 @@
   white-space: nowrap;
   flex: none;
 }
+
+.gear-use {
+  margin-left: 0.4rem;
+}

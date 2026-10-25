@@ -157,14 +157,19 @@ export const texts = {
     chooseDestination: 'Choose where to go on the map.',
     goHere: 'Go here',
     gear: 'Gear',
-    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns', n: number) =>
+    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns' | 'uses', n: number) =>
       lasts === 'absorbs'
         ? `takes ${n} more damage`
         : lasts === 'untilHit'
           ? 'until a zombie hurts you'
-          : n === 1
-            ? 'last turn'
-            : `${n} turns left`,
+          : lasts === 'uses'
+            ? `${n} ${n === 1 ? 'bolt' : 'bolts'} left`
+            : n === 1
+              ? 'last turn'
+              : `${n} turns left`,
+    shoot: (cost: number) => `Shoot (${cost} AP)`,
+    chooseZombieInRange:
+      'Choose the zombie to hit. Tap a nearby place on the map to see zombies there.',
     chooseTrashTarget: 'Choose a card in your hand to trash.',
     useService: (name: string, cost: number) => `${name} (${cost} AP)`,
     rare: 'Rare',
@@ -275,6 +280,7 @@ export const texts = {
           `Walker: ${b.zombies.walker.hp} health, hits for ${b.zombies.walker.damage}, follows ${b.zombies.walker.followSteps} step. Runner: ${b.zombies.runner.hp} health, follows up to ${b.zombies.runner.followSteps} steps. Brute: ${b.zombies.brute.hp} health, hits for ${b.zombies.brute.damage}, never follows. Screamer: does not bite, but adds ${b.zombies.screamer.screamNoise} noise every turn while it has seen you.`,
           `Kill a zombie and you can search its body: pick from ${b.zombies.walker.loot} find (a Brute: ${b.zombies.brute.loot}), up to ${b.bodyLootMax} when one card kills several. No noise.`,
           'Zombies two steps away lose track of you, and they never enter the Shelter.',
+          'Bow and Crossbow are silent and can hit a zombie one step away, if you can see it (a street, or a building you have been in or scouted). Knife is silent too.',
           "A building's zombies are only a guess until you go in or scout it. Next to the End turn button you can see who will attack.",
           ...(b.wounds.enabled
             ? [
@@ -442,12 +448,15 @@ export const texts = {
     zombieScreamed: (noise: number) => `A Screamer shrieks: +${noise} noise.`,
     gearEquipped: (card: string) => `You put on ${card}. It stays in front of you.`,
     gearAbsorbed: (n: number) => `Your vest takes ${n} damage.`,
-    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns') =>
+    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns' | 'uses') =>
       reason === 'absorbs'
         ? `${card} is worn out.`
         : reason === 'untilHit'
           ? `You stumble: ${card} comes off.`
-          : `${card} runs out.`,
+          : reason === 'uses'
+            ? `${card} is out of bolts.`
+            : `${card} runs out.`,
+    gearUsed: (card: string) => `You shoot with the ${card}. Not a sound.`,
     bodySearched: (n: number) =>
       `You search the body: ${n === 1 ? '1 find' : `${n} finds`} to choose from.`,
     damageBlocked: (n: number) => `You block ${n} damage.`,
@@ -546,6 +555,15 @@ export const texts = {
       text: 'Heal 3. Use up: heal 6 instead.',
       modes: ['Heal 3', 'Use up: heal 6'],
     },
+    knife: { name: 'Knife', text: 'Deal 1 damage. Silent. Follow-up Quiet: deal 2 instead.' },
+    bow: {
+      name: 'Bow',
+      text: 'Deal 2 damage to a zombie here or 1 step away (where you can see it). Silent.',
+    },
+    crossbow: {
+      name: 'Crossbow',
+      text: 'Gear with 3 bolts: pay 1 AP to deal 3 damage to a zombie here or 1 step away. Silent.',
+    },
     painkillers: {
       name: 'Painkillers',
       text: 'Trash a Nerves or Wound from your hand. Draw 1 card.',
@@ -596,6 +614,12 @@ export const texts = {
     tooFar: (max: number) =>
       `Too far. This card moves you up to ${max} step${max === 1 ? '' : 's'}.`,
     noDestination: 'There is nowhere this card can take you.',
+    noZombiesInRange: (range: number) =>
+      `No zombie you can see here or ${range === 1 ? '1 step' : `${range} steps`} away.`,
+    zombieOutOfRange: (range: number) =>
+      `That zombie is out of range (here or ${range === 1 ? '1 step' : `${range} steps`} away, where you can see it).`,
+    noSuchGear: 'That gear is not in front of you.',
+    gearNotUsable: 'This gear works by itself; there is nothing to use.',
   },
 } as const
 

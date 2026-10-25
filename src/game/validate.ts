@@ -14,9 +14,10 @@ import {
   needsZombieTarget,
   scoutRangeOf,
   trashFilterOf,
+  targetRangeOf,
 } from './rules'
 import { checkSearchHere } from './search'
-import { zombiesAt } from './zombies'
+import { zombiesAt, zombiesInRange } from './zombies'
 import type {
   Action,
   CardInstance,
@@ -26,6 +27,7 @@ import type {
   GameState,
   OpenStashAction,
   PlayCardAction,
+  UseGearAction,
   UseServiceAction,
   Validation,
 } from './types'
@@ -73,9 +75,36 @@ export function validate(
       return validateUseService(state, action, content)
     case 'openStash':
       return validateOpenStash(state, action, content)
+    case 'useGear':
+      return validateUseGear(state, action, content)
     case 'endTurn':
       return validateEndTurn(state, action)
   }
+}
+
+/** A zombie target for a ranged weapon: here or up to `range` steps away, where you can see it. */
+function checkZombieTarget(
+  state: GameState,
+  content: Content,
+  range: number,
+  uid: string | undefined,
+): Validation {
+  const targets = zombiesInRange(state, content, range)
+  if (targets.length === 0) return no(texts.reasons.noZombiesInRange(range))
+  if (!uid) return no(texts.reasons.chooseZombie)
+  if (!targets.some((z) => z.uid === uid)) return no(texts.reasons.zombieOutOfRange(range))
+  return ok
+}
+
+function validateUseGear(state: GameState, action: UseGearAction, content: Content): Validation {
+  const card = state.piles.gear.find((c) => c.uid === action.uid)
+  const def = card && content.cards[card.card]?.gear
+  if (!card || !def) return no(texts.reasons.noSuchGear)
+  if (def.effect.kind !== 'shoot') return no(texts.reasons.gearNotUsable)
+  if (state.player.ap < def.effect.cost) {
+    return no(texts.reasons.notEnoughAp(def.effect.cost, state.player.ap))
+  }
+  return checkZombieTarget(state, content, def.effect.range, action.target?.zombie)
 }
 
 /** Can the service where you stand be used at all right now? For the UI's button. */
@@ -177,13 +206,19 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
   }
 
   const here = zombiesAt(state, state.player.location)
-  if ((needsZombieTarget(effects) || needsZombiesHere(effects)) && here.length === 0) {
-    return no(texts.reasons.noZombiesHere)
-  }
-  if (needsZombieTarget(effects)) {
-    const uid = action.target?.zombie
-    if (!uid) return no(texts.reasons.chooseZombie)
-    if (!here.some((z) => z.uid === uid)) return no(texts.reasons.zombieNotHere)
+  const range = targetRangeOf(effects)
+  if (needsZombieTarget(effects) && range > 0) {
+    const check = checkZombieTarget(state, content, range, action.target?.zombie)
+    if (!check.ok) return check
+  } else {
+    if ((needsZombieTarget(effects) || needsZombiesHere(effects)) && here.length === 0) {
+      return no(texts.reasons.noZombiesHere)
+    }
+    if (needsZombieTarget(effects)) {
+      const uid = action.target?.zombie
+      if (!uid) return no(texts.reasons.chooseZombie)
+      if (!here.some((z) => z.uid === uid)) return no(texts.reasons.zombieNotHere)
+    }
   }
 
   const scoutRange = scoutRangeOf(effects)

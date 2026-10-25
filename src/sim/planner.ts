@@ -68,6 +68,9 @@ const baseValue: Readonly<Record<string, number>> = {
   chainsaw: 8,
   bicycle: 8,
   firstAidKit: 7,
+  knife: 5,
+  bow: 6,
+  crossbow: 8,
 }
 
 const styleBonus: Readonly<Record<Style, (id: string, def: CardDef) => number>> = {
@@ -314,6 +317,8 @@ function fight(ctx: Ctx): Action | undefined {
   for (const a of cardPlays(ctx)) {
     const def = defOf(state, content, a.uid)
     if (!def || maxDamage(def) === 0) continue
+    // Ranged weapons could hit a zombie next door; the bots only clear where they stand.
+    if (a.target?.zombie && !zombies.some((z) => z.uid === a.target?.zombie)) continue
     const after = applyAction(state, a, content).state
     const killed =
       zombies.length - zombiesAt(after, here).filter((z) => zombieWasHere(z.uid, zombies)).length
@@ -324,6 +329,17 @@ function fight(ctx: Ctx): Action | undefined {
     let score = killed * 10 + 2 - arrivals * 12 - def.cost
     if (burns && canSearchAt(state, here)) score -= packChance(state, content, here) > 0 ? 30 : 8
     if (score > bestScore) {
+      bestScore = score
+      best = a
+    }
+  }
+  // Gear you shoot with (the Crossbow): worth a bolt when it kills a zombie here.
+  for (const a of ctx.actions) {
+    if (a.type !== 'useGear' || !zombies.some((z) => z.uid === a.target?.zombie)) continue
+    const after = applyAction(state, a, content).state
+    const killed = zombies.length - zombiesAt(after, here).length
+    const score = killed * 10 + 1
+    if (killed > 0 && score > bestScore) {
       bestScore = score
       best = a
     }

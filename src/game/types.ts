@@ -17,7 +17,13 @@ export type Effect =
   | { readonly kind: 'search'; readonly bonus?: number; readonly silent?: boolean }
   | { readonly kind: 'searchBonus'; readonly amount: number }
   | { readonly kind: 'move'; readonly maxSteps: number; readonly unnoticed?: boolean }
-  | { readonly kind: 'damage'; readonly amount: number; readonly target: 'one' | 'allHere' }
+  | {
+      readonly kind: 'damage'
+      readonly amount: number
+      readonly target: 'one' | 'allHere'
+      /** Bow: a single target may also stand this many steps away (where you can see zombies). */
+      readonly range?: number
+    }
   | { readonly kind: 'neutralize'; readonly target: 'one' | 'allHere' }
   | { readonly kind: 'block'; readonly amount: number }
   | { readonly kind: 'heal'; readonly amount: number }
@@ -38,6 +44,13 @@ export type GearEffect =
   | { readonly kind: 'freeMoveSteps'; readonly steps: number }
   /** Every search reveals this many more finds. */
   | { readonly kind: 'searchBonus'; readonly amount: number }
+  /** Crossbow: pay `cost` AP to deal `damage` to one zombie up to `range` steps away. */
+  | {
+      readonly kind: 'shoot'
+      readonly damage: number
+      readonly range: number
+      readonly cost: number
+    }
 
 /** When a piece of gear goes to the discard pile. */
 export type GearLasts =
@@ -47,6 +60,8 @@ export type GearLasts =
   | { readonly kind: 'untilHit' }
   /** After this many of your turns, counting the turn you put it on. */
   | { readonly kind: 'turns'; readonly turns: number }
+  /** After you have used it this many times (Crossbow bolts). */
+  | { readonly kind: 'uses'; readonly uses: number }
 
 export interface GearDef {
   readonly effect: GearEffect
@@ -344,9 +359,16 @@ export interface PlayCardAction {
   readonly target?: {
     readonly trash?: string
     readonly location?: LocationId
-    /** uid of a zombie at your location. */
+    /** uid of a zombie at your location (or in range, for ranged weapons). */
     readonly zombie?: string
   }
+}
+
+/** Use a piece of gear in front of you (the Crossbow). */
+export interface UseGearAction {
+  readonly type: 'useGear'
+  readonly uid: string
+  readonly target?: PlayCardAction['target']
 }
 
 export interface FreeMoveAction {
@@ -402,6 +424,7 @@ export type Action =
   | DeclineFindAction
   | UseServiceAction
   | OpenStashAction
+  | UseGearAction
   | EndTurnAction
 
 export type GameEvent =
@@ -478,6 +501,7 @@ export type GameEvent =
   | { readonly type: 'zombieKilled'; readonly uid: string }
   | { readonly type: 'bodySearched'; readonly options: readonly CardId[] }
   | { readonly type: 'gearEquipped'; readonly uid: string; readonly card: CardId }
+  | { readonly type: 'gearUsed'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'gearAbsorbed'; readonly uid: string; readonly amount: number }
   | {
       readonly type: 'gearLost'

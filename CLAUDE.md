@@ -71,7 +71,9 @@ src/sim/   bots and balance reports (from M6), run in Node
   `rareFindWeight`) and locked stashes (`openStash`). A search is always the last effect
   of a card mode, because the game then waits for the player.
 - Gear lives in `src/game/gear.ts`: cards with `gear` on their `CardDef` and an `equip` effect stay
-  in `piles.gear` with a counter in `state.gearLeft` until they wear out (`GearLasts`).
+  in `piles.gear` with a counter in `state.gearLeft` until they wear out (`GearLasts`). Gear with a
+  `shoot` effect (Crossbow) is used with the `useGear` action. Ranged damage (`range` on a damage
+  effect) targets zombies from `zombiesInRange`: here, or that far away where zombies are known.
 - Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per
   building in `startZombies.kinds` and `content.arrivals`), the danger meter (`raiseDanger`,
   `dangerLevel`, `noiseThreshold`), noticing, noise and arrivals,

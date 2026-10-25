@@ -48,6 +48,14 @@ export function needsZombieTarget(effects: readonly Effect[]): boolean {
   return effects.some((e) => (e.kind === 'damage' || e.kind === 'neutralize') && e.target === 'one')
 }
 
+/** How far away a single zombie target may be (0: only where you stand). */
+export function targetRangeOf(effects: readonly Effect[]): number {
+  return effects.reduce(
+    (most, e) => (e.kind === 'damage' && e.target === 'one' ? Math.max(most, e.range ?? 0) : most),
+    0,
+  )
+}
+
 /** True if the effects only make sense with at least one zombie at the player's location. */
 export function needsZombiesHere(effects: readonly Effect[]): boolean {
   return effects.some(

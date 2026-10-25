@@ -1,12 +1,12 @@
 # Codex prompt: the missing illustrations (M8)
 
 Paste everything in the box below into Codex, with this repository open. It generates the
-7 missing pictures in the same style as the existing ones, adds them to the game and opens a
+14 missing pictures in the same style as the existing ones, adds them to the game and opens a
 pull request.
 
 ```
 You are working in the repository for "One More Building", a small turn-based zombie
-survival deckbuilder (React + TypeScript). Your job: create the 7 missing illustrations in
+survival deckbuilder (React + TypeScript). Your job: create the 14 missing illustrations in
 EXACTLY the same style as the existing ones, and add them to the game.
 
 ## Look first
@@ -18,7 +18,7 @@ reference and the new images must look like they belong to the same set:
 Also read docs/card-art-prompt.md and docs/location-art/prompt.md (the prompts used for
 those images).
 
-## Style (same for all 7)
+## Style (same for all 14)
 
 - Landscape 3:2, 1536 x 1024 px, PNG. Full-bleed, no border, no frame, no transparency.
 - Match the existing art: gritty, painterly, hand-inked graphic-novel illustration, muted
@@ -39,7 +39,7 @@ those images).
   signs and posters must be blank or unreadable). No close-up faces. Do not copy any
   existing franchise, brand, character or game artwork.
 
-## The 7 images
+## The 14 images
 
 Rare cards (in the game they get a gold frame, so they may feel a little special: a warm
 shaft of light, a found treasure, but still the same muted style):
@@ -50,6 +50,14 @@ shaft of light, a found treasure, but still the same muted style):
 | chainsaw        | red    | A heavy chainsaw resting on a workshop floor among wood shavings, the chain slightly oily. No blood. |
 | bicycle         | teal   | A sturdy old city bicycle leaning against a grey wall, a small basket on the front, ready to ride. |
 | firstAidKit     | teal   | An open hard-shell first aid kit (a plain cross symbol, no text) full of neatly packed bandages, scissors and pill packs. |
+| crossbow        | red    | A compact hunting crossbow resting on a crate, three bolts lying beside it, cocked and ready. Silent and deadly. |
+
+Ordinary weapon cards (no gold frame):
+
+| file (id)       | Accent | Subject |
+| --------------- | ------ | ------- |
+| knife           | teal   | A plain sturdy kitchen or hunting knife lying on a worn wooden cutting board, its blade catching a thin line of light. No blood. |
+| bow             | teal   | A simple recurve bow and a quiver with a few arrows leaning against a gym bench, like it was taken from a school sports hall. |
 
 Places:
 
@@ -58,12 +66,16 @@ Places:
 | gasStation      | amber  | A small roadside petrol station: two pumps under a flat canopy, the kiosk windows dirty, a car left with its door open. Shop sign blank. |
 | school          | amber  | A two-storey brick school building with long rows of windows, an empty playground with a rusty climbing frame, the front door ajar. |
 | hospital        | red    | A large, grim hospital entrance: an ambulance parked askew, a cracked glass entrance, a cross symbol without text above the door. One tiny dark silhouette far behind the glass. |
+| apartments      | red    | A tall grey apartment block of five or six storeys, many small balconies, some windows lit or broken, a stairwell door hanging open. Feels crowded and dangerous. |
+| church          | teal   | A small old stone church with a modest bell tower, a heavy wooden door ajar, a quiet overgrown churchyard. The calmest place in town. |
+| sportsShop      | amber  | A sports shop with a wide window showing bikes, balls and running shoes on display (blank signs), the glass cracked, a bicycle left at the door. |
+| square          | amber  | An empty town square seen from its edge: a dry fountain in the middle, cobblestones, benches, four streets leading away, a lone tiny silhouette far off. |
 
 ## Steps
 
 1. Generate shotgun.png and gasStation.png first and show them to me before going on.
    Check that they match the reference images and contain no text.
-2. Generate the other five. If an image contains any text or drifts in style, regenerate it.
+2. Generate the other twelve. If an image contains any text or drifts in style, regenerate it.
 3. Save the originals (1536 x 1024 PNG):
    - cards: art-source/cards/<id>.png
    - places: art-source/locations/<id>.png
@@ -72,11 +84,11 @@ Places:
    - places: src/assets/locations/<id>.webp
    (The game picks them up automatically by file name; no code change is needed.)
 5. Empty the `awaitingArt` lists in src/ui/cardImages.test.ts and
-   src/ui/locationImages.test.ts (they name exactly these 7 ids), so the tests now require
+   src/ui/locationImages.test.ts (they name exactly these 14 ids), so the tests now require
    the new images.
 6. Run `npm install` (once) and `npm run check`. It must pass.
 7. Commit on a new branch (never on main), with a commit message in English, and open a
-   pull request named "Add art for rare cards, Gas Station, School and Hospital".
+   pull request named "Add art for new cards and places".
 ```
 
 ## Hvis du hellere vil bruge ChatGPT

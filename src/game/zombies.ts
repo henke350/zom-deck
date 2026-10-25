@@ -20,6 +20,21 @@ export function zombiesAt(state: GameState, location: LocationId): Zombie[] {
   return state.zombies.filter((z) => z.location === location)
 }
 
+/**
+ * Zombies you can target from where you stand: here, and up to `range` steps away where you
+ * can see how many zombies there are (a street, or a building you have been in or scouted).
+ */
+export function zombiesInRange(state: GameState, content: Content, range: number): Zombie[] {
+  const here = state.player.location
+  if (range <= 0) return zombiesAt(state, here)
+  return state.zombies.filter(
+    (z) =>
+      z.location === here ||
+      (distance(content, here, z.location) <= range &&
+        zombieInfo(state, content, z.location).known),
+  )
+}
+
 export function zombieStats(balance: Balance, kind: ZombieKind): ZombieStats {
   return balance.zombies[kind]
 }

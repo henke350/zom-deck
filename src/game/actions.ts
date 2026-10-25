@@ -1,10 +1,25 @@
 import { defaultContent } from '../data/content'
 import { cityContent } from './city'
 import { texts } from '../data/texts.en'
-import { activeEffects, moveStepsOf, needsZombieTarget, scoutRangeOf, trashFilterOf } from './rules'
-import { zombiesAt } from './zombies'
+import {
+  activeEffects,
+  moveStepsOf,
+  needsZombieTarget,
+  scoutRangeOf,
+  targetRangeOf,
+  trashFilterOf,
+} from './rules'
+import { zombiesInRange } from './zombies'
 import { validate } from './validate'
-import type { Action, CardMode, Content, GameState, LocationId, PlayCardAction } from './types'
+import type {
+  Action,
+  CardMode,
+  Content,
+  GameState,
+  LocationId,
+  PlayCardAction,
+  UseGearAction,
+} from './types'
 
 /** What a card mode needs the player to pick before it can be played. */
 export type TargetKind = 'location' | 'trash' | 'zombie' | undefined
@@ -34,7 +49,7 @@ function candidatesFor(
     case 'location':
       return Object.keys(content.locations).map((location) => ({ ...base, target: { location } }))
     case 'zombie':
-      return zombiesAt(state, state.player.location).map((z) => ({
+      return zombiesInRange(state, content, targetRangeOf(activeEffects(state, mode))).map((z) => ({
         ...base,
         target: { zombie: z.uid },
       }))
@@ -58,6 +73,9 @@ export function listActions(state: GameState, baseContent: Content = defaultCont
     def?.modes.forEach((mode, modeIndex) => {
       candidates.push(...candidatesFor(state, card.uid, modeIndex, mode, content))
     })
+  }
+  for (const gear of state.piles.gear) {
+    candidates.push(...gearCandidates(state, gear.uid, content))
   }
 
   for (const to of Object.keys(content.locations)) candidates.push({ type: 'freeMove', to })
@@ -127,4 +145,41 @@ export function freeMoveTargets(
   return Object.keys(content.locations).filter(
     (to) => validate(state, { type: 'freeMove', to }, content).ok,
   )
+}
+
+/** Every way to use a piece of gear now, valid or not (the Crossbow: one per zombie in range). */
+function gearCandidates(state: GameState, uid: string, content: Content): UseGearAction[] {
+  const card = state.piles.gear.find((c) => c.uid === uid)
+  const effect = card && content.cards[card.card]?.gear?.effect
+  if (effect?.kind !== 'shoot') return []
+  return zombiesInRange(state, content, effect.range).map((z) => ({
+    type: 'useGear',
+    uid,
+    target: { zombie: z.uid },
+  }))
+}
+
+/** For the UI: how a piece of gear can be used now (zombie targets), or why not. */
+export interface GearOption {
+  readonly target: 'zombie'
+  readonly actions: readonly UseGearAction[]
+  readonly reason?: string
+}
+
+export function gearOptions(
+  state: GameState,
+  uid: string,
+  baseContent: Content = defaultContent,
+): GearOption | undefined {
+  const content = cityContent(state, baseContent)
+  const card = state.piles.gear.find((c) => c.uid === uid)
+  const effect = card && content.cards[card.card]?.gear?.effect
+  if (effect?.kind !== 'shoot') return undefined
+  const actions = gearCandidates(state, uid, content).filter((a) => validate(state, a, content).ok)
+  const reason = actions.length > 0 ? undefined : validate(state, { type: 'useGear', uid }, content)
+  return {
+    target: 'zombie',
+    actions,
+    reason: reason && !reason.ok ? reason.reason : undefined,
+  }
 }

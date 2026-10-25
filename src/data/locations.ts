@@ -9,6 +9,7 @@ const houseLoot = [
   { card: 'runningShoes', weight: 1 },
   { card: 'alarmClock', weight: 1 },
   { card: 'districtMap', weight: 1 },
+  { card: 'knife', weight: 1 },
   { card: 'travelLight', weight: 1 },
   { card: 'bicycle', weight: 1 },
 ] as const satisfies readonly LootEntry[]
@@ -96,6 +97,7 @@ export const locations = {
       { card: 'travelLight', weight: 2 },
       { card: 'painkillers', weight: 2 },
       { card: 'bandage', weight: 2 },
+      { card: 'knife', weight: 1 },
       { card: 'bicycle', weight: 1 },
     ],
   },
@@ -159,6 +161,7 @@ export const extraBuildings = {
     },
     lootPool: [
       { card: 'molotov', weight: 3 },
+      { card: 'bow', weight: 1 },
       { card: 'runningShoes', weight: 2 },
       { card: 'travelLight', weight: 2 },
       { card: 'flashlight', weight: 2 },
@@ -179,6 +182,7 @@ export const extraBuildings = {
     },
     lootPool: [
       { card: 'districtMap', weight: 3 },
+      { card: 'bow', weight: 2 },
       { card: 'flashlight', weight: 2 },
       { card: 'alarmClock', weight: 2 },
       { card: 'bandage', weight: 2 },
@@ -230,6 +234,7 @@ export const extraBuildings = {
       { card: 'flashlight', weight: 1 },
       { card: 'softSoles', weight: 1 },
       { card: 'districtMap', weight: 1 },
+      { card: 'knife', weight: 1 },
     ],
   },
   church: {
@@ -267,6 +272,8 @@ export const extraBuildings = {
     lootPool: [
       { card: 'runningShoes', weight: 3 },
       { card: 'baseballBat', weight: 3 },
+      { card: 'bow', weight: 2 },
+      { card: 'crossbow', weight: 1 },
       { card: 'kevlarVest', weight: 1 },
       { card: 'softSoles', weight: 1 },
       { card: 'travelLight', weight: 1 },

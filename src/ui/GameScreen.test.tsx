@@ -266,6 +266,33 @@ describe('GameScreen: gear', () => {
   })
 })
 
+describe('GameScreen: ranged weapons', () => {
+  it('shoots with the Crossbow from the gear row', async () => {
+    const state = makeState({ gear: ['crossbow'], zombies: [{ at: 'street' }] })
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    const gear = within(screen.getByRole('list', { name: texts.ui.gear }))
+    await userEvent.setup().click(gear.getByRole('button', { name: texts.ui.shoot(1) }))
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.gearUsed(texts.cards.crossbow.name))).toBeTruthy()
+  })
+
+  it('lets you pick a target next door for the Bow', async () => {
+    const state = makeState({ hand: ['bow'], zombies: [{ at: 'street' }, { at: 'street' }] })
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    const view = render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    const user = userEvent.setup()
+    const bow = view.container.querySelector<HTMLElement>('[data-card="bow"]')!
+    await user.click(within(bow).getByRole('button', { name: texts.ui.play }))
+    expect(screen.getByText(texts.ui.chooseZombieInRange, { exact: false })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: /^Street/ }))
+    const targets = screen.getAllByRole('button', { name: new RegExp(`^${texts.ui.target}`) })
+    await user.click(targets[0]!)
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.zombieHit(2, 0))).toBeTruthy()
+  })
+})
+
 describe('GameScreen: rules and the end of an expedition', () => {
   const draw = ['bandage', 'bandage', 'bandage', 'bandage', 'bandage', 'bandage']
 
