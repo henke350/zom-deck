@@ -33,7 +33,9 @@ import { RulesDialog } from './components/RulesDialog'
 import { TopBar } from './components/TopBar'
 import { EndTurnPreview } from './components/EndTurnPreview'
 import { cardText } from './names'
-import { markRulesSeen } from './storage'
+import { currentHint } from './hints'
+import { markRulesSeen, setTipsHidden, tipsHidden } from './storage'
+import { TipLine } from './components/TipLine'
 import { useGame } from './useGame'
 
 interface GameScreenProps {
@@ -64,6 +66,11 @@ export function GameScreen({
   // The buildings of this city, where they stand and how the roads connect them.
   const content = useMemo(() => cityContent(state, defaultContent), [state])
   const [rulesOpen, setRulesOpen] = useState(showRulesOnStart)
+  const [tipsOn, setTipsOn] = useState(() => !tipsHidden())
+  const showTips = (on: boolean) => {
+    setTipsHidden(!on)
+    setTipsOn(on)
+  }
   // A move that would end the expedition by walking home, waiting for the player to confirm.
   const [homeMove, setHomeMove] = useState<Action | null>(null)
   const [pending, setPending] = useState<PendingPlay | null>(null)
@@ -281,7 +288,11 @@ export function GameScreen({
               </button>
             </p>
           ) : (
-            <p className="prompt muted">{texts.ui.keepHint(state.balance.keepCards)}</p>
+            <TipLine
+              hint={tipsOn ? currentHint(state, content) : null}
+              keep={state.balance.keepCards}
+              onHide={() => showTips(false)}
+            />
           )}
           {preview && <EndTurnPreview preview={preview} />}
           <button
@@ -339,7 +350,13 @@ export function GameScreen({
         />
       )}
 
-      {rulesOpen && <RulesDialog balance={state.balance} onClose={closeRules} />}
+      {rulesOpen && (
+        <RulesDialog
+          balance={state.balance}
+          onClose={closeRules}
+          onShowTips={tipsOn ? undefined : () => showTips(true)}
+        />
+      )}
     </div>
   )
 }

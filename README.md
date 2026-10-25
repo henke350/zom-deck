@@ -83,6 +83,8 @@ Kort- og stedillustrationerne er lavet med en AI-billedgenerator ud fra prompts 
 (`card-art-prompt.md`, `card-art/cards.json` og `location-art/prompt.md`). Spillet bruger små
 WebP-filer i `src/assets/cards/` og `src/assets/locations/`; originalerne ligger i `art-source/`.
 Filnavnet er kortets eller stedets id, så et nyt billede findes automatisk.
+De 7 manglende billeder (4 sjældne kort, Gas Station, School og Hospital) laves med prompten i
+`docs/art-prompts-m8.md` (til Codex eller ChatGPT).
 
 ## Teknik
 

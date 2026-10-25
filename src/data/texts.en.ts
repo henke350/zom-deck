@@ -8,7 +8,7 @@ export const texts = {
   title: 'One More Building',
   workingTitleNote: 'Working title',
   tagline: 'Head home with what you have, or risk one more building?',
-  statusLine: 'Prototype in progress · milestone M6 (all content, bots and balance)',
+  statusLine: 'Prototype · milestone M8 (polish and release)',
   startExpedition: 'Start expedition',
   prototypeNote:
     'Early prototype: search the city for supply packs, keep the noise down, and get home before dark.',
@@ -125,6 +125,18 @@ export const texts = {
     youToken: 'You',
     keeping: 'Keeping',
     keepHint: (n: number) => `You may keep ${n} unplayed card for next turn.`,
+    tipLabel: 'Tip',
+    hideTips: 'Hide tips',
+    showTips: 'Show tips for new players',
+    hints: {
+      goHome:
+        'You have enough supplies. Walk back to the Shelter to win, or risk one more building for more stars.',
+      zombies: 'Zombies here attack when you end the turn. Hit them, sneak, or walk away first.',
+      search:
+        'Play Search (or Quick search in the panel) to look for supplies. The first search finds a hidden pack.',
+      walk: 'Pick a highlighted place on the map to walk there for free. "0–3?" is how many zombies might be inside.',
+      endTurn: (n: number) => `Nothing more to do? End the turn. You may keep ${n} card.`,
+    },
     cancel: 'Cancel',
     chooseDestination: 'Choose where to go on the map.',
     goHere: 'Go here',

@@ -7,6 +7,7 @@ import { texts } from '../data/texts.en'
 import { newGame, zombiesAt, type GameState } from '../game'
 import { classicBalance, makeState } from '../game/testkit'
 import { GameScreen } from './GameScreen'
+import { setTipsHidden } from './storage'
 
 afterEach(cleanup)
 
@@ -102,8 +103,9 @@ describe('GameScreen', () => {
   it('lets you cancel a card that needs a choice', async () => {
     const { card, user } = renderGame()
     await user.click(card('run').getByRole('button', { name: texts.ui.play }))
+    expect(screen.getByText(texts.ui.chooseOnMap, { exact: false })).toBeTruthy()
     await user.click(screen.getByRole('button', { name: texts.ui.cancel }))
-    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.queryByText(texts.ui.chooseOnMap, { exact: false })).toBeNull()
   })
 
   it('keeps a card and ends the turn', async () => {
@@ -231,6 +233,21 @@ describe('GameScreen: searching', () => {
     await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
     const noiseStat = screen.getByText(texts.ui.noiseLabel).parentElement!
     expect(within(noiseStat).getByText(`1/${balance.noiseThreshold}`)).toBeTruthy()
+  })
+})
+
+describe('GameScreen: tips for new players', () => {
+  it('shows a tip that fits the moment, and can be hidden and shown again', async () => {
+    setTipsHidden(false)
+    const { user } = renderGame()
+    expect(screen.getByText(texts.ui.hints.walk)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: texts.ui.hideTips }))
+    expect(screen.queryByText(texts.ui.hints.walk)).toBeNull()
+    expect(screen.getByText(texts.ui.keepHint(balance.keepCards))).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: texts.rules.short }))
+    await user.click(screen.getByRole('button', { name: texts.ui.showTips }))
+    await user.click(screen.getByRole('button', { name: texts.rules.close }))
+    expect(screen.getByText(texts.ui.hints.walk)).toBeTruthy()
   })
 })
 
