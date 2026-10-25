@@ -185,15 +185,28 @@ export function searchBodies(
   content: Content,
   events: GameEvent[],
 ): GameState {
-  const loot = killed.reduce((sum, z) => sum + state.balance.zombies[z.kind].loot, 0)
+  if (killed.length === 0 || state.phase !== 'action') return state
+  // Each body carries its kind's loot; a fraction is the chance of one more find.
+  let rolled = state.rng
+  let loot = 0
+  for (const z of killed) {
+    const carries = state.balance.zombies[z.kind].loot
+    loot += Math.floor(carries)
+    const chance = carries - Math.floor(carries)
+    if (chance > 0) {
+      const [r, next] = nextFloat(rolled)
+      rolled = next
+      if (r < chance) loot += 1
+    }
+  }
   const count = Math.min(loot, state.balance.bodyLootMax)
   const bodyPool = content.bodyLoot ?? []
-  if (count <= 0 || bodyPool.length === 0 || state.phase !== 'action') return state
+  if (count <= 0 || bodyPool.length === 0) return { ...state, rng: rolled }
   const rareWeight = dangerLevel(state).rareFindWeight
   const pool = bodyPool.map((entry) =>
     content.cards[entry.card]?.rare ? { ...entry, weight: entry.weight * rareWeight } : entry,
   )
-  const [options, rng] = drawFinds(pool, count, state.rng)
+  const [options, rng] = drawFinds(pool, count, rolled)
   if (options.length === 0) return { ...state, rng }
   events.push({ type: 'bodySearched', options })
   return {
@@ -273,6 +286,10 @@ export function chooseFind(
   } else if ('take' in choice) {
     next = gainCard(next, choice.take, 'find', events)
     if (content.cards[choice.take]?.rare) next = raiseDanger(next, content, 'rare', events)
+    // Danger follows the deck: every few finds taken, the city gets wilder.
+    const every = state.balance.danger.perFindsTaken
+    const taken = state.stats.cardsTaken.length + 1
+    if (every > 0 && taken % every === 0) next = raiseDanger(next, content, 'deck', events)
   } else {
     const target = state.piles.hand.find((c) => c.uid === choice.scrap)
     if (!target) throw new Error('chooseFind: validated scrap target is missing')

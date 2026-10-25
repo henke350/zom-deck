@@ -15,6 +15,7 @@ import {
   scoutRangeOf,
   trashFilterOf,
   targetRangeOf,
+  needsUnawareTarget,
 } from './rules'
 import { checkSearchHere } from './search'
 import { zombiesAt, zombiesInRange } from './zombies'
@@ -217,7 +218,12 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
     if (needsZombieTarget(effects)) {
       const uid = action.target?.zombie
       if (!uid) return no(texts.reasons.chooseZombie)
-      if (!here.some((z) => z.uid === uid)) return no(texts.reasons.zombieNotHere)
+      const target = here.find((z) => z.uid === uid)
+      if (!target) return no(texts.reasons.zombieNotHere)
+      // Silent Takedown: only a zombie that has not seen you (or is distracted right now).
+      if (needsUnawareTarget(effects) && target.alerted && !target.neutralized) {
+        return no(texts.reasons.zombieSeesYou)
+      }
     }
   }
 

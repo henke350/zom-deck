@@ -293,6 +293,28 @@ describe('GameScreen: ranged weapons', () => {
   })
 })
 
+describe('GameScreen: the danger ramp', () => {
+  it('shows a banner when danger rises, says what raises it next, and marks tougher zombies', async () => {
+    const state = makeState({
+      location: 'pharmacy',
+      packsAt: ['pharmacy'],
+      danger: 2,
+      zombies: [{ at: 'street' }],
+    })
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    const view = render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    const every = balance.danger.perFindsTaken
+    expect(screen.getByText(texts.ui.dangerNext(every), { exact: false })).toBeTruthy()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
+    expect(screen.getByText(texts.ui.dangerBanner.title(3))).toBeTruthy()
+    expect(screen.getByText(texts.ui.dangerBanner.tougher(1))).toBeTruthy()
+    expect(view.container.querySelector('.ztough')).not.toBeNull()
+    await user.click(screen.getByRole('button', { name: texts.ui.dangerBanner.close }))
+    expect(screen.queryByText(texts.ui.dangerBanner.title(3))).toBeNull()
+  })
+})
+
 describe('GameScreen: rules and the end of an expedition', () => {
   const draw = ['bandage', 'bandage', 'bandage', 'bandage', 'bandage', 'bandage']
 

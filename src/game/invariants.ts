@@ -3,7 +3,7 @@ import { cityContent } from './city'
 import { listActions } from './actions'
 import { totalCount } from './deck'
 import { starsFor } from './rules'
-import { noiseThreshold } from './zombies'
+import { noiseThreshold, zombieMaxHp } from './zombies'
 import type { Content, GameState } from './types'
 
 /**
@@ -76,7 +76,7 @@ export function checkInvariants(state: GameState, baseContent: Content = default
   const zombieUids = state.zombies.map((z) => z.uid)
   if (new Set(zombieUids).size !== zombieUids.length) fail('two zombies share a uid')
   for (const z of state.zombies) {
-    if (z.hp <= 0 || z.hp > balance.zombies[z.kind].hp) {
+    if (z.hp <= 0 || z.hp > zombieMaxHp(state, z.kind)) {
       fail(`zombie ${z.uid} has impossible health`)
     }
     if (!content.locations[z.location]) fail(`zombie ${z.uid} is nowhere`)

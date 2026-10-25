@@ -39,6 +39,39 @@ export function zombieStats(balance: Balance, kind: ZombieKind): ZombieStats {
   return balance.zombies[kind]
 }
 
+/** A zombie's full health now: its kind's health plus the danger level's bonus. */
+export function zombieMaxHp(state: GameState, kind: ZombieKind): number {
+  return zombieStats(state.balance, kind).hp + dangerLevel(state).zombieHpBonus
+}
+
+/**
+ * The first look inside a building (you walk in, or scout it): its start zombies get their
+ * kind now, from the building's own mix plus the kinds of the current danger level, at full
+ * health. Their number was fixed at the start, so the shown range stays true.
+ */
+export function revealZombies(state: GameState, content: Content, location: LocationId): GameState {
+  if (!state.zombies.some((z) => z.location === location && z.rollOnReveal)) return state
+  const own = content.locations[location]?.startZombies?.kinds ?? []
+  const byDanger = content.arrivals?.byDanger ?? []
+  const level = byDanger[Math.min(state.danger, byDanger.length) - 1] ?? []
+  const mix: ZombieMix = [...own, ...level]
+  let rng = state.rng
+  const zombies = state.zombies.map((z) => {
+    if (z.location !== location || !z.rollOnReveal) return z
+    const [kind, next] = rollKind(mix, rng)
+    rng = next
+    return {
+      uid: z.uid,
+      kind,
+      location: z.location,
+      hp: zombieMaxHp(state, kind),
+      alerted: z.alerted,
+      neutralized: z.neutralized,
+    }
+  })
+  return { ...state, rng, zombies }
+}
+
 /** Picks a kind from a weighted mix (only Walkers when the mix is empty). */
 export function rollKind(mix: ZombieMix | undefined, rng: number): [kind: ZombieKind, rng: number] {
   const options = (mix ?? []).filter((m) => m.weight > 0)
@@ -85,6 +118,7 @@ export function setupZombies(
         hp: zombieStats(balance, kind).hp,
         alerted: false,
         neutralized: false,
+        ...(balance.danger.enabled && balance.danger.rollOnReveal ? { rollOnReveal: true } : {}),
       })
     }
   }
@@ -189,6 +223,7 @@ export function dangerLevel(state: GameState): DangerLevel {
     arrivals: 1,
     extraFinds: 0,
     rareFindWeight: state.balance.rareFindWeight,
+    zombieHpBonus: 0,
   }
   if (!danger.enabled) return fallback
   return danger.levels[Math.min(state.danger, danger.levels.length) - 1] ?? fallback
@@ -225,7 +260,7 @@ function spawnZombie(
     uid: `z${state.nextZombieUid}`,
     kind,
     location,
-    hp: zombieStats(state.balance, kind).hp,
+    hp: zombieMaxHp(state, kind),
     alerted: location === state.player.location,
     neutralized: false,
   }
@@ -285,12 +320,18 @@ export function raiseDanger(
   events: GameEvent[],
 ): GameState {
   const { danger } = state.balance
-  const steps = reason === 'pack' ? danger.perPack : danger.perRareFind
+  const steps = reason === 'pack' ? danger.perPack : reason === 'rare' ? danger.perRareFind : 1
   if (!danger.enabled || steps <= 0) return state
   const level = Math.min(state.danger + steps, danger.levels.length)
   if (level <= state.danger) return state
   events.push({ type: 'dangerRose', level, reason })
   let next: GameState = { ...state, danger: level }
+  // Tougher zombies: everyone gains what the new level adds to their health.
+  const tougher = dangerLevel(next).zombieHpBonus - dangerLevel(state).zombieHpBonus
+  if (tougher > 0 && next.zombies.length > 0) {
+    events.push({ type: 'zombiesToughened', amount: tougher })
+    next = { ...next, zombies: next.zombies.map((z) => ({ ...z, hp: z.hp + tougher })) }
+  }
   const at = hordeLocation(next, content)
   for (let i = 0; i < danger.hordeSize * (level - state.danger); i++) {
     next = spawnZombie(next, content, 'horde', events, at)

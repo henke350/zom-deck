@@ -111,6 +111,27 @@ export const cards = {
       },
     ],
   },
+  headShot: {
+    id: 'headShot',
+    kind: 'action',
+    cost: 1,
+    tags: ['weapon'],
+    trashable: true,
+    modes: [
+      {
+        effects: [{ kind: 'damage', amount: 1, target: 'one' }],
+        followUp: { tag: 'weapon', effects: [{ kind: 'kill', target: 'one' }] },
+      },
+    ],
+  },
+  silentTakedown: {
+    id: 'silentTakedown',
+    kind: 'action',
+    cost: 1,
+    tags: ['quiet'],
+    trashable: true,
+    modes: [{ effects: [{ kind: 'kill', target: 'one', unaware: true }] }],
+  },
   knife: {
     id: 'knife',
     kind: 'action',
