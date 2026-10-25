@@ -75,6 +75,10 @@ src/sim/   bots and balance reports (from M6), run in Node
   engine state and a readable log. The UI gets choices and reasons from
   `cardOptions`, `freeMoveTargets` and `validate`, never from its own rules.
 - UI tests use Testing Library with `// @vitest-environment jsdom` at the top of the file.
+- The built game is an installable web app (`public/manifest.webmanifest`, no service worker:
+  offline play is not wanted) and is published to GitHub Pages from main
+  (`.github/workflows/pages.yml`). It is played on a
+  landscape tablet: keep the game screen on one screen at 960×600 and up, and touch-friendly.
 - No backend, accounts, database, API keys or LLM calls in the game.
 
 ## Checks before every push

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
@@ -41,6 +41,27 @@ describe('GameScreen', () => {
     await user.click(node('Street'))
     expect(log().getByText(texts.log.moved('Street', '', 0))).toBeTruthy()
     expect(node('Street').getAttribute('aria-label')).toContain(texts.ui.youAreHere)
+  })
+
+  it('on a touch screen, a first tap only shows the place; a second tap goes there', () => {
+    const { node, log } = renderGame()
+    const tap = (el: HTMLElement) => {
+      fireEvent.pointerDown(el, { pointerType: 'touch' })
+      fireEvent.click(el)
+    }
+    tap(node('Street'))
+    expect(log().queryByText(texts.log.moved('Street', '', 0))).toBeNull()
+    expect(screen.getByRole('heading', { name: 'Street' })).toBeTruthy()
+    tap(node('Street'))
+    expect(log().getByText(texts.log.moved('Street', '', 0))).toBeTruthy()
+  })
+
+  it('goes to the shown place with Go here', async () => {
+    const { node, log, user } = renderGame()
+    fireEvent.pointerDown(node('Street'), { pointerType: 'touch' })
+    fireEvent.click(node('Street'))
+    await user.click(screen.getByRole('button', { name: texts.ui.goHere }))
+    expect(log().getByText(texts.log.moved('Street', '', 0))).toBeTruthy()
   })
 
   it('shows a hovered place on top of the panel without replacing where you are', async () => {

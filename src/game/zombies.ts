@@ -168,7 +168,12 @@ function arrivalLocation(state: GameState, content: Content): LocationId {
 /** The current step of the danger meter. Without the meter, the balance's plain noise threshold. */
 export function dangerLevel(state: GameState): DangerLevel {
   const { danger } = state.balance
-  const fallback = { noiseThreshold: state.balance.noiseThreshold, arrivals: 1 }
+  const fallback: DangerLevel = {
+    noiseThreshold: state.balance.noiseThreshold,
+    arrivals: 1,
+    extraFinds: 0,
+    rareFindWeight: state.balance.rareFindWeight,
+  }
   if (!danger.enabled) return fallback
   return danger.levels[Math.min(state.danger, danger.levels.length) - 1] ?? fallback
 }

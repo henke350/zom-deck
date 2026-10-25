@@ -492,6 +492,38 @@ describe('danger meter', () => {
     )
   })
 
+  it('sends a horde to the street when hordes are switched on', () => {
+    const hordes = { ...classicBalance, danger: { ...classicBalance.danger, hordeSize: 1 } }
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], balance: hordes })
+    const next = play(state, { type: 'quickSearch' })
+    expect(zombiesAt(next, 'street')).toHaveLength(1)
+    expect(next.stats.zombiesFromHordes).toBe(1)
+  })
+
+  it('rewards higher danger with extra finds in every search', () => {
+    const levels = balance.danger.levels
+    const top = levels.length
+    const extra = levels[top - 1]!.extraFinds
+    expect(extra).toBeGreaterThan(0)
+    const finds = (danger: number) =>
+      play(makeState({ location: 'pharmacy', danger }), { type: 'quickSearch' }).pendingFind
+        ?.options.length ?? 0
+    expect(finds(top)).toBe(finds(1) + extra)
+  })
+
+  it('makes rare finds more likely at higher danger', () => {
+    const rareIn = (danger: number) => {
+      let rare = 0
+      for (let seed = 1; seed <= 300; seed++) {
+        const state = makeState({ location: 'police', danger, seed })
+        const options = play(state, { type: 'quickSearch' }).pendingFind?.options ?? []
+        if (options.includes('shotgun')) rare += 1
+      }
+      return rare
+    }
+    expect(rareIn(balance.danger.levels.length)).toBeGreaterThan(rareIn(1))
+  })
+
   it('can be switched off', () => {
     const off = { ...classicBalance, danger: { ...classicBalance.danger, enabled: false } }
     const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], balance: off })

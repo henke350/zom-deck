@@ -30,6 +30,8 @@ interface LocationPanelProps {
   /** Legal ways to open the stash where you stand, and why forcing it is not possible. */
   readonly stashActions: readonly OpenStashAction[]
   readonly forceCheck: Validation
+  /** Go to this place (the same as clicking it on the map). Only shown when the move is legal. */
+  readonly onMove?: () => void
 }
 
 export function LocationPanel({
@@ -45,6 +47,7 @@ export function LocationPanel({
   onService,
   stashActions,
   forceCheck,
+  onMove,
 }: LocationPanelProps) {
   const def = content.locations[location]
   const { name, description } = locationText(location)
@@ -71,6 +74,11 @@ export function LocationPanel({
         <h2>{ui.unknownBuilding}</h2>
         <p className="muted">{ui.unknownDescription}</p>
         <p className="where">{ui.stepsAway(steps)}</p>
+        {onMove && moveCheck?.ok && (
+          <button type="button" className="btn btn-primary btn-small go-here" onClick={onMove}>
+            {ui.goHere}
+          </button>
+        )}
         {!info.known && <p className="zombie-info">{ui.zombiesUnknown(info.min, info.max)}</p>}
         {moveCheck && !moveCheck.ok && <p className="reason">{moveCheck.reason}</p>}
         <p className="free-move">{freeMoveStatus}</p>
@@ -87,6 +95,11 @@ export function LocationPanel({
       <h2>{name}</h2>
       <p className="muted">{description}</p>
       <p className="where">{isHere ? ui.youAreHere : ui.stepsAway(steps)}</p>
+      {!isHere && onMove && moveCheck?.ok && (
+        <button type="button" className="btn btn-primary btn-small go-here" onClick={onMove}>
+          {ui.goHere}
+        </button>
+      )}
       {site && (
         <ul className="site-facts">
           <li>{site.searches}</li>

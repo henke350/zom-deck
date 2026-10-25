@@ -22,13 +22,18 @@ export interface DangerLevel {
   readonly noiseThreshold: number
   /** Zombies that arrive each time the noise meter fills. */
   readonly arrivals: number
+  /** The reward: extra finds in every search at this level. */
+  readonly extraFinds: number
+  /** The reward: how much of its weight a rare find counts in a search at this level. */
+  readonly rareFindWeight: number
 }
 
 /**
- * The danger meter: the better you do, the wilder the city gets. It starts at level 1 and
- * rises one level for every pack and every rare find you take (up to the last level). Each
- * rise brings a horde to the street. Which kinds arrive at each level is content
- * (`arrivals.byDanger`).
+ * The danger meter: the better you do, the wilder the city gets, and the richer. It starts at
+ * level 1 and rises one level for every pack and every rare find you take (up to the last
+ * level). Higher levels bring more and harder zombies, but also more finds and more rare
+ * finds. Each rise can bring a horde to the street (`hordeSize`). Which kinds arrive at each
+ * level is content (`arrivals.byDanger`).
  */
 export interface DangerBalance {
   readonly enabled: boolean
@@ -121,15 +126,17 @@ export const balance: Balance = {
   },
   danger: {
     enabled: true,
+    // Tuning 2 (24 Oct 2026, after playtests): no hordes, one zombie per full meter at every
+    // level, and a reward for pushing on: more finds and more rare finds as danger rises.
     levels: [
-      { noiseThreshold: 4, arrivals: 1 },
-      { noiseThreshold: 4, arrivals: 1 },
-      { noiseThreshold: 3, arrivals: 1 },
-      { noiseThreshold: 3, arrivals: 2 },
+      { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.25 },
+      { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.5 },
+      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 0.5 },
+      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 1 },
     ],
     perPack: 1,
     perRareFind: 1,
-    hordeSize: 1,
+    hordeSize: 0,
   },
   extraStartZombies: 0,
   zombieFollow: 'chase',

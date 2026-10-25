@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from 'react'
+import { useRef, type KeyboardEvent } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Content, GameState, LocationId } from '../../game'
 import { buildingKnown, zombieInfo, zombiesAt } from '../../game'
@@ -12,7 +12,8 @@ interface CityMapProps {
   /** Locations a click moves you to right now. */
   readonly destinations: ReadonlySet<LocationId>
   readonly selected: LocationId | null
-  readonly onActivate: (id: LocationId) => void
+  /** `touch`: the place was tapped with a finger, not clicked with a mouse or the keyboard. */
+  readonly onActivate: (id: LocationId, touch: boolean) => void
   readonly onFocusLocation: (id: LocationId | null) => void
 }
 
@@ -86,6 +87,7 @@ export function CityMap({
   onActivate,
   onFocusLocation,
 }: CityMapProps) {
+  const lastPointer = useRef('mouse')
   const here = state.player.location
   const pos = (id: LocationId) => content.locations[id]?.mapPos ?? { x: 0, y: 0 }
   const herePos = pos(here)
@@ -93,7 +95,7 @@ export function CityMap({
   const onKey = (id: LocationId) => (event: KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      onActivate(id)
+      onActivate(id, false)
     }
   }
 
@@ -140,7 +142,10 @@ export function CityMap({
               tabIndex={0}
               aria-label={label}
               data-location={loc.id}
-              onClick={() => onActivate(loc.id)}
+              onPointerDown={(e) => {
+                lastPointer.current = e.pointerType
+              }}
+              onClick={() => onActivate(loc.id, lastPointer.current === 'touch')}
               onKeyDown={onKey(loc.id)}
               onMouseEnter={() => onFocusLocation(loc.id)}
               onMouseLeave={() => onFocusLocation(null)}

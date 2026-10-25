@@ -70,6 +70,7 @@ export const texts = {
     burnedShort: 'Burned',
     noiseLabel: 'Noise',
     dangerLabel: 'Danger',
+    dangerBonus: (finds: number) => `Danger · +${finds} find`,
     noiseBadge: (n: number, arrivals: number) =>
       arrivals > 0 ? `+${n} noise · zombie!` : `+${n} noise`,
     zombiesRange: (min: number, max: number) => (min === max ? `${min}?` : `${min}–${max}?`),
@@ -125,6 +126,7 @@ export const texts = {
     keepHint: (n: number) => `You may keep ${n} unplayed card for next turn.`,
     cancel: 'Cancel',
     chooseDestination: 'Choose where to go on the map.',
+    goHere: 'Go here',
     chooseTrashTarget: 'Choose a card in your hand to trash.',
     useService: (name: string, cost: number) => `${name} (${cost} AP)`,
     rare: 'Rare',
@@ -147,7 +149,7 @@ export const texts = {
     stashIntro: 'Take one rare find, or scrap a card instead.',
     youAreHere: 'You are here',
     stepsAway: (n: number) => `${n} step${n === 1 ? '' : 's'} away`,
-    freeMoveAvailable: 'Free move available: click a highlighted neighbour.',
+    freeMoveAvailable: 'Free move available: choose a highlighted neighbour.',
     freeMoveCosts: (ap: number) => `Free move costs ${ap} AP (Heavy Load in hand).`,
     freeMoveUsed: 'Free move used this turn.',
     log: 'Log',
@@ -213,7 +215,7 @@ export const texts = {
         heading: 'Your turn',
         items: [
           `Draw up to ${b.handSize} cards and get ${b.apPerTurn} AP. Play a card by paying its AP cost.`,
-          'Once per turn you may walk one step for free: click a highlighted neighbour on the map.',
+          'Once per turn you may walk one step for free: choose a highlighted neighbour on the map (on a touch screen, tap it twice or use Go here).',
           `When you end the turn you may keep ${b.keepCards} unplayed card. The rest are discarded.`,
         ],
       },
@@ -252,9 +254,14 @@ export const texts = {
             {
               heading: 'Danger',
               items: [
-                `The city gets wilder the better you do. Danger starts at 1 and rises by one for every pack and every rare find you take, up to ${b.danger.levels.length}.`,
-                `Each time it rises, ${b.danger.hordeSize === 1 ? 'a zombie gathers' : `${b.danger.hordeSize} zombies gather`} on the street. ${b.danger.levels.map((l, i) => `Danger ${i + 1}: ${l.arrivals === 1 ? 'a zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise`).join('. ')}.`,
-                'At low danger the noise brings Walkers; higher up come Runners, Screamers and at last Brutes.',
+                `The city gets wilder the better you do, and richer. Danger starts at 1 and rises by one for every pack and every rare find you take, up to ${b.danger.levels.length}.`,
+                `${b.danger.levels.map((l, i) => `Danger ${i + 1}: ${l.arrivals === 1 ? 'a zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise${l.extraFinds > 0 ? `, +${l.extraFinds} find in every search` : ''}`).join('. ')}.`,
+                'At low danger the noise brings Walkers; higher up come Runners, Screamers and at last Brutes. Rare finds turn up more often the higher the danger.',
+                ...(b.danger.hordeSize > 0
+                  ? [
+                      `Each time danger rises, ${b.danger.hordeSize === 1 ? 'a zombie gathers' : `${b.danger.hordeSize} zombies gather`} on the street.`,
+                    ]
+                  : []),
               ],
             },
           ]
