@@ -6,22 +6,22 @@ Botterne ser kun det, en spiller ser på skærmen: zombiespænd i ubesøgte bygn
 
 ## Kort fortalt
 
-- "Skynd dig hjem" vinder 66 %, under planens grænse på cirka 80 %.
-- De fire spillestile vinder mellem 70 % og 83 %, så ingen stil er klart bedst.
-- Grådighed koster: den grådige bot dør i 47 % af spillene, men får ★★★ i 21 %.
-- Spillene slutter i gennemsnit i tur 4,3, og ingen tænkende bot når at blive overrasket af mørket.
+- "Skynd dig hjem" vinder 69 %, under planens grænse på cirka 80 %.
+- De fire spillestile vinder mellem 69 % og 90 %, så stilene er ikke lige stærke.
+- Grådighed koster: den grådige bot dør i 42 % af spillene, men får ★★★ i 18 %.
+- Spillene slutter i gennemsnit i tur 5,2.
 
 ## Resultat pr. bot
 
 | Bot | Sejr | ★ | ★★ | ★★★ | Død | Mørke | Ture | Liv ved sejr | Dæk ved slut | Fund taget | Fjernet |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Tilfældig | 1 % | 1 % | 0 % | 0 % | 55 % | 45 % | 8,4 | 5,4 | 10,0 | 0,6 | 1,3 |
-| Skynd dig hjem | 66 % | 66 % | 0 % | 0 % | 34 % | 0 % | 3,3 | 4,3 | 11,5 | 0,0 | 0,4 |
-| Grådig | 53 % | 18 % | 14 % | 21 % | 47 % | 0 % | 4,6 | 2,5 | 19,1 | 6,8 | 0,5 |
-| Stille | 70 % | 32 % | 38 % | 0 % | 30 % | 0 % | 4,0 | 3,7 | 17,7 | 5,7 | 0,4 |
-| Kæmper | 78 % | 30 % | 48 % | 0 % | 22 % | 0 % | 4,9 | 4,2 | 18,7 | 6,7 | 0,5 |
-| Løber | 83 % | 34 % | 49 % | 0 % | 18 % | 0 % | 4,5 | 4,3 | 18,5 | 6,4 | 0,4 |
-| Let bagage | 76 % | 31 % | 46 % | 0 % | 24 % | 0 % | 4,6 | 3,8 | 16,0 | 5,3 | 1,7 |
+| Tilfældig | 1 % | 1 % | 0 % | 0 % | 49 % | 50 % | 8,8 | 4,4 | 9,9 | 0,8 | 1,5 |
+| Skynd dig hjem | 69 % | 69 % | 0 % | 0 % | 31 % | 0 % | 3,7 | 4,7 | 11,5 | 0,0 | 0,5 |
+| Grådig | 58 % | 17 % | 23 % | 18 % | 42 % | 0 % | 5,7 | 2,6 | 20,6 | 8,5 | 0,7 |
+| Stille | 69 % | 32 % | 37 % | 0 % | 31 % | 0 % | 4,8 | 4,1 | 18,8 | 6,9 | 0,5 |
+| Kæmper | 88 % | 37 % | 51 % | 0 % | 12 % | 1 % | 6,0 | 5,2 | 20,5 | 8,6 | 0,6 |
+| Løber | 90 % | 44 % | 46 % | 0 % | 10 % | 0 % | 5,5 | 4,7 | 20,0 | 7,9 | 0,4 |
+| Let bagage | 81 % | 38 % | 43 % | 0 % | 19 % | 0 % | 5,4 | 4,2 | 16,7 | 6,2 | 1,9 |
 
 _Ture_: gennemsnitlig tur, hvor spillet sluttede. _Dæk ved slut_: kort ejet til sidst (startdækket har 10). _Fjernet_: kort skrottet, brugt op eller fjernet.
 
@@ -29,13 +29,13 @@ _Ture_: gennemsnitlig tur, hvor spillet sluttede. _Dæk ved slut_: kort ejet til
 
 | Bot | Død på vej hjem | Skade fra forfølgere | Skade fra zombier på stedet | Zombier fra støj | Zombier fra skumring | Zombier fra skrig | Zombier fra horder | Fare ved slut | Dræbte zombier |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Tilfældig | 6 % | 1,6 | 5,5 | 0,2 | 0,3 | 0,4 | 0,0 | 1,7 | 0,2 |
-| Skynd dig hjem | 31 % | 3,7 | 2,9 | 0,6 | 0,0 | 0,6 | 0,0 | 3,0 | 0,0 |
-| Grådig | 44 % | 4,3 | 4,2 | 1,5 | 0,0 | 0,6 | 0,0 | 3,9 | 2,2 |
-| Stille | 27 % | 4,4 | 2,5 | 1,2 | 0,0 | 0,8 | 0,0 | 3,9 | 0,1 |
-| Kæmper | 20 % | 3,3 | 2,9 | 1,4 | 0,0 | 0,4 | 0,0 | 3,9 | 2,3 |
-| Løber | 16 % | 3,1 | 2,5 | 1,4 | 0,0 | 0,4 | 0,0 | 3,9 | 1,8 |
-| Let bagage | 22 % | 3,6 | 3,0 | 1,3 | 0,0 | 0,4 | 0,0 | 3,9 | 1,7 |
+| Tilfældig | 6 % | 1,7 | 5,2 | 0,2 | 0,4 | 0,5 | 0,0 | 1,7 | 0,3 |
+| Skynd dig hjem | 26 % | 4,1 | 2,1 | 0,7 | 0,0 | 0,6 | 0,0 | 2,9 | 0,0 |
+| Grådig | 38 % | 4,7 | 3,6 | 1,7 | 0,0 | 0,7 | 0,0 | 3,9 | 2,9 |
+| Stille | 26 % | 4,7 | 2,0 | 1,4 | 0,0 | 0,9 | 0,0 | 3,8 | 0,5 |
+| Kæmper | 10 % | 2,8 | 2,0 | 1,5 | 0,0 | 0,4 | 0,0 | 3,9 | 3,2 |
+| Løber | 8 % | 2,9 | 2,0 | 1,6 | 0,0 | 0,3 | 0,0 | 3,9 | 2,3 |
+| Let bagage | 16 % | 3,7 | 2,2 | 1,4 | 0,0 | 0,5 | 0,0 | 3,8 | 2,0 |
 
 _Død på vej hjem_: dræbt med nok pakker til at vinde. Skade og zombier er gennemsnit pr. spil.
 
@@ -43,13 +43,13 @@ _Død på vej hjem_: dræbt med nok pakker til at vinde. Skade og zombier er gen
 
 | Bot | Hastesøgninger pr. spil | Tomme ture pr. spil | Dismantle/Patch up pr. spil | Gemmesteder åbnet | Sjældne fund taget |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Tilfældig | 0,4 | 3,8 | 0,4 | 0,1 | 0,0 |
-| Skynd dig hjem | 0,0 | 0,0 | 0,4 | 0,6 | 0,0 |
-| Grådig | 0,1 | 0,0 | 0,2 | 0,9 | 2,1 |
-| Stille | 0,4 | 0,0 | 0,1 | 0,9 | 1,7 |
-| Kæmper | 0,1 | 0,0 | 0,1 | 0,7 | 1,7 |
-| Løber | 0,2 | 0,0 | 0,1 | 0,7 | 1,7 |
-| Let bagage | 0,1 | 0,0 | 0,0 | 0,8 | 1,3 |
+| Tilfældig | 0,6 | 3,8 | 0,5 | 0,1 | 0,0 |
+| Skynd dig hjem | 0,0 | 0,0 | 0,5 | 0,5 | 0,0 |
+| Grådig | 0,3 | 0,0 | 0,3 | 0,7 | 1,9 |
+| Stille | 0,5 | 0,0 | 0,2 | 0,7 | 1,3 |
+| Kæmper | 0,3 | 0,0 | 0,2 | 0,5 | 1,4 |
+| Løber | 0,3 | 0,0 | 0,2 | 0,5 | 1,5 |
+| Let bagage | 0,2 | 0,0 | 0,1 | 0,6 | 1,1 |
 
 _Tom tur_: en tur, der sluttede uden at spille et kort, gå eller søge. Gemmesteder og sjældne fund er gennemsnit pr. spil.
 
@@ -59,34 +59,37 @@ Pr. 100 spil. "Taget" er summen for Grådig, Stille, Kæmper, Løber, Let bagage
 
 | Kort | Taget | Spillet | Grådig | Stille | Kæmper | Løber | Let bagage |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| runningShoes | 402 | 432 | 101 | 40 | 83 | 120 | 58 |
-| bicycle | 386 | 293 | 88 | 81 | 54 | 102 | 61 |
-| baseballBat | 350 | 131 | 102 | 15 | 128 | 60 | 46 |
-| alarmClock | 310 | 33 | 50 | 158 | 50 | 34 | 18 |
-| bandage | 267 | 32 | 88 | 23 | 79 | 49 | 29 |
-| chainsaw | 195 | 30 | 44 | 41 | 53 | 28 | 29 |
-| painkillers | 195 | 107 | 25 | 2 | 26 | 19 | 123 |
-| shotgun | 171 | 53 | 44 | 36 | 37 | 22 | 32 |
-| flashlight | 148 | 160 | 22 | 71 | 23 | 20 | 12 |
-| toolbox | 98 | 19 | 6 | 1 | 1 | 6 | 85 |
-| lockpick | 97 | 85 | 15 | 50 | 12 | 14 | 6 |
-| softSoles | 96 | 42 | 1 | 32 | 1 | 62 | 0 |
-| axe | 96 | 61 | 24 | 2 | 42 | 23 | 4 |
-| firstAidKit | 91 | 8 | 35 | 9 | 22 | 16 | 10 |
-| pistol | 54 | 22 | 15 | 2 | 18 | 13 | 6 |
-| molotov | 49 | 6 | 11 | 0 | 24 | 9 | 4 |
-| adrenaline | 41 | 18 | 1 | 1 | 1 | 39 | 0 |
-| kevlarVest | 33 | 28 | 10 | 4 | 14 | 4 | 2 |
-| travelLight | 2 | 2 | 0 | 0 | 0 | 0 | 2 |
+| runningShoes | 473 | 528 | 132 | 38 | 71 | 154 | 79 |
+| alarmClock | 410 | 33 | 87 | 173 | 81 | 46 | 24 |
+| baseballBat | 357 | 141 | 96 | 9 | 139 | 65 | 47 |
+| bandage | 348 | 41 | 122 | 21 | 104 | 64 | 36 |
+| bicycle | 312 | 240 | 84 | 52 | 37 | 90 | 49 |
+| painkillers | 238 | 119 | 33 | 7 | 36 | 24 | 139 |
+| knife | 207 | 118 | 28 | 77 | 68 | 22 | 12 |
+| flashlight | 178 | 208 | 34 | 68 | 36 | 26 | 15 |
+| softSoles | 171 | 82 | 1 | 40 | 1 | 128 | 1 |
+| chainsaw | 164 | 21 | 37 | 29 | 50 | 27 | 21 |
+| bow | 155 | 68 | 25 | 52 | 52 | 14 | 11 |
+| axe | 142 | 105 | 38 | 4 | 64 | 32 | 5 |
+| lockpick | 128 | 116 | 18 | 66 | 20 | 16 | 7 |
+| toolbox | 125 | 26 | 6 | 1 | 1 | 6 | 112 |
+| crossbow | 98 | 82 | 21 | 30 | 20 | 10 | 17 |
+| firstAidKit | 79 | 8 | 32 | 6 | 22 | 13 | 7 |
+| shotgun | 76 | 26 | 19 | 14 | 15 | 13 | 16 |
+| molotov | 66 | 8 | 16 | 3 | 28 | 12 | 8 |
+| pistol | 58 | 15 | 17 | 2 | 19 | 13 | 7 |
+| adrenaline | 20 | 8 | 0 | 0 | 0 | 19 | 0 |
+| travelLight | 7 | 8 | 0 | 0 | 0 | 0 | 7 |
+| kevlarVest | 2 | 1 | 1 | 0 | 1 | 0 | 0 |
 | districtMap | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Spørgsmålene fra planen (afsnit 7)
 
-- **Kan en fast rute vinde uden valg?** "Skynd dig hjem" vinder 66 % (grænsen er cirka 80 %).
-- **Er det spændende at fortsætte eller gå hjem?** Den grådige bot kommer hjem med 3+ pakker i 35 % og med 4 i 21 %, men dør på vej hjem i 44 %.
-- **Kan flere spillestile vinde?** Stille 70 %, Kæmper 78 %, Løber 83 %, Let bagage 76 %.
-- **Bliver dækkene forskellige?** Mest tagne fund: Stille: alarmClock, bicycle, flashlight · Kæmper: baseballBat, runningShoes, bandage · Løber: runningShoes, bicycle, softSoles · Let bagage: painkillers, toolbox, bicycle.
-- **Er der kort, ingen bruger?** Sjældent taget (under 5 pr. 100 spil): travelLight, districtMap.
+- **Kan en fast rute vinde uden valg?** "Skynd dig hjem" vinder 69 % (grænsen er cirka 80 %).
+- **Er det spændende at fortsætte eller gå hjem?** Den grådige bot kommer hjem med 3+ pakker i 41 % og med 4 i 18 %, men dør på vej hjem i 38 %.
+- **Kan flere spillestile vinde?** Stille 69 %, Kæmper 88 %, Løber 90 %, Let bagage 81 %.
+- **Bliver dækkene forskellige?** Mest tagne fund: Stille: alarmClock, knife, flashlight · Kæmper: baseballBat, bandage, alarmClock · Løber: runningShoes, softSoles, bicycle · Let bagage: painkillers, toolbox, runningShoes.
+- **Er der kort, ingen bruger?** Sjældent taget (under 5 pr. 100 spil): kevlarVest, districtMap.
 - **Kan dårlige hænder håndteres?** 0,0 tomme ture pr. spil i gennemsnit for de tænkende bots.
 
 ## Hvad hvis?
@@ -95,22 +98,25 @@ Sejrsrate med ét eller flere balancetal ændret (300 spil pr. bot). Prøv selv 
 
 | Ændring | Skynd dig hjem | Grådig | Stille | Kæmper | Løber | Let bagage |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Ingen (standard) | 66 % | 53 % (★★★ 21 %) | 70 % | 78 % | 83 % | 76 % |
-| Som i M6: 10 liv, Run ×2 og Search ×3 (`maxHp=10 starterDeck.run=2 starterDeck.search=3`) | 86 % | 67 % (★★★ 31 %) | 78 % | 86 % | 89 % | 84 % |
-| Klassisk kort, alt synligt (før 21. okt.) (`randomCity=false hiddenBuildings=false`) | 67 % | 58 % (★★★ 22 %) | 83 % | 88 % | 92 % | 96 % |
-| Tilfældig by, alt synligt (`hiddenBuildings=false`) | 81 % | 61 % (★★★ 22 %) | 77 % | 84 % | 87 % | 83 % |
-| Fund i afkastbunken og ingen ligsøgning (før 25. okt.) (`findsToHand=false zombies.walker.loot=0 zombies.runner.loot=0 zombies.brute.loot=0 zombies.screamer.loot=0`) | 64 % | 41 % (★★★ 17 %) | 55 % | 66 % | 73 % | 65 % |
-| Fund i afkastbunken (`findsToHand=false`) | 64 % | 40 % (★★★ 13 %) | 55 % | 69 % | 74 % | 67 % |
-| Ingen ligsøgning (`zombies.walker.loot=0 zombies.runner.loot=0 zombies.brute.loot=0 zombies.screamer.loot=0`) | 64 % | 57 % (★★★ 20 %) | 66 % | 76 % | 83 % | 78 % |
-| Uden faremeter (før 23. okt.) (`danger.enabled=false`) | 69 % | 57 % (★★★ 22 %) | 70 % | 82 % | 86 % | 77 % |
-| Faremeter som 23. okt. (horder, fare 4: 2 zombier, ingen belønning) (`danger.hordeSize=1 danger.levels.3.arrivals=2 danger.levels.1.rareFindWeight=0.25 danger.levels.2.rareFindWeight=0.25 danger.levels.3.rareFindWeight=0.25 danger.levels.2.extraFinds=0 danger.levels.3.extraFinds=0`) | 63 % | 36 % (★★★ 6 %) | 51 % | 62 % | 67 % | 57 % |
-| Faremeter uden ekstra fund (`danger.levels.2.extraFinds=0 danger.levels.3.extraFinds=0`) | 64 % | 55 % (★★★ 22 %) | 66 % | 76 % | 85 % | 79 % |
-| Sjældne fund hæver ikke faren (`danger.perRareFind=0`) | 64 % | 55 % (★★★ 22 %) | 66 % | 79 % | 81 % | 78 % |
-| 10 liv (`maxHp=10`) | 72 % | 61 % (★★★ 32 %) | 72 % | 82 % | 84 % | 79 % |
-| 8 liv (`maxHp=8`) | 58 % | 50 % (★★★ 15 %) | 62 % | 72 % | 79 % | 69 % |
-| Zombier giver 2 skade (`zombies.walker.damage=2`) | 43 % | 28 % (★★★ 7 %) | 42 % | 55 % | 59 % | 51 % |
-| +1 startzombie i hver bygning (`extraStartZombies=1`) | 35 % | 25 % (★★★ 1 %) | 34 % | 45 % | 54 % | 38 % |
-| 8 ture (skumring fra tur 6) (`turnLimit=8 duskFromTurn=6`) | 64 % | 60 % (★★★ 21 %) | 67 % | 79 % | 86 % | 78 % |
+| Ingen (standard) | 69 % | 58 % (★★★ 18 %) | 69 % | 88 % | 90 % | 81 % |
+| Som i M6: 10 liv, Run ×2 og Search ×3 (`maxHp=10 starterDeck.run=2 starterDeck.search=3`) | 88 % | 67 % (★★★ 20 %) | 77 % | 94 % | 95 % | 90 % |
+| Klassisk kort, alt synligt (før 21. okt.) (`randomCity=false hiddenBuildings=false`) | 93 % | 64 % (★★★ 35 %) | 77 % | 76 % | 86 % | 74 % |
+| Tilfældig by, alt synligt (`hiddenBuildings=false`) | 79 % | 68 % (★★★ 12 %) | 77 % | 90 % | 92 % | 87 % |
+| Lille by (3 × 3, 4 pakker, før 25. okt.) (`cityMap=classic packsOnMap=4`) | 66 % | 57 % (★★★ 23 %) | 61 % | 82 % | 83 % | 75 % |
+| Stor by med 12 ture (skumring fra tur 10) (`turnLimit=12 duskFromTurn=10`) | 65 % | 58 % (★★★ 18 %) | 70 % | 86 % | 87 % | 75 % |
+| Stor by med 4 pakker (`packsOnMap=4`) | 56 % | 55 % (★★★ 6 %) | 65 % | 80 % | 79 % | 71 % |
+| Fund i afkastbunken og ingen ligsøgning (før 25. okt.) (`findsToHand=false zombies.walker.loot=0 zombies.runner.loot=0 zombies.brute.loot=0 zombies.screamer.loot=0`) | 65 % | 46 % (★★★ 13 %) | 59 % | 78 % | 82 % | 70 % |
+| Fund i afkastbunken (`findsToHand=false`) | 65 % | 44 % (★★★ 11 %) | 58 % | 79 % | 82 % | 70 % |
+| Ingen ligsøgning (`zombies.walker.loot=0 zombies.runner.loot=0 zombies.brute.loot=0 zombies.screamer.loot=0`) | 65 % | 55 % (★★★ 14 %) | 67 % | 83 % | 88 % | 76 % |
+| Uden faremeter (før 23. okt.) (`danger.enabled=false`) | 71 % | 57 % (★★★ 19 %) | 69 % | 87 % | 90 % | 81 % |
+| Faremeter som 23. okt. (horder, fare 4: 2 zombier, ingen belønning) (`danger.hordeSize=1 danger.levels.3.arrivals=2 danger.levels.1.rareFindWeight=0.25 danger.levels.2.rareFindWeight=0.25 danger.levels.3.rareFindWeight=0.25 danger.levels.2.extraFinds=0 danger.levels.3.extraFinds=0`) | 66 % | 44 % (★★★ 7 %) | 51 % | 76 % | 78 % | 65 % |
+| Faremeter uden ekstra fund (`danger.levels.2.extraFinds=0 danger.levels.3.extraFinds=0`) | 65 % | 56 % (★★★ 16 %) | 68 % | 85 % | 85 % | 77 % |
+| Sjældne fund hæver ikke faren (`danger.perRareFind=0`) | 65 % | 55 % (★★★ 17 %) | 67 % | 86 % | 88 % | 77 % |
+| 10 liv (`maxHp=10`) | 71 % | 62 % (★★★ 23 %) | 79 % | 89 % | 91 % | 79 % |
+| 8 liv (`maxHp=8`) | 59 % | 52 % (★★★ 14 %) | 63 % | 85 % | 83 % | 72 % |
+| Zombier giver 2 skade (`zombies.walker.damage=2`) | 43 % | 28 % (★★★ 7 %) | 45 % | 67 % | 65 % | 49 % |
+| +1 startzombie i hver bygning (`extraStartZombies=1`) | 31 % | 23 % (★★★ 0 %) | 30 % | 49 % | 52 % | 43 % |
+| 8 ture (skumring fra tur 6) (`turnLimit=8 duskFromTurn=6`) | 65 % | 59 % (★★★ 13 %) | 72 % | 87 % | 89 % | 79 % |
 
 ## Botterne
 

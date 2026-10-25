@@ -17,7 +17,13 @@ export type Effect =
   | { readonly kind: 'search'; readonly bonus?: number; readonly silent?: boolean }
   | { readonly kind: 'searchBonus'; readonly amount: number }
   | { readonly kind: 'move'; readonly maxSteps: number; readonly unnoticed?: boolean }
-  | { readonly kind: 'damage'; readonly amount: number; readonly target: 'one' | 'allHere' }
+  | {
+      readonly kind: 'damage'
+      readonly amount: number
+      readonly target: 'one' | 'allHere'
+      /** Bow: a single target may also stand this many steps away (where you can see zombies). */
+      readonly range?: number
+    }
   | { readonly kind: 'neutralize'; readonly target: 'one' | 'allHere' }
   | { readonly kind: 'block'; readonly amount: number }
   | { readonly kind: 'heal'; readonly amount: number }
@@ -38,6 +44,13 @@ export type GearEffect =
   | { readonly kind: 'freeMoveSteps'; readonly steps: number }
   /** Every search reveals this many more finds. */
   | { readonly kind: 'searchBonus'; readonly amount: number }
+  /** Crossbow: pay `cost` AP to deal `damage` to one zombie up to `range` steps away. */
+  | {
+      readonly kind: 'shoot'
+      readonly damage: number
+      readonly range: number
+      readonly cost: number
+    }
 
 /** When a piece of gear goes to the discard pile. */
 export type GearLasts =
@@ -47,6 +60,8 @@ export type GearLasts =
   | { readonly kind: 'untilHit' }
   /** After this many of your turns, counting the turn you put it on. */
   | { readonly kind: 'turns'; readonly turns: number }
+  /** After you have used it this many times (Crossbow bolts). */
+  | { readonly kind: 'uses'; readonly uses: number }
 
 export interface GearDef {
   readonly effect: GearEffect
@@ -106,6 +121,13 @@ export interface LocationDef {
   }
   /** Something you can do here for AP (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly service?: LocationService
+  /** An empty building slot on a bigger map: a random city always puts a building here. */
+  readonly slot?: boolean
+  /**
+   * Downtown: on a slot, the far, rich part of a bigger map; on a building, it belongs there.
+   * A random city puts downtown buildings in downtown slots first.
+   */
+  readonly downtown?: boolean
 }
 
 export type ServiceId = 'dismantle' | 'patchUp'
@@ -189,6 +211,14 @@ export interface Content {
    * Their map position comes from the building slot they are placed in.
    */
   readonly extraBuildings?: Readonly<Record<LocationId, Omit<LocationDef, 'mapPos'>>>
+  /**
+   * A bigger city (`balance.cityMap: 'large'`): its own roads and empty building slots. A
+   * random city fills every slot with a building from the classic map and `extraBuildings`.
+   */
+  readonly largeMap?: {
+    readonly locations: Readonly<Record<LocationId, LocationDef>>
+    readonly connections: readonly (readonly [LocationId, LocationId])[]
+  }
 }
 
 /**
@@ -329,9 +359,16 @@ export interface PlayCardAction {
   readonly target?: {
     readonly trash?: string
     readonly location?: LocationId
-    /** uid of a zombie at your location. */
+    /** uid of a zombie at your location (or in range, for ranged weapons). */
     readonly zombie?: string
   }
+}
+
+/** Use a piece of gear in front of you (the Crossbow). */
+export interface UseGearAction {
+  readonly type: 'useGear'
+  readonly uid: string
+  readonly target?: PlayCardAction['target']
 }
 
 export interface FreeMoveAction {
@@ -387,6 +424,7 @@ export type Action =
   | DeclineFindAction
   | UseServiceAction
   | OpenStashAction
+  | UseGearAction
   | EndTurnAction
 
 export type GameEvent =
@@ -463,6 +501,7 @@ export type GameEvent =
   | { readonly type: 'zombieKilled'; readonly uid: string }
   | { readonly type: 'bodySearched'; readonly options: readonly CardId[] }
   | { readonly type: 'gearEquipped'; readonly uid: string; readonly card: CardId }
+  | { readonly type: 'gearUsed'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'gearAbsorbed'; readonly uid: string; readonly amount: number }
   | {
       readonly type: 'gearLost'

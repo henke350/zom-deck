@@ -2,7 +2,7 @@ import { defaultContent } from '../data/content'
 import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
-import { equip, tickGear } from './gear'
+import { equip, fireGear, tickGear } from './gear'
 import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
 import { validate } from './validate'
@@ -83,6 +83,10 @@ function step(state: GameState, action: Action, content: Content, events: GameEv
       return applyService(state, action, content, events)
     case 'openStash':
       return openStash(state, action.uid, content, events)
+    case 'useGear': {
+      const used = fireGear(state, action.uid, action.target?.zombie ?? '', content, events)
+      return searchKilled(state, used, content, events)
+    }
     case 'endTurn':
       return endTurn(state, action, content, events)
   }
@@ -155,11 +159,19 @@ function playCard(
     return { ...next, pendingFind: { ...next.pendingFind, noise } }
   }
   next = addNoise(next, noise, content, 'noise', events)
+  return searchKilled(state, next, content, events)
+}
 
-  // Zombies this card killed can be searched.
+/** Zombies this action killed can be searched (`before` still has them). */
+function searchKilled(
+  before: GameState,
+  after: GameState,
+  content: Content,
+  events: GameEvent[],
+): GameState {
   const killed = new Set(events.flatMap((e) => (e.type === 'zombieKilled' ? [e.uid] : [])))
-  const bodies = state.zombies.filter((z) => killed.has(z.uid))
-  return searchBodies(next, bodies, content, events)
+  const bodies = before.zombies.filter((z) => killed.has(z.uid))
+  return searchBodies(after, bodies, content, events)
 }
 
 function resolveEffect(

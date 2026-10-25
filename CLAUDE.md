@@ -6,8 +6,10 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
 - **Current milestone:** M0–M6 done (M5 waits only for the user's own three playthroughs).
-  **M7 – playtest and tuning** is in progress: tuning 1 (9 health, Run ×1, Search ×4) and rare finds with locked stashes are in;
-  the playtest is next. Balance changes are the user's call; show them the effect with
+  **M7 – playtest and tuning** is nearly done: tunings 1–3, zombie kinds, the danger meter, finds to
+  hand, body search and gear are in, and the user's own playtests are logged in the plan; only
+  tests by 2–3 other players are missing. **M8 (polish and release) is in progress**: tips for
+  new players are in (`src/ui/hints.ts`); the missing art is ordered (`docs/art-prompts-m8.md`). Balance changes are the user's call; show them the effect with
   `npm run sim -- --set …` first.
   Work one milestone at a time and meet its "done" criteria before moving on.
 
@@ -58,8 +60,9 @@ src/sim/   bots and balance reports (from M6), run in Node
   what a player sees (`view.ts`), never hidden packs or unvisited zombie counts. `npm run sim`
   writes `docs/balance-report.md` (generated, never edit by hand); `npm run fuzz` plays 10 000
   random games. Built by `vite.sim.config.ts`, typechecked by `tsconfig.sim.json`.
-- Random cities live in `src/game/city.ts`: `state.city` places buildings in the classic map's
-  building slots; every engine entry point first calls `cityContent(state, content)`.
+- Random cities live in `src/game/city.ts`: `state.city` places buildings in the building slots of
+  the map `balance.cityMap` picks (`mapContent`: classic 3 × 3, or `content.largeMap` 5 × 3 with
+  empty slots and downtown slots that take downtown buildings first); every engine entry point first calls `cityContent(state, content)`.
   `buildingKnown` hides buildings the player has not been next to. `makeState` and
   `classicBalance` (testkit) use the classic map so tests can name places.
 - Search lives in `src/game/search.ts`: pack placement, weighted finds, the
@@ -68,7 +71,9 @@ src/sim/   bots and balance reports (from M6), run in Node
   `rareFindWeight`) and locked stashes (`openStash`). A search is always the last effect
   of a card mode, because the game then waits for the player.
 - Gear lives in `src/game/gear.ts`: cards with `gear` on their `CardDef` and an `equip` effect stay
-  in `piles.gear` with a counter in `state.gearLeft` until they wear out (`GearLasts`).
+  in `piles.gear` with a counter in `state.gearLeft` until they wear out (`GearLasts`). Gear with a
+  `shoot` effect (Crossbow) is used with the `useGear` action. Ranged damage (`range` on a damage
+  effect) targets zombies from `zombiesInRange`: here, or that far away where zombies are known.
 - Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per
   building in `startZombies.kinds` and `content.arrivals`), the danger meter (`raiseDanger`,
   `dangerLevel`, `noiseThreshold`), noticing, noise and arrivals,

@@ -31,3 +31,26 @@ export function forgetRulesSeen(): void {
     // Nothing to forget.
   }
 }
+
+const TIPS_HIDDEN = 'one-more-building:tips-hidden'
+let tipsHiddenThisVisit: boolean | undefined
+
+/** Has the player turned off the tips for new players? */
+export function tipsHidden(): boolean {
+  if (tipsHiddenThisVisit !== undefined) return tipsHiddenThisVisit
+  try {
+    return window.localStorage.getItem(TIPS_HIDDEN) === 'yes'
+  } catch {
+    return false
+  }
+}
+
+export function setTipsHidden(hidden: boolean): void {
+  tipsHiddenThisVisit = hidden
+  try {
+    if (hidden) window.localStorage.setItem(TIPS_HIDDEN, 'yes')
+    else window.localStorage.removeItem(TIPS_HIDDEN)
+  } catch {
+    // Storage refused: the choice holds for this visit.
+  }
+}

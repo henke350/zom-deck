@@ -58,11 +58,14 @@ function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] 
   return ids.map((card, i) => ({ uid: `${prefix}${i + 1}`, card }))
 }
 
-/** The balance file, but on the classic map with every building in view. Tests use it by default. */
+/** The balance file, but on the classic map (with its 4 packs) and every building in view. Tests use it by default. */
 export const classicBalance: Balance = {
   ...defaultBalance,
   randomCity: false,
+  cityMap: 'classic',
   hiddenBuildings: false,
+  // The small map has 6 buildings; 4 packs is its tuning (the large city has 5).
+  packsOnMap: 4,
 }
 
 export function makeState(spec: StateSpec = {}): GameState {

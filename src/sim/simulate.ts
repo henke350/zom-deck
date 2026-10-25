@@ -41,6 +41,15 @@ export const variants: readonly Variant[] = [
   },
   { name: 'Tilfældig by, alt synligt', overrides: ['hiddenBuildings=false'] },
   {
+    name: 'Lille by (3 × 3, 4 pakker, før 25. okt.)',
+    overrides: ['cityMap=classic', 'packsOnMap=4'],
+  },
+  {
+    name: 'Stor by med 12 ture (skumring fra tur 10)',
+    overrides: ['turnLimit=12', 'duskFromTurn=10'],
+  },
+  { name: 'Stor by med 4 pakker', overrides: ['packsOnMap=4'] },
+  {
     name: 'Fund i afkastbunken og ingen ligsøgning (før 25. okt.)',
     overrides: [
       'findsToHand=false',

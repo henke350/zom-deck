@@ -111,6 +111,27 @@ export const cards = {
       },
     ],
   },
+  knife: {
+    id: 'knife',
+    kind: 'action',
+    cost: 0,
+    tags: ['weapon', 'quiet'],
+    trashable: true,
+    modes: [
+      {
+        effects: [{ kind: 'damage', amount: 1, target: 'one' }],
+        followUp: { tag: 'quiet', effects: [{ kind: 'damage', amount: 2, target: 'one' }] },
+      },
+    ],
+  },
+  bow: {
+    id: 'bow',
+    kind: 'action',
+    cost: 1,
+    tags: ['weapon', 'quiet'],
+    trashable: true,
+    modes: [{ effects: [{ kind: 'damage', amount: 2, target: 'one', range: 1 }] }],
+  },
   axe: {
     id: 'axe',
     kind: 'action',
@@ -274,6 +295,19 @@ export const cards = {
     trashable: true,
     rare: true,
     modes: [{ noise: 3, effects: [{ kind: 'damage', amount: 4, target: 'allHere' }] }],
+  },
+  crossbow: {
+    id: 'crossbow',
+    kind: 'action',
+    cost: 1,
+    tags: ['weapon', 'quiet'],
+    trashable: true,
+    rare: true,
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: {
+      effect: { kind: 'shoot', damage: 3, range: 1, cost: 1 },
+      lasts: { kind: 'uses', uses: 3 },
+    },
   },
   bicycle: {
     id: 'bicycle',

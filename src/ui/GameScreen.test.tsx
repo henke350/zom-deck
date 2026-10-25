@@ -7,6 +7,7 @@ import { texts } from '../data/texts.en'
 import { newGame, zombiesAt, type GameState } from '../game'
 import { classicBalance, makeState } from '../game/testkit'
 import { GameScreen } from './GameScreen'
+import { setTipsHidden } from './storage'
 
 afterEach(cleanup)
 
@@ -102,8 +103,9 @@ describe('GameScreen', () => {
   it('lets you cancel a card that needs a choice', async () => {
     const { card, user } = renderGame()
     await user.click(card('run').getByRole('button', { name: texts.ui.play }))
+    expect(screen.getByText(texts.ui.chooseOnMap, { exact: false })).toBeTruthy()
     await user.click(screen.getByRole('button', { name: texts.ui.cancel }))
-    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.queryByText(texts.ui.chooseOnMap, { exact: false })).toBeNull()
   })
 
   it('keeps a card and ends the turn', async () => {
@@ -234,6 +236,21 @@ describe('GameScreen: searching', () => {
   })
 })
 
+describe('GameScreen: tips for new players', () => {
+  it('shows a tip that fits the moment, and can be hidden and shown again', async () => {
+    setTipsHidden(false)
+    const { user } = renderGame()
+    expect(screen.getByText(texts.ui.hints.walk)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: texts.ui.hideTips }))
+    expect(screen.queryByText(texts.ui.hints.walk)).toBeNull()
+    expect(screen.getByText(texts.ui.keepHint(balance.keepCards))).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: texts.rules.short }))
+    await user.click(screen.getByRole('button', { name: texts.ui.showTips }))
+    await user.click(screen.getByRole('button', { name: texts.rules.close }))
+    expect(screen.getByText(texts.ui.hints.walk)).toBeTruthy()
+  })
+})
+
 describe('GameScreen: gear', () => {
   it('shows gear in front of you and how long it lasts', async () => {
     const state = makeState({ hand: ['kevlarVest', 'search'], gear: ['flashlight'] })
@@ -246,6 +263,33 @@ describe('GameScreen: gear', () => {
     await userEvent.setup().click(within(vest).getByRole('button', { name: texts.ui.play }))
     expect(gear().getByText(texts.cards.kevlarVest.name)).toBeTruthy()
     expect(gear().getByText(texts.ui.gearLeft('absorbs', 3))).toBeTruthy()
+  })
+})
+
+describe('GameScreen: ranged weapons', () => {
+  it('shoots with the Crossbow from the gear row', async () => {
+    const state = makeState({ gear: ['crossbow'], zombies: [{ at: 'street' }] })
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    const gear = within(screen.getByRole('list', { name: texts.ui.gear }))
+    await userEvent.setup().click(gear.getByRole('button', { name: texts.ui.shoot(1) }))
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.gearUsed(texts.cards.crossbow.name))).toBeTruthy()
+  })
+
+  it('lets you pick a target next door for the Bow', async () => {
+    const state = makeState({ hand: ['bow'], zombies: [{ at: 'street' }, { at: 'street' }] })
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    const view = render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    const user = userEvent.setup()
+    const bow = view.container.querySelector<HTMLElement>('[data-card="bow"]')!
+    await user.click(within(bow).getByRole('button', { name: texts.ui.play }))
+    expect(screen.getByText(texts.ui.chooseZombieInRange, { exact: false })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: /^Street/ }))
+    const targets = screen.getAllByRole('button', { name: new RegExp(`^${texts.ui.target}`) })
+    await user.click(targets[0]!)
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.zombieHit(2, 0))).toBeTruthy()
   })
 })
 

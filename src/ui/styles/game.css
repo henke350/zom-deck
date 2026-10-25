@@ -883,3 +883,22 @@
   padding: 0.15rem 0.7rem;
   background: var(--bg);
 }
+
+/* Tips for new players, above the hand */
+.tip {
+  flex: 1 1 24rem;
+  flex-wrap: nowrap;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+.tip b {
+  color: var(--teal);
+}
+.tip .btn {
+  white-space: nowrap;
+  flex: none;
+}
+
+.gear-use {
+  margin-left: 0.4rem;
+}

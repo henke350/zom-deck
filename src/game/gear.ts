@@ -1,4 +1,5 @@
 import type { CardInstance, Content, GameEvent, GameState, GearDef, GearLasts } from './types'
+import { damageZombies } from './zombies'
 
 /**
  * Gear: cards that stay in front of you after you play them (Kevlar Vest, Running Shoes,
@@ -15,6 +16,8 @@ export function freshGear(def: GearDef): number {
       return def.lasts.turns
     case 'untilHit':
       return 1
+    case 'uses':
+      return def.lasts.uses
   }
 }
 
@@ -65,6 +68,33 @@ function loseGear(
     },
     gearLeft,
   }
+}
+
+/**
+ * Uses a piece of gear (the Crossbow): pays its AP, deals its damage to the chosen zombie and
+ * counts down its uses. It goes to the discard pile when the last use is spent.
+ */
+export function fireGear(
+  state: GameState,
+  uid: string,
+  zombie: string,
+  content: Content,
+  events: GameEvent[],
+): GameState {
+  const card = state.piles.gear.find((c) => c.uid === uid)
+  const def = card && content.cards[card.card]?.gear
+  if (!card || !def || def.effect.kind !== 'shoot')
+    throw new Error('fireGear: validated gear is missing')
+  events.push({ type: 'gearUsed', uid, card: card.card })
+  const left = (state.gearLeft[uid] ?? 1) - 1
+  let next: GameState = {
+    ...state,
+    player: { ...state.player, ap: state.player.ap - def.effect.cost },
+    gearLeft: { ...state.gearLeft, [uid]: left },
+  }
+  next = damageZombies(next, [zombie], def.effect.damage, events)
+  if (def.lasts.kind === 'uses' && left <= 0) next = loseGear(next, card, 'uses', events)
+  return next
 }
 
 /** Extra finds in every search from the gear in front of you. */

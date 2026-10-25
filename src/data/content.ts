@@ -1,6 +1,6 @@
 import type { Content } from '../game/types'
 import { cards } from './cards'
-import { connections, extraBuildings, locations, startLocation } from './locations'
+import { connections, extraBuildings, largeMap, locations, startLocation } from './locations'
 
 /** The game's content. Tests and the campaign can pass their own. */
 export const defaultContent: Content = {
@@ -11,6 +11,7 @@ export const defaultContent: Content = {
   packCard: 'heavyLoad',
   woundCard: 'wound',
   extraBuildings,
+  largeMap,
   // What zombies carry: small, common things, and now and then something rare.
   bodyLoot: [
     { card: 'bandage', weight: 3 },
@@ -22,6 +23,7 @@ export const defaultContent: Content = {
     { card: 'lockpick', weight: 1 },
     { card: 'molotov', weight: 1 },
     { card: 'pistol', weight: 1 },
+    { card: 'knife', weight: 1 },
     { card: 'firstAidKit', weight: 1 },
   ],
   // Noise mostly brings Walkers; dusk brings more Runners, so the walk home gets faster and harder.

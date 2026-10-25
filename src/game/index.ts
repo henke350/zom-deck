@@ -1,5 +1,5 @@
-export { cardOptions, freeMoveTargets, listActions, targetKindOf } from './actions'
-export type { ModeOption, TargetKind } from './actions'
+export { cardOptions, freeMoveTargets, gearOptions, listActions, targetKindOf } from './actions'
+export type { GearOption, ModeOption, TargetKind } from './actions'
 export { ownedCount, totalCount } from './deck'
 export { applyAction, previewOutcome } from './engine'
 export { buildingKnown, cityContent } from './city'

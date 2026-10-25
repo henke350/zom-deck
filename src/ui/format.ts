@@ -42,6 +42,8 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       )
     case 'gearEquipped':
       return log.gearEquipped(cardText(event.card).name)
+    case 'gearUsed':
+      return log.gearUsed(cardText(event.card).name)
     case 'gearAbsorbed':
       return log.gearAbsorbed(event.amount)
     case 'gearLost':

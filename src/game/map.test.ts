@@ -65,7 +65,12 @@ describe('city map data', () => {
   })
 
   it('has a name and description for every place', () => {
-    const all = [...ids, ...Object.keys(defaultContent.extraBuildings ?? {})]
+    const largePlaces = Object.values(defaultContent.largeMap?.locations ?? {})
+      .filter((l) => !l.slot)
+      .map((l) => l.id)
+    const all = [
+      ...new Set([...ids, ...Object.keys(defaultContent.extraBuildings ?? {}), ...largePlaces]),
+    ]
     expect(Object.keys(texts.locations).sort()).toEqual(all.sort())
   })
 

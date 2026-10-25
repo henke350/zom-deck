@@ -4,7 +4,16 @@ import { texts } from '../../data/texts.en'
 import { Dialog } from './Dialog'
 
 /** The whole game on one page. Numbers come from the balance file. */
-export function RulesDialog({ balance, onClose }: { balance: Balance; onClose: () => void }) {
+export function RulesDialog({
+  balance,
+  onClose,
+  onShowTips,
+}: {
+  balance: Balance
+  onClose: () => void
+  /** Shown when the tips for new players are turned off: turns them back on. */
+  onShowTips?: () => void
+}) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const rules = texts.rules
@@ -28,6 +37,11 @@ export function RulesDialog({ balance, onClose }: { balance: Balance; onClose: (
         ))}
       </div>
       <div className="dialog-actions">
+        {onShowTips && (
+          <button type="button" className="btn" onClick={onShowTips}>
+            {texts.ui.showTips}
+          </button>
+        )}
         <button type="button" className="btn btn-primary" onClick={onClose}>
           {rules.close}
         </button>

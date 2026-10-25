@@ -25,6 +25,6 @@ export function locationText(id: LocationId): LocationText {
 
 /** Finds which card a uid belongs to, in any pile. */
 export function cardIdOf(state: GameState, uid: string): CardId | undefined {
-  const { draw, hand, inPlay, discard, removed } = state.piles
-  return [hand, inPlay, discard, draw, removed].flat().find((c) => c.uid === uid)?.card
+  const { draw, hand, inPlay, discard, removed, gear } = state.piles
+  return [hand, inPlay, gear, discard, draw, removed].flat().find((c) => c.uid === uid)?.card
 }

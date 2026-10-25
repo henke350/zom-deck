@@ -6,11 +6,13 @@ import {
   cityContent,
   expeditionResult,
   freeMoveTargets,
+  gearOptions,
   listActions,
   previewEndTurn,
   previewOutcome,
   validate,
   validateServiceHere,
+  zombiesAt,
 } from '../game'
 import type {
   Action,
@@ -33,7 +35,9 @@ import { RulesDialog } from './components/RulesDialog'
 import { TopBar } from './components/TopBar'
 import { EndTurnPreview } from './components/EndTurnPreview'
 import { cardText } from './names'
-import { markRulesSeen } from './storage'
+import { currentHint } from './hints'
+import { markRulesSeen, setTipsHidden, tipsHidden } from './storage'
+import { TipLine } from './components/TipLine'
 import { useGame } from './useGame'
 
 interface GameScreenProps {
@@ -64,6 +68,11 @@ export function GameScreen({
   // The buildings of this city, where they stand and how the roads connect them.
   const content = useMemo(() => cityContent(state, defaultContent), [state])
   const [rulesOpen, setRulesOpen] = useState(showRulesOnStart)
+  const [tipsOn, setTipsOn] = useState(() => !tipsHidden())
+  const showTips = (on: boolean) => {
+    setTipsHidden(!on)
+    setTipsOn(on)
+  }
   // A move that would end the expedition by walking home, waiting for the player to confirm.
   const [homeMove, setHomeMove] = useState<Action | null>(null)
   const [pending, setPending] = useState<PendingPlay | null>(null)
@@ -154,7 +163,10 @@ export function GameScreen({
       act(only)
       return
     }
-    if (option.target) setPending({ uid, mode: option.mode, kind: option.target, options: option })
+    if (option.target) {
+      if (option.target === 'zombie') setSelected(null)
+      setPending({ uid, mode: option.mode, kind: option.target, options: option })
+    }
   }
 
   const onTrash = (targetUid: string) => {
@@ -171,8 +183,13 @@ export function GameScreen({
   }
 
   // The side panel shows where you are (or a place you clicked). A hovered place is shown on top.
-  const shown =
-    pending?.kind === 'zombie' ? state.player.location : (selected ?? state.player.location)
+  // While a ranged weapon waits for a target, a tap on the map shows the zombies there.
+  const shown = selected ?? state.player.location
+  const ranged =
+    pending?.kind === 'zombie' &&
+    pending.options.actions.some(
+      (a) => !zombiesAt(state, state.player.location).some((z) => z.uid === a.target?.zombie),
+    )
   const peek = pending?.kind !== 'zombie' && hovered !== shown ? hovered : null
   const zombieTargets =
     pending?.kind === 'zombie'
@@ -207,7 +224,20 @@ export function GameScreen({
     setServiceOpen(false)
   }
   function cardIdFor(uid: string) {
-    return state.piles.hand.find((c) => c.uid === uid)?.card ?? uid
+    return [...state.piles.hand, ...state.piles.gear].find((c) => c.uid === uid)?.card ?? uid
+  }
+
+  // Use a piece of gear (the Crossbow): one target goes at once, more open a choice.
+  const onUseGear = (uid: string) => {
+    const option = gearOptions(state, uid, content)
+    const [only] = option?.actions ?? []
+    if (!option || !only) return
+    if (option.actions.length === 1) {
+      act(only)
+      return
+    }
+    setSelected(null)
+    setPending({ uid, mode: 0, kind: 'zombie', options: option })
   }
 
   return (
@@ -264,7 +294,7 @@ export function GameScreen({
       </main>
 
       <section className="hand-area" aria-label={texts.ui.hand}>
-        <GearRow state={state} content={content} />
+        <GearRow state={state} content={content} onUse={onUseGear} busy={pending !== null} />
         <div className="hand-bar">
           {pending || serviceOpen ? (
             <p className="prompt" role="status">
@@ -273,7 +303,7 @@ export function GameScreen({
                 {
                   location: texts.ui.chooseOnMap,
                   trash: texts.ui.chooseTrashTarget,
-                  zombie: texts.ui.chooseZombieTarget,
+                  zombie: ranged ? texts.ui.chooseZombieInRange : texts.ui.chooseZombieTarget,
                 }[pending?.kind ?? 'trash']
               }{' '}
               <button type="button" className="btn btn-quiet" onClick={cancelChoice}>
@@ -281,7 +311,11 @@ export function GameScreen({
               </button>
             </p>
           ) : (
-            <p className="prompt muted">{texts.ui.keepHint(state.balance.keepCards)}</p>
+            <TipLine
+              hint={tipsOn ? currentHint(state, content) : null}
+              keep={state.balance.keepCards}
+              onHide={() => showTips(false)}
+            />
           )}
           {preview && <EndTurnPreview preview={preview} />}
           <button
@@ -339,7 +373,13 @@ export function GameScreen({
         />
       )}
 
-      {rulesOpen && <RulesDialog balance={state.balance} onClose={closeRules} />}
+      {rulesOpen && (
+        <RulesDialog
+          balance={state.balance}
+          onClose={closeRules}
+          onShowTips={tipsOn ? undefined : () => showTips(true)}
+        />
+      )}
     </div>
   )
 }
