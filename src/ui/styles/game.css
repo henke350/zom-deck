@@ -858,3 +858,28 @@
     font-size: 14px;
   }
 }
+
+/* Gear in front of you: one short line above the hand */
+.gear-row {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+}
+.gear-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.gear-item {
+  border: 1.5px solid var(--teal);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  background: var(--bg);
+}

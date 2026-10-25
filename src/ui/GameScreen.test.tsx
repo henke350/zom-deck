@@ -234,6 +234,21 @@ describe('GameScreen: searching', () => {
   })
 })
 
+describe('GameScreen: gear', () => {
+  it('shows gear in front of you and how long it lasts', async () => {
+    const state = makeState({ hand: ['kevlarVest', 'search'], gear: ['flashlight'] })
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    const view = render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    const gear = () => within(screen.getByRole('list', { name: texts.ui.gear }))
+    expect(gear().getByText(texts.cards.flashlight.name)).toBeTruthy()
+    expect(gear().getByText(texts.ui.gearLeft('turns', 2))).toBeTruthy()
+    const vest = view.container.querySelector<HTMLElement>('[data-card="kevlarVest"]')!
+    await userEvent.setup().click(within(vest).getByRole('button', { name: texts.ui.play }))
+    expect(gear().getByText(texts.cards.kevlarVest.name)).toBeTruthy()
+    expect(gear().getByText(texts.ui.gearLeft('absorbs', 3))).toBeTruthy()
+  })
+})
+
 describe('GameScreen: rules and the end of an expedition', () => {
   const draw = ['bandage', 'bandage', 'bandage', 'bandage', 'bandage', 'bandage']
 

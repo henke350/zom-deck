@@ -23,6 +23,7 @@ import type {
 import type { Balance } from '../data/balance'
 import { CityMap } from './components/CityMap'
 import { ConfirmHomeDialog } from './components/ConfirmHomeDialog'
+import { GearRow } from './components/GearRow'
 import { EventLog } from './components/EventLog'
 import { FindDialog } from './components/FindDialog'
 import { GameOverPanel } from './components/GameOverPanel'
@@ -263,6 +264,7 @@ export function GameScreen({
       </main>
 
       <section className="hand-area" aria-label={texts.ui.hand}>
+        <GearRow state={state} content={content} />
         <div className="hand-bar">
           {pending || serviceOpen ? (
             <p className="prompt" role="status">

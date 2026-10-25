@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
+import { defaultContent } from '../data/content'
 import { cardOptions, freeMoveTargets, listActions } from './actions'
 import { applyAction } from './engine'
-import { cardsIn, makeState } from './testkit'
+import { makeState } from './testkit'
 import type { Action, GameState } from './types'
 import { validate } from './validate'
 
@@ -81,21 +82,10 @@ describe('move cards', () => {
     expect(state.player.location).toBe('supermarket')
   })
 
-  it('Running Shoes move up to 2 steps', () => {
-    const state = makeState({ hand: ['runningShoes'] })
-    expect(reasonFor(state, { type: 'playCard', uid: 'h1', target: { location: 'police' } })).toBe(
-      texts.reasons.tooFar(2),
-    )
-    const next = play(state, { type: 'playCard', uid: 'h1', target: { location: 'pharmacy' } })
-    expect(next.player.location).toBe('pharmacy')
-  })
-
-  it('Running Shoes draw a card as a Follow-up to another Move card', () => {
-    const state = makeState({ hand: ['run', 'runningShoes'], draw: ['bandage'] })
-    let next = play(state, { type: 'playCard', uid: 'h1', target: { location: 'street' } })
-    next = play(next, { type: 'playCard', uid: 'h2', target: { location: 'police' } })
+  it('Bicycle moves up to 3 steps', () => {
+    const state = makeState({ hand: ['bicycle'] })
+    const next = play(state, { type: 'playCard', uid: 'h1', target: { location: 'police' } })
     expect(next.player.location).toBe('police')
-    expect(cardsIn(next.piles.hand)).toEqual(['bandage'])
   })
 
   it('Soft Soles move one step', () => {
@@ -108,10 +98,10 @@ describe('move cards', () => {
   })
 
   it('offers only reachable destinations to the UI', () => {
-    const [option] = cardOptions(makeState({ hand: ['runningShoes'] }), 'h1')
+    const [option] = cardOptions(makeState({ hand: ['softSoles'] }), 'h1')
     const targets = option?.actions.map((a) => a.target?.location).sort()
     expect(option?.target).toBe('location')
-    expect(targets).toEqual(['houseA', 'houseB', 'pharmacy', 'street', 'supermarket', 'workshop'])
+    expect(targets).toEqual(['houseA', 'street'])
   })
 
   it('explains to the UI why a card has no legal use', () => {
@@ -139,14 +129,34 @@ describe('going home', () => {
   })
 
   it('stops a card mid-way when you win (no draw after arriving)', () => {
-    const state = makeState({
-      location: 'street',
-      packs: 2,
-      hand: ['run', 'runningShoes'],
-      draw: ['bandage'],
-    })
-    let next = play(state, { type: 'playCard', uid: 'h1', target: { location: 'pharmacy' } })
-    next = play(next, { type: 'playCard', uid: 'h2', target: { location: 'shelter' } })
+    // A test card that moves and then draws, like a sprint.
+    const content = {
+      ...defaultContent,
+      cards: {
+        ...defaultContent.cards,
+        sprint: {
+          id: 'sprint',
+          kind: 'action' as const,
+          cost: 1,
+          tags: ['move' as const],
+          trashable: true,
+          modes: [
+            {
+              effects: [
+                { kind: 'move' as const, maxSteps: 2 },
+                { kind: 'draw' as const, amount: 1 },
+              ],
+            },
+          ],
+        },
+      },
+    }
+    const state = makeState({ location: 'pharmacy', packs: 2, hand: ['sprint'], draw: ['bandage'] })
+    const next = applyAction(
+      state,
+      { type: 'playCard', uid: 'h1', target: { location: 'shelter' } },
+      content,
+    ).state
     expect(next.phase).toBe('gameOver')
     expect(next.piles.hand).toHaveLength(0)
   })

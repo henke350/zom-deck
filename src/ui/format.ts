@@ -40,6 +40,14 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
         event.reason,
         texts.zombieKinds[event.kind].name,
       )
+    case 'gearEquipped':
+      return log.gearEquipped(cardText(event.card).name)
+    case 'gearAbsorbed':
+      return log.gearAbsorbed(event.amount)
+    case 'gearLost':
+      return log.gearLost(cardText(event.card).name, event.reason)
+    case 'bodySearched':
+      return log.bodySearched(event.options.length)
     case 'zombieScreamed':
       return log.zombieScreamed(event.noise)
     case 'dangerRose':

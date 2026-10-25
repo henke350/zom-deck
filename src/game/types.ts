@@ -27,6 +27,31 @@ export type Effect =
   | { readonly kind: 'trashFromHand'; readonly filter: 'any' | 'junk' }
   | { readonly kind: 'scout'; readonly scope: 'one' | 'all'; readonly range?: number }
   | { readonly kind: 'burnBuilding' }
+  /** Gear: the card stays in front of you (see `CardDef.gear`) instead of being discarded. */
+  | { readonly kind: 'equip' }
+
+/** What a piece of gear does while it lies in front of you. */
+export type GearEffect =
+  /** Takes up to this much damage in each zombie phase (after Block). */
+  | { readonly kind: 'absorb'; readonly perPhase: number }
+  /** Your free move may go this many steps. */
+  | { readonly kind: 'freeMoveSteps'; readonly steps: number }
+  /** Every search reveals this many more finds. */
+  | { readonly kind: 'searchBonus'; readonly amount: number }
+
+/** When a piece of gear goes to the discard pile. */
+export type GearLasts =
+  /** After it has taken this much damage in all. */
+  | { readonly kind: 'absorbs'; readonly total: number }
+  /** As soon as a zombie hurts you. */
+  | { readonly kind: 'untilHit' }
+  /** After this many of your turns, counting the turn you put it on. */
+  | { readonly kind: 'turns'; readonly turns: number }
+
+export interface GearDef {
+  readonly effect: GearEffect
+  readonly lasts: GearLasts
+}
 
 export type EffectKind = Effect['kind']
 
@@ -56,6 +81,8 @@ export interface CardDef {
   readonly freeMoveCostWhileInHand?: number
   /** A rare find: seldom in searches, always in locked stashes. */
   readonly rare?: boolean
+  /** Gear: what the card does while it lies in front of you, and how long it lasts. */
+  readonly gear?: GearDef
 }
 
 export type LocationId = string
@@ -132,6 +159,8 @@ export interface PendingFind {
   readonly noise: number
   /** The finds come from an opened stash, not a search. */
   readonly fromStash?: boolean
+  /** The finds come from the bodies of zombies you just killed. */
+  readonly fromBody?: boolean
   /** This search also uncovered a locked stash. */
   readonly stashFound?: boolean
 }
@@ -153,6 +182,8 @@ export interface Content {
     /** With the danger meter: what noise, screams and hordes bring at each level (level 1 first). */
     readonly byDanger?: readonly ZombieMix[]
   }
+  /** What zombies carry: the pool a body search draws from (see `ZombieStats.loot`). */
+  readonly bodyLoot?: readonly LootEntry[]
   /**
    * More buildings that a random city can use instead of the ones on the classic map.
    * Their map position comes from the building slot they are placed in.
@@ -180,6 +211,8 @@ export interface Piles {
   readonly discard: readonly CardInstance[]
   /** Used-up and trashed cards. They never come back. */
   readonly removed: readonly CardInstance[]
+  /** Gear in front of you. It goes to the discard pile when it wears out. */
+  readonly gear: readonly CardInstance[]
 }
 
 export interface PlayerState {
@@ -224,6 +257,8 @@ export interface GameState {
   readonly noise: number
   /** The danger meter, from 1. Rises with packs and rare finds (see `balance.danger`). */
   readonly danger: number
+  /** For each piece of gear in front of you: damage it can still take, or turns it has left. */
+  readonly gearLeft: Readonly<Record<string, number>>
   /** Places the player has been this expedition (hidden danger is revealed there). */
   readonly visited: readonly LocationId[]
   /** The buildings of this city and where they stand. Absent: the classic map. */
@@ -249,6 +284,7 @@ export interface Stats {
   readonly damageFromZombies: number
   /** Health lost to your own cards (Adrenaline). */
   readonly damageFromCards: number
+  /** Damage kept off you by Block and gear (Kevlar Vest). */
   readonly damageBlocked: number
   readonly attacksByFollowers: number
   readonly attacksByZombiesThere: number
@@ -259,6 +295,8 @@ export interface Stats {
   readonly zombiesFromScreams: number
   /** Zombies brought by the danger meter's hordes. */
   readonly zombiesFromHordes: number
+  /** Body searches after killing zombies. */
+  readonly bodiesSearched: number
   /** The highest danger level reached. */
   readonly dangerReached: number
   readonly zombiesKilled: number
@@ -423,6 +461,15 @@ export type GameEvent =
       readonly hpLeft: number
     }
   | { readonly type: 'zombieKilled'; readonly uid: string }
+  | { readonly type: 'bodySearched'; readonly options: readonly CardId[] }
+  | { readonly type: 'gearEquipped'; readonly uid: string; readonly card: CardId }
+  | { readonly type: 'gearAbsorbed'; readonly uid: string; readonly amount: number }
+  | {
+      readonly type: 'gearLost'
+      readonly uid: string
+      readonly card: CardId
+      readonly reason: GearLasts['kind']
+    }
   | { readonly type: 'zombieNeutralized'; readonly uid: string }
   | { readonly type: 'scouted'; readonly locations: readonly LocationId[] }
   | { readonly type: 'buildingBurned'; readonly location: LocationId }

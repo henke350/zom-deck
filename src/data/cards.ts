@@ -83,18 +83,8 @@ export const cards = {
     cost: 0,
     tags: ['tool', 'quiet'],
     trashable: true,
-    modes: [
-      {
-        effects: [{ kind: 'searchBonus', amount: 1 }],
-        followUp: {
-          tag: 'tool',
-          effects: [
-            { kind: 'searchBonus', amount: 1 },
-            { kind: 'draw', amount: 1 },
-          ],
-        },
-      },
-    ],
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: { effect: { kind: 'searchBonus', amount: 1 }, lasts: { kind: 'turns', turns: 2 } },
   },
   alarmClock: {
     id: 'alarmClock',
@@ -162,12 +152,8 @@ export const cards = {
     cost: 1,
     tags: [],
     trashable: true,
-    modes: [
-      {
-        effects: [{ kind: 'block', amount: 2 }],
-        followUp: { tag: 'weapon', effects: [{ kind: 'block', amount: 3 }] },
-      },
-    ],
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: { effect: { kind: 'absorb', perPhase: 1 }, lasts: { kind: 'absorbs', total: 3 } },
   },
 
   // Finds: Move
@@ -177,18 +163,8 @@ export const cards = {
     cost: 1,
     tags: ['move'],
     trashable: true,
-    modes: [
-      {
-        effects: [{ kind: 'move', maxSteps: 2 }],
-        followUp: {
-          tag: 'move',
-          effects: [
-            { kind: 'move', maxSteps: 2 },
-            { kind: 'draw', amount: 1 },
-          ],
-        },
-      },
-    ],
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: { effect: { kind: 'freeMoveSteps', steps: 2 }, lasts: { kind: 'untilHit' } },
   },
   adrenaline: {
     id: 'adrenaline',

@@ -82,6 +82,10 @@ export function printDecks(content: Content, balance: Balance): PrintCard[] {
       for (let i = 0; i < entry.weight; i++) out.push({ card: entry.card, deck: building.id })
     }
   }
+  for (const entry of content.bodyLoot ?? []) {
+    if (content.cards[entry.card]?.rare) continue
+    for (let i = 0; i < entry.weight; i++) out.push({ card: entry.card, deck: 'body' })
+  }
   for (const card of Object.values(content.cards).filter((c) => c.rare)) {
     out.push({ card: card.id, deck: 'rare' })
   }
@@ -137,6 +141,7 @@ function deckColor(deck: string, content: Content): string {
   if (deck === 'start') return '#2a7462'
   if (deck === 'rare') return '#b8860b'
   if (deck === 'junk') return '#555555'
+  if (deck === 'body') return '#8a2f2a'
   const i = buildings(content).findIndex((b) => b.id === deck)
   return DECK_COLORS[i % DECK_COLORS.length] ?? '#444'
 }
@@ -145,6 +150,7 @@ function deckLabel(deck: string): string {
   if (deck === 'start') return 'Start deck'
   if (deck === 'rare') return 'Rare find'
   if (deck === 'junk') return 'Junk'
+  if (deck === 'body') return 'Body finds'
   return `${locName(deck)} finds`
 }
 
@@ -440,7 +446,7 @@ function rulesPages(content: Content, balance: Balance, cardBacks: boolean): str
   <div class="cols">
   <h3>What to print</h3>
   <ul>
-    <li><b>Cards</b>, 63 × 88 mm: start deck, one find deck per building, rare deck, junk. ${cardBacks ? 'Print double-sided (flip on long edge) or glue the backs on. Sleeves help.' : 'No backs: use sleeves with opaque backs. Each card names its deck at the bottom.'}</li>
+    <li><b>Cards</b>, 63 × 88 mm: start deck, one find deck per building, body deck, rare deck, junk. ${cardBacks ? 'Print double-sided (flip on long edge) or glue the backs on. Sleeves help.' : 'No backs: use sleeves with opaque backs. Each card names its deck at the bottom.'}</li>
     <li><b>Building tiles</b>, 80 × 57 mm, ${pool} buildings with an "Unknown" back.</li>
     <li><b>Tokens</b>: zombies (back: <i>has seen you</i>), packs, stashes, search, damage, block, burned and +1 find markers.</li>
     <li><b>Board</b> and <b>player board</b> (A4 landscape).</li>
@@ -450,7 +456,7 @@ function rulesPages(content: Content, balance: Balance, cardBacks: boolean): str
     <li>Place the board. Take the Supermarket tile, shuffle the other building tiles and draw ${slots - 1}. Shuffle these ${slots} tiles face down and put one on each dashed slot. The rest go back in the box.</li>
     <li>Shuffle the pack tokens (${b.packsOnMap - 1} packs, ${slots - b.packsOnMap} empty) face down onto the buildings that are not the Supermarket. The Supermarket always has a pack: mark it with a face-up pack token once you know where it is.</li>
     <li>Shuffle the stash tokens (${b.stashesOnMap} locked, ${slots - b.stashesOnMap} empty) face down, one on every building.</li>
-    <li>Shuffle each building's find deck and the rare deck. Shuffle your start deck (${Object.entries(
+    <li>Shuffle each building's find deck, the body deck and the rare deck. Shuffle your start deck (${Object.entries(
       b.starterDeck,
     )
       .map(([c, n]) => `${cardInfo(c).name} ×${n}`)
@@ -465,8 +471,9 @@ function rulesPages(content: Content, balance: Balance, cardBacks: boolean): str
   <h3>Buildings and zombies</h3>
   <p>The first time you step into a building or scout it, roll for its zombies on the tile: first how many, then one roll per zombie for its kind. Zombies where you stand <b>see you</b> when you arrive: flip them to <i>has seen you</i>. Sneak, Alarm Clock and Soft Soles stop that for this turn.</p>
   <p>In the zombie phase, zombies that have seen you move to you if you are within their follow range; the others lose track (flip back). Then every zombie where you stand attacks for its damage; Block takes damage first. Zombies never enter the Shelter. Damage you deal hits one zombie of your choice (Shotgun and Chainsaw: all of them); extra damage is lost. Mark damage with damage tokens.</p>
+  <p><b>Search the body:</b> when a card kills zombies, draw ${b.zombies.walker.loot} card per zombie (a Brute: ${b.zombies.brute.loot}) from the body deck, at most ${b.bodyLootMax}. Take one into your hand, trash a card from your hand, or take nothing; shuffle the rest back. No noise.</p>
   <h3>Searching</h3>
-  <p>Play Search in a building: draw ${b.searchOptions} cards from its find deck, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Choose one: put one find in your discard pile, or trash a card from your hand for good, or take nothing. Shuffle the rest back. +${b.searchNoise} noise. Quick search (no card): ${b.quickSearch.cost} AP and only ${b.quickSearch.options} finds. Each building can be searched ${b.searchesPerBuilding} times (search markers).</p>
+  <p>Play Search in a building: draw ${b.searchOptions} cards from its find deck, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Choose one: ${b.findsToHand ? 'put one find into your hand' : 'put one find in your discard pile'}, or trash a card from your hand for good, or take nothing. Shuffle the rest back. +${b.searchNoise} noise. Quick search (no card): ${b.quickSearch.cost} AP and only ${b.quickSearch.options} finds. Each building can be searched ${b.searchesPerBuilding} times (search markers).</p>
   <p>On the first search, turn its pack token: a pack moves to your Packs track and puts a Heavy Load into your discard pile. Turn its stash token too: a locked stash opens with a Tool card (${b.stashToolCost} AP, the card goes to your discard pile) or by force (${b.stashForce.cost} AP, +${b.stashForce.noise} noise). Draw ${b.stashOptions} rare finds and keep one.</p>
   <h3>Noise</h3>
   <p>When the noise marker reaches the threshold, zombies arrive where you stand (on the Street if you are in the Shelter) and the marker drops by the threshold. Roll d6 for each zombie's kind. They have seen you (unless they wait on the Street while you are in the Shelter).</p>
@@ -478,7 +485,7 @@ function rulesPages(content: Content, balance: Balance, cardBacks: boolean): str
   <h3>Services</h3>
   <p>Workshop (Dismantle) and Pharmacy or Hospital (Patch up): pay ${b.locationServiceCost} AP to trash a card from your hand. Patch up only takes Nerves and Wound.</p>
   <h3>Card words</h3>
-  <p><b>Follow-up X:</b> stronger if you already played a card with tag X this turn. <b>Use up:</b> trash the card after playing it. <b>Heavy Load</b> can't be trashed. <b>Wound</b> cards are only used in the Wound variant (lose ${b.wounds.damageInOnePhase}+ health in one zombie phase: take a Wound).</p>
+  <p><b>Follow-up X:</b> stronger if you already played a card with tag X this turn. <b>Use up:</b> trash the card after playing it. <b>Gear:</b> lay the card in front of you; it works every turn until it wears out (track it with a die), then put it in your discard pile. <b>Heavy Load</b> can't be trashed. <b>Wound</b> cards are only used in the Wound variant (lose ${b.wounds.damageInOnePhase}+ health in one zombie phase: take a Wound).</p>
   <h3>Differences from the screen version</h3>
   <p>Rare finds only come from stashes. Random picks are d6 tables, so the odds are rounded.</p>
   </div>

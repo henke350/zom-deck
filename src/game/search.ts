@@ -1,6 +1,7 @@
 import { texts } from '../data/texts.en'
 import type { Balance } from '../data/balance'
 import { gainCard, withoutCard } from './deck'
+import { gearSearchBonus } from './gear'
 import { nextFloat, shuffle } from './rng'
 import { addNoise, dangerLevel, raiseDanger, zombiesAt } from './zombies'
 import type {
@@ -12,6 +13,7 @@ import type {
   LootEntry,
   SiteState,
   Validation,
+  Zombie,
 } from './types'
 
 /**
@@ -130,7 +132,8 @@ export function performSearch(
     spec.extra +
     state.player.searchBonus +
     (peaceful ? state.balance.peacefulSearchBonus : 0) +
-    danger.extraFinds
+    danger.extraFinds +
+    gearSearchBonus(state, content)
   const [options, rng] = drawFinds(pool, count, state.rng)
   events.push({ type: 'searched', location, options, quick: spec.quick })
   const stashFound = site.stash === 'hidden'
@@ -169,6 +172,42 @@ export function performSearch(
     next = raiseDanger(next, content, 'pack', events)
   }
   return next
+}
+
+/**
+ * Search the body: after a card kills zombies, the player sees finds from what zombies carry
+ * (`content.bodyLoot`), one or more per zombie by kind (`loot`), up to `bodyLootMax`. The game
+ * then waits for the same choice as a search (take, scrap or nothing), with no noise.
+ */
+export function searchBodies(
+  state: GameState,
+  killed: readonly Zombie[],
+  content: Content,
+  events: GameEvent[],
+): GameState {
+  const loot = killed.reduce((sum, z) => sum + state.balance.zombies[z.kind].loot, 0)
+  const count = Math.min(loot, state.balance.bodyLootMax)
+  const bodyPool = content.bodyLoot ?? []
+  if (count <= 0 || bodyPool.length === 0 || state.phase !== 'action') return state
+  const rareWeight = dangerLevel(state).rareFindWeight
+  const pool = bodyPool.map((entry) =>
+    content.cards[entry.card]?.rare ? { ...entry, weight: entry.weight * rareWeight } : entry,
+  )
+  const [options, rng] = drawFinds(pool, count, state.rng)
+  if (options.length === 0) return { ...state, rng }
+  events.push({ type: 'bodySearched', options })
+  return {
+    ...state,
+    rng,
+    phase: 'chooseFind',
+    pendingFind: {
+      location: state.player.location,
+      options,
+      packFound: false,
+      noise: 0,
+      fromBody: true,
+    },
+  }
 }
 
 /** Rare finds that can turn up in a stash: every rare card, equally likely. */

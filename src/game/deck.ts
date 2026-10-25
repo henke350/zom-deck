@@ -3,7 +3,13 @@ import type { CardId, CardInstance, GameEvent, GameState, Piles } from './types'
 
 /** Cards the player owns: everything except used-up and trashed cards. */
 export function ownedCount(piles: Piles): number {
-  return piles.draw.length + piles.hand.length + piles.inPlay.length + piles.discard.length
+  return (
+    piles.draw.length +
+    piles.hand.length +
+    piles.inPlay.length +
+    piles.discard.length +
+    piles.gear.length
+  )
 }
 
 /** Every card in the game, including removed ones. */
@@ -45,7 +51,7 @@ export function drawCards(state: GameState, count: number, events: GameEvent[]):
   return { ...state, rng, piles: { ...state.piles, draw, hand, discard } }
 }
 
-/** Adds a new card to the discard pile. */
+/** Adds a new card to the discard pile, or a find to the hand when the balance says so. */
 export function gainCard(
   state: GameState,
   card: CardId,
@@ -54,9 +60,13 @@ export function gainCard(
 ): GameState {
   const instance: CardInstance = { uid: `c${state.nextUid}`, card }
   events.push({ type: 'cardGained', uid: instance.uid, card, reason })
+  const toHand = reason === 'find' && state.balance.findsToHand
+  const { hand, discard } = state.piles
   return {
     ...state,
     nextUid: state.nextUid + 1,
-    piles: { ...state.piles, discard: [...state.piles.discard, instance] },
+    piles: toHand
+      ? { ...state.piles, hand: [...hand, instance] }
+      : { ...state.piles, discard: [...discard, instance] },
   }
 }

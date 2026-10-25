@@ -17,7 +17,21 @@ export function checkInvariants(state: GameState, baseContent: Content = default
   const { piles, player, balance, stats } = state
 
   // Cards: every card has a unique uid c1, c2, …, and none is ever lost.
-  const cards = [piles.draw, piles.hand, piles.inPlay, piles.discard, piles.removed].flat()
+  const cards = [
+    piles.draw,
+    piles.hand,
+    piles.inPlay,
+    piles.discard,
+    piles.removed,
+    piles.gear,
+  ].flat()
+  for (const g of piles.gear) {
+    if (!content.cards[g.card]?.gear) fail(`${g.card} lies in front of you but is not gear`)
+    if ((state.gearLeft[g.uid] ?? 0) <= 0) fail(`gear ${g.uid} should have worn out`)
+  }
+  if (Object.keys(state.gearLeft).some((uid) => !piles.gear.some((g) => g.uid === uid))) {
+    fail('a gear counter has no gear')
+  }
   const uids = cards.map((c) => c.uid)
   if (new Set(uids).size !== uids.length) fail('a card is in two places')
   if (totalCount(piles) !== state.nextUid - 1) fail('cards were lost or invented')

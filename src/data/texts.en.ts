@@ -111,7 +111,8 @@ export const texts = {
       burned: 'Supply pack: lost in the fire, if there was one',
     },
     findTitle: 'Choose a find',
-    findIntro: (place: string) => `You searched ${place}. Take one find, or scrap a card instead.`,
+    findIntro: (place: string) =>
+      `You searched ${place}. Take one find into your hand, or scrap a card instead.`,
     packBanner: (packs: number) =>
       `You found a supply pack! You now carry ${packs}. It adds a Heavy Load to your deck.`,
     take: 'Take',
@@ -127,6 +128,15 @@ export const texts = {
     cancel: 'Cancel',
     chooseDestination: 'Choose where to go on the map.',
     goHere: 'Go here',
+    gear: 'Gear',
+    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns', n: number) =>
+      lasts === 'absorbs'
+        ? `takes ${n} more damage`
+        : lasts === 'untilHit'
+          ? 'until a zombie hurts you'
+          : n === 1
+            ? 'last turn'
+            : `${n} turns left`,
     chooseTrashTarget: 'Choose a card in your hand to trash.',
     useService: (name: string, cost: number) => `${name} (${cost} AP)`,
     rare: 'Rare',
@@ -146,6 +156,8 @@ export const texts = {
     },
     stashBanner: 'You also found a locked stash! Open it from the side panel.',
     stashTitle: 'Inside the stash',
+    bodyTitle: 'Search the body',
+    bodyIntro: 'It carried something. Take one find into your hand, or scrap a card instead.',
     stashIntro: 'Take one rare find, or scrap a card instead.',
     youAreHere: 'You are here',
     stepsAway: (n: number) => `${n} step${n === 1 ? '' : 's'} away`,
@@ -222,7 +234,7 @@ export const texts = {
       {
         heading: 'Searching',
         items: [
-          `Play Search in a building to see ${b.searchOptions} finds, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Take one into your deck, scrap a card from your hand for good, or take nothing.`,
+          `Play Search in a building to see ${b.searchOptions} finds, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Take one ${b.findsToHand ? 'straight into your hand' : 'into your deck'}, scrap a card from your hand for good, or take nothing.`,
           `No Search card? A quick search costs ${b.quickSearch.cost} AP and shows ${b.quickSearch.options} finds. Each building can be searched ${b.searchesPerBuilding} times.`,
           `The first search in a building that hides a pack gives you the pack and a Heavy Load card that clogs your deck. The Supermarket always has a pack.`,
           `Rare finds (marked Rare) seldom turn up. ${b.stashesOnMap} buildings hide a locked stash, found by searching there: open it with a Tool card for ${b.stashToolCost} AP, or force it for ${b.stashForce.cost} AP and +${b.stashForce.noise} noise, and pick 1 of ${b.stashOptions} rare finds.`,
@@ -233,6 +245,7 @@ export const texts = {
         items: [
           `When you end your turn, zombies that have seen you follow you. Then every zombie where you stand attacks. Block soaks up damage.`,
           `Walker: ${b.zombies.walker.hp} health, hits for ${b.zombies.walker.damage}, follows ${b.zombies.walker.followSteps} step. Runner: ${b.zombies.runner.hp} health, follows up to ${b.zombies.runner.followSteps} steps. Brute: ${b.zombies.brute.hp} health, hits for ${b.zombies.brute.damage}, never follows. Screamer: does not bite, but adds ${b.zombies.screamer.screamNoise} noise every turn while it has seen you.`,
+          `Kill a zombie and you can search its body: pick from ${b.zombies.walker.loot} find (a Brute: ${b.zombies.brute.loot}), up to ${b.bodyLootMax} when one card kills several. No noise.`,
           'Zombies two steps away lose track of you, and they never enter the Shelter.',
           "A building's zombies are only a guess until you go in or scout it. Next to the End turn button you can see who will attack.",
           ...(b.wounds.enabled
@@ -272,6 +285,7 @@ export const texts = {
           'Trash weak cards so your good cards come up more often. Nerves and Wound are junk. Heavy Load cannot be trashed.',
           'Follow-up: a card gets stronger if you already played a card with the named tag this turn.',
           'Use up: the card is removed for good after you play it.',
+          'Gear (Kevlar Vest, Running Shoes, Flashlight) stays in front of you after you play it and keeps working until it wears out. Then it goes to your discard pile, and you can draw it again.',
           `Workshop: Dismantle and Pharmacy: Patch up trash a card from your hand for ${b.locationServiceCost} AP. Patch up only takes Nerves and Wound.`,
         ],
       },
@@ -398,6 +412,16 @@ export const texts = {
     zombieLostTrack: (kind: string) => `A ${kind} loses track of you.`,
     zombieAttacked: (damage: number, kind: string) => `A ${kind} attacks you (${damage} damage).`,
     zombieScreamed: (noise: number) => `A Screamer shrieks: +${noise} noise.`,
+    gearEquipped: (card: string) => `You put on ${card}. It stays in front of you.`,
+    gearAbsorbed: (n: number) => `Your vest takes ${n} damage.`,
+    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns') =>
+      reason === 'absorbs'
+        ? `${card} is worn out.`
+        : reason === 'untilHit'
+          ? `You stumble: ${card} comes off.`
+          : `${card} runs out.`,
+    bodySearched: (n: number) =>
+      `You search the body: ${n === 1 ? '1 find' : `${n} finds`} to choose from.`,
     damageBlocked: (n: number) => `You block ${n} damage.`,
     zombieHit: (damage: number, hpLeft: number) =>
       hpLeft > 0
@@ -449,7 +473,7 @@ export const texts = {
     },
     flashlight: {
       name: 'Flashlight',
-      text: 'Your next search this turn reveals +1 find. Follow-up Tool: draw 1 card.',
+      text: 'Gear: every search reveals +1 find. Lasts this turn and the next.',
     },
     alarmClock: {
       name: 'Alarm Clock',
@@ -464,9 +488,12 @@ export const texts = {
     },
     kevlarVest: {
       name: 'Kevlar Vest',
-      text: 'Prevent up to 2 damage this turn. Follow-up Weapon: prevent 3 instead.',
+      text: 'Gear: takes 1 damage in each zombie phase. Wears out after 3 damage.',
     },
-    runningShoes: { name: 'Running Shoes', text: 'Move up to 2. Follow-up Move: draw 1 card.' },
+    runningShoes: {
+      name: 'Running Shoes',
+      text: 'Gear: your free move may go 2 steps. Lost when a zombie hurts you.',
+    },
     adrenaline: { name: 'Adrenaline', text: 'Gain 2 AP. Lose 1 health.' },
     travelLight: {
       name: 'Travel Light',

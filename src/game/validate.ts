@@ -2,6 +2,7 @@ import { defaultContent } from '../data/content'
 import { cityContent } from './city'
 import { texts } from '../data/texts.en'
 import { ownedCount } from './deck'
+import { freeMoveSteps } from './gear'
 import { distance, neighbors } from './map'
 import {
   activeEffects,
@@ -211,9 +212,12 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
 function validateFreeMove(state: GameState, action: FreeMoveAction, content: Content): Validation {
   const check = validateDestination(state, action.to, content)
   if (!check.ok) return check
-  if (!neighbors(content, state.player.location).includes(action.to)) {
-    return no(texts.reasons.notAdjacent)
-  }
+  const steps = freeMoveSteps(state, content)
+  const reachable =
+    steps > 1
+      ? distance(content, state.player.location, action.to) <= steps
+      : neighbors(content, state.player.location).includes(action.to)
+  if (!reachable) return no(texts.reasons.notAdjacent)
   if (state.player.freeMoveUsed) return no(texts.reasons.freeMoveUsed)
   const cost = freeMoveCost(state, content)
   if (state.player.ap < cost) return no(texts.reasons.freeMoveNeedsAp(cost, state.player.ap))
