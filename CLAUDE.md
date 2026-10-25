@@ -6,8 +6,9 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
 - **Source of truth for design and scope:** `docs/plan.md` (Danish). Read the
   "Gældende beslutninger" section first; later sections override earlier ones.
 - **Current milestone:** M0–M6 done (M5 waits only for the user's own three playthroughs).
-  **M7 – playtest and tuning** is in progress: tuning 1 (9 health, Run ×1, Search ×4) and rare finds with locked stashes are in;
-  the playtest is next. Balance changes are the user's call; show them the effect with
+  **M7 – playtest and tuning** is nearly done: tunings 1–3, zombie kinds, the danger meter, finds to
+  hand, body search and gear are in, and the user's own playtests are logged in the plan; only
+  tests by 2–3 other players are missing. M8 (polish and release) is next. Balance changes are the user's call; show them the effect with
   `npm run sim -- --set …` first.
   Work one milestone at a time and meet its "done" criteria before moving on.
 
