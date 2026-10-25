@@ -136,9 +136,11 @@ export function GameScreen({
     setRulesOpen(false)
   }
 
-  const onActivateLocation = (id: LocationId) => {
+  // A mouse click on a highlighted place goes there at once. A finger tap first shows the
+  // place; a second tap (or Go here in the panel) goes there, so a stray touch costs nothing.
+  const onActivateLocation = (id: LocationId, touch: boolean) => {
     const action = mapActions.get(id)
-    if (action) act(action)
+    if (action && (!touch || selected === id)) act(action)
     else setSelected(id)
   }
 
@@ -227,6 +229,7 @@ export function GameScreen({
               content={content}
               location={shown}
               moveCheck={moveCheckFor(shown)}
+              onMove={mapActions.has(shown) ? () => onActivateLocation(shown, false) : undefined}
               quickSearch={validate(state, { type: 'quickSearch' }, content)}
               onQuickSearch={() => act({ type: 'quickSearch' })}
               zombieTargets={zombieTargets}
