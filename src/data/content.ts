@@ -12,21 +12,13 @@ export const defaultContent: Content = {
   woundCard: 'wound',
   extraBuildings,
   largeMap,
-  // What zombies carry: small, common things, and now and then something rare.
+  // What zombies carry: small, everyday things. The good finds wait in the special buildings.
   bodyLoot: [
     { card: 'bandage', weight: 3 },
     { card: 'painkillers', weight: 2 },
     { card: 'alarmClock', weight: 2 },
     { card: 'flashlight', weight: 2 },
-    { card: 'baseballBat', weight: 2 },
-    { card: 'runningShoes', weight: 1 },
-    { card: 'lockpick', weight: 1 },
-    { card: 'molotov', weight: 1 },
-    { card: 'pistol', weight: 1 },
-    { card: 'knife', weight: 1 },
-    { card: 'headShot', weight: 1 },
-    { card: 'silentTakedown', weight: 1 },
-    { card: 'firstAidKit', weight: 1 },
+    { card: 'knife', weight: 2 },
   ],
   // Noise mostly brings Walkers; dusk brings more Runners, so the walk home gets faster and harder.
   // With the danger meter, noise and hordes bring the kinds of the current level instead.
