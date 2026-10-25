@@ -2,12 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { defaultContent } from '../data/content'
 import { cardImages } from './cardImages'
 
-/** Cards added after the illustrations were made. They show without a picture until art arrives. */
-const awaitingArt = ['knife', 'bow', 'crossbow']
-
 describe('card images', () => {
-  it('has an illustration for every card, except the ones still waiting for art', () => {
+  it('has an illustration for every card', () => {
     const missing = Object.keys(defaultContent.cards).filter((id) => !cardImages[id])
-    expect(missing.sort()).toEqual([...awaitingArt].sort())
+    expect(missing).toEqual([])
   })
 })
