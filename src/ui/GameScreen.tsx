@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import {
@@ -24,6 +24,7 @@ import type {
 } from '../game'
 import type { Balance } from '../data/balance'
 import { CityMap } from './components/CityMap'
+import { DangerBanner } from './components/DangerBanner'
 import { ConfirmHomeDialog } from './components/ConfirmHomeDialog'
 import { GearRow } from './components/GearRow'
 import { EventLog } from './components/EventLog'
@@ -68,6 +69,14 @@ export function GameScreen({
   // The buildings of this city, where they stand and how the roads connect them.
   const content = useMemo(() => cityContent(state, defaultContent), [state])
   const [rulesOpen, setRulesOpen] = useState(showRulesOnStart)
+  // A banner when the danger meter rises, so the ramp-up is felt.
+  const [dangerShown, setDangerShown] = useState(state.danger)
+  const [dangerBanner, setDangerBanner] = useState<number | null>(null)
+  if (state.danger !== dangerShown) {
+    setDangerShown(state.danger)
+    setDangerBanner(state.danger > dangerShown ? state.danger : null)
+  }
+  const closeDangerBanner = useCallback(() => setDangerBanner(null), [])
   const [tipsOn, setTipsOn] = useState(() => !tipsHidden())
   const showTips = (on: boolean) => {
     setTipsHidden(!on)
@@ -373,6 +382,14 @@ export function GameScreen({
         />
       )}
 
+      {dangerBanner !== null && (
+        <DangerBanner
+          level={dangerBanner}
+          balance={state.balance}
+          content={content}
+          onClose={closeDangerBanner}
+        />
+      )}
       {rulesOpen && (
         <RulesDialog
           balance={state.balance}
