@@ -305,7 +305,7 @@ export const cards = {
     trashable: true,
     modes: [
       {
-        effects: [{ kind: 'discardFromHand' }, { kind: 'draw', amount: 2 }],
+        effects: [{ kind: 'discardFromHand' }, { kind: 'draw', amount: 1 }],
       },
     ],
   },
