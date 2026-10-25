@@ -63,7 +63,8 @@ src/sim/   bots and balance reports (from M6), run in Node
   `buildingKnown` hides buildings the player has not been next to. `makeState` and
   `classicBalance` (testkit) use the classic map so tests can name places.
 - Search lives in `src/game/search.ts`: pack placement, weighted finds, the
-  `chooseFind` phase (take / scrap / decline), rare finds (`rare` on the card, weight scaled by
+  `chooseFind` phase (take / scrap / decline; taken finds go to the hand when `findsToHand`), body
+  searches after kills (`searchBodies`, `content.bodyLoot`), rare finds (`rare` on the card, weight scaled by
   `rareFindWeight`) and locked stashes (`openStash`). A search is always the last effect
   of a card mode, because the game then waits for the player.
 - Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per

@@ -57,7 +57,7 @@ describe('locked stashes', () => {
     for (const card of opened.pendingFind?.options ?? []) expect(rare.has(card)).toBe(true)
     const card = opened.pendingFind?.options[0] ?? ''
     const taken = play(opened, { type: 'takeFind', card })
-    expect(cardsIn(taken.piles.discard)).toContain(card)
+    expect(cardsIn(taken.piles.hand)).toContain(card)
     expect(taken.noise).toBe(0)
     expect(taken.sites.houseA?.stash).toBe('opened')
     expect(taken.stats.stashesOpened).toBe(1)

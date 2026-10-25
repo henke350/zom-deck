@@ -128,6 +128,7 @@ describe('noise', () => {
       'zombieKilled',
       'noiseAdded',
       'zombieArrived',
+      'bodySearched',
     ])
   })
 
@@ -320,6 +321,43 @@ describe('combat cards', () => {
     )
   })
 
+  it('killing a zombie lets you search its body: take a find into your hand, no noise', () => {
+    const state = here(['axe'])
+    const { state: looting, events } = applyAction(state, {
+      type: 'playCard',
+      uid: 'h1',
+      target: { zombie: 'z1' },
+    })
+    expect(looting.phase).toBe('chooseFind')
+    expect(looting.pendingFind).toMatchObject({ fromBody: true, noise: 0, packFound: false })
+    expect(looting.pendingFind?.options).toHaveLength(balance.zombies.walker.loot)
+    expect(types(events).at(-1)).toBe('bodySearched')
+    const card = looting.pendingFind!.options[0]!
+    const taken = play(looting, { type: 'takeFind', card })
+    expect(cardsIn(taken.piles.hand)).toContain(card)
+    expect(taken.noise).toBe(looting.noise)
+    expect(taken.stats.bodiesSearched).toBe(1)
+  })
+
+  it('a Brute carries more, and one card killing many shows at most a few finds', () => {
+    const brute = here(['chainsaw'], [{ at: 'police', kind: 'brute' }])
+    const afterBrute = play(brute, { type: 'playCard', uid: 'h1' })
+    expect(afterBrute.pendingFind?.options).toHaveLength(balance.zombies.brute.loot)
+    const crowd = here(
+      ['chainsaw'],
+      [1, 2, 3, 4].map(() => ({ at: 'police' })),
+    )
+    const afterCrowd = play(crowd, { type: 'playCard', uid: 'h1' })
+    expect(afterCrowd.zombies).toHaveLength(0)
+    expect(afterCrowd.pendingFind?.options).toHaveLength(balance.bodyLootMax)
+  })
+
+  it('a zombie that is only hurt has nothing to search yet', () => {
+    const next = play(here(['crowbar']), { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+    expect(next.phase).toBe('action')
+    expect(next.pendingFind).toBeUndefined()
+  })
+
   it('Crowbar wounds, a second hit kills', () => {
     let state = here(['crowbar', 'crowbar'])
     state = play(state, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
@@ -331,6 +369,7 @@ describe('combat cards', () => {
   it('Axe kills a fresh zombie, and Baseball Bat then Axe clears two', () => {
     let state = here(['baseballBat', 'axe'], [{ at: 'police', hp: 1 }, { at: 'police' }])
     state = play(state, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+    state = play(state, { type: 'declineFind' }) // leave the body
     state = play(state, { type: 'playCard', uid: 'h2', target: { zombie: 'z2' } })
     expect(state.zombies).toHaveLength(0)
     expect(state.piles.hand).toHaveLength(1) // the Bat drew a card
@@ -338,7 +377,7 @@ describe('combat cards', () => {
 
   it('Molotov hits every zombie here, burns the building and makes noise', () => {
     const state = here(['molotov', 'search'], [{ at: 'police' }, { at: 'police', hp: 3 }])
-    const next = play(state, { type: 'playCard', uid: 'h1' })
+    const next = play(play(state, { type: 'playCard', uid: 'h1' }), { type: 'declineFind' })
     expect(next.zombies).toEqual([expect.objectContaining({ uid: 'z2', hp: 1 })])
     expect(next.sites.police).toMatchObject({ burned: true, searchesLeft: 0 })
     expect(next.noise).toBe(2)

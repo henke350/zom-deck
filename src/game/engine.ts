@@ -2,7 +2,7 @@ import { defaultContent } from '../data/content'
 import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
-import { chooseFind, openStash, performSearch } from './search'
+import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
 import { validate } from './validate'
 import {
@@ -153,7 +153,12 @@ function playCard(
   if (next.phase === 'chooseFind' && next.pendingFind) {
     return { ...next, pendingFind: { ...next.pendingFind, noise } }
   }
-  return addNoise(next, noise, content, 'noise', events)
+  next = addNoise(next, noise, content, 'noise', events)
+
+  // Zombies this card killed can be searched.
+  const killed = new Set(events.flatMap((e) => (e.type === 'zombieKilled' ? [e.uid] : [])))
+  const bodies = state.zombies.filter((z) => killed.has(z.uid))
+  return searchBodies(next, bodies, content, events)
 }
 
 function resolveEffect(

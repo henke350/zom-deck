@@ -132,6 +132,8 @@ export interface PendingFind {
   readonly noise: number
   /** The finds come from an opened stash, not a search. */
   readonly fromStash?: boolean
+  /** The finds come from the bodies of zombies you just killed. */
+  readonly fromBody?: boolean
   /** This search also uncovered a locked stash. */
   readonly stashFound?: boolean
 }
@@ -153,6 +155,8 @@ export interface Content {
     /** With the danger meter: what noise, screams and hordes bring at each level (level 1 first). */
     readonly byDanger?: readonly ZombieMix[]
   }
+  /** What zombies carry: the pool a body search draws from (see `ZombieStats.loot`). */
+  readonly bodyLoot?: readonly LootEntry[]
   /**
    * More buildings that a random city can use instead of the ones on the classic map.
    * Their map position comes from the building slot they are placed in.
@@ -259,6 +263,8 @@ export interface Stats {
   readonly zombiesFromScreams: number
   /** Zombies brought by the danger meter's hordes. */
   readonly zombiesFromHordes: number
+  /** Body searches after killing zombies. */
+  readonly bodiesSearched: number
   /** The highest danger level reached. */
   readonly dangerReached: number
   readonly zombiesKilled: number
@@ -423,6 +429,7 @@ export type GameEvent =
       readonly hpLeft: number
     }
   | { readonly type: 'zombieKilled'; readonly uid: string }
+  | { readonly type: 'bodySearched'; readonly options: readonly CardId[] }
   | { readonly type: 'zombieNeutralized'; readonly uid: string }
   | { readonly type: 'scouted'; readonly locations: readonly LocationId[] }
   | { readonly type: 'buildingBurned'; readonly location: LocationId }

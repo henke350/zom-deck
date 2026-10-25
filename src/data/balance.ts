@@ -14,6 +14,8 @@ export interface ZombieStats {
   readonly followSteps: number
   /** Noise it makes at the end of each turn while it has seen you. */
   readonly screamNoise: number
+  /** Finds you see when you search its body after killing it (0: nothing to search). */
+  readonly loot: number
 }
 
 /** One step of the danger meter. */
@@ -82,6 +84,10 @@ export interface Balance {
   readonly locationServiceCost: number
   /** Rare finds count this much of their loot weight in an ordinary search (0–1). */
   readonly rareFindWeight: number
+  /** Taken finds go straight into your hand (true) or onto your discard pile (false). */
+  readonly findsToHand: boolean
+  /** The most finds one body search can show, however many zombies a card killed. */
+  readonly bodyLootMax: number
   /** Buildings that hide a locked stash of rare finds (placed at random). */
   readonly stashesOnMap: number
   /** Rare finds to choose from in an opened stash. */
@@ -119,10 +125,10 @@ export const balance: Balance = {
   packsOnMap: 4,
   starThresholds: [2, 3, 4],
   zombies: {
-    walker: { hp: 2, damage: 1, followSteps: 1, screamNoise: 0 },
-    runner: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0 },
-    brute: { hp: 4, damage: 2, followSteps: 0, screamNoise: 0 },
-    screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2 },
+    walker: { hp: 2, damage: 1, followSteps: 1, screamNoise: 0, loot: 1 },
+    runner: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0, loot: 1 },
+    brute: { hp: 4, damage: 2, followSteps: 0, screamNoise: 0, loot: 2 },
+    screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2, loot: 1 },
   },
   danger: {
     enabled: true,
@@ -145,6 +151,10 @@ export const balance: Balance = {
   hiddenBuildings: true,
   heavyLoadPerPack: 1,
   locationServiceCost: 1,
+  // Tuning 3 (25 Oct 2026, after playtests): more deckbuilding within one run, and a reward
+  // for killing zombies (search the body).
+  findsToHand: true,
+  bodyLootMax: 3,
   rareFindWeight: 0.25,
   stashesOnMap: 2,
   stashOptions: 2,

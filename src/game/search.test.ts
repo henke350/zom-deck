@@ -178,14 +178,22 @@ describe('choosing a find', () => {
       uid: 'h1',
     })
 
-  it('puts a taken find in the discard pile with a new id', () => {
+  it('puts a taken find straight into your hand with a new id', () => {
     const state = searched()
     const card = state.pendingFind?.options[0] ?? ''
     const next = play(state, { type: 'takeFind', card })
     expect(next.phase).toBe('action')
     expect(next.pendingFind).toBeUndefined()
-    expect(next.piles.discard.at(-1)).toEqual({ uid: `c${state.nextUid}`, card })
+    expect(next.piles.hand.at(-1)).toEqual({ uid: `c${state.nextUid}`, card })
     expect(ownedCount(next.piles)).toBe(ownedCount(state.piles) + 1)
+  })
+
+  it('puts a taken find in the discard pile when finds do not go to the hand', () => {
+    const state = searched()
+    const toDiscard = { ...state, balance: { ...state.balance, findsToHand: false } }
+    const card = state.pendingFind?.options[0] ?? ''
+    const next = play(toDiscard, { type: 'takeFind', card })
+    expect(next.piles.discard.at(-1)).toEqual({ uid: `c${state.nextUid}`, card })
   })
 
   it('only takes one of the revealed finds', () => {

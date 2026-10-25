@@ -22,6 +22,7 @@ export function emptyStats(startHp: number, startCards: number): Stats {
     woundsGained: 0,
     zombiesFromScreams: 0,
     zombiesFromHordes: 0,
+    bodiesSearched: 0,
     dangerReached: 1,
     stashesOpened: 0,
   }
@@ -83,6 +84,9 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
         break
       case 'zombieKilled':
         s.zombiesKilled += 1
+        break
+      case 'bodySearched':
+        s.bodiesSearched += 1
         break
     }
   }

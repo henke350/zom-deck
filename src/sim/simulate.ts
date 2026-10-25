@@ -40,6 +40,26 @@ export const variants: readonly Variant[] = [
     overrides: ['randomCity=false', 'hiddenBuildings=false'],
   },
   { name: 'Tilfældig by, alt synligt', overrides: ['hiddenBuildings=false'] },
+  {
+    name: 'Fund i afkastbunken og ingen ligsøgning (før 25. okt.)',
+    overrides: [
+      'findsToHand=false',
+      'zombies.walker.loot=0',
+      'zombies.runner.loot=0',
+      'zombies.brute.loot=0',
+      'zombies.screamer.loot=0',
+    ],
+  },
+  { name: 'Fund i afkastbunken', overrides: ['findsToHand=false'] },
+  {
+    name: 'Ingen ligsøgning',
+    overrides: [
+      'zombies.walker.loot=0',
+      'zombies.runner.loot=0',
+      'zombies.brute.loot=0',
+      'zombies.screamer.loot=0',
+    ],
+  },
   { name: 'Uden faremeter (før 23. okt.)', overrides: ['danger.enabled=false'] },
   {
     name: 'Faremeter som 23. okt. (horder, fare 4: 2 zombier, ingen belønning)',
