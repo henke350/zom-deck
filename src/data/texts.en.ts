@@ -86,6 +86,18 @@ export const texts = {
     burnedShort: 'Burned',
     noiseLabel: 'Noise',
     dangerLabel: 'Danger',
+    dangerNext: (finds: number) => `next: a pack or ${finds} ${finds === 1 ? 'find' : 'finds'}`,
+    dangerBanner: {
+      title: (level: number) => `Danger ${level}`,
+      intro: 'You are getting stronger, and so is the city.',
+      tougher: (n: number) => `Every zombie now has +${n} health.`,
+      noise: (threshold: number, arrivals: number) =>
+        `Every ${threshold} noise brings ${arrivals === 1 ? 'a zombie' : `${arrivals} zombies`}.`,
+      newKinds: (kinds: string) => `New zombies can be ${kinds}.`,
+      finds: (n: number) => `Every search finds +${n}.`,
+      close: 'Got it',
+    },
+    tougherZombie: 'tougher than usual',
     dangerBonus: (finds: number) => `Danger · +${finds} find`,
     noiseBadge: (n: number, arrivals: number) =>
       arrivals > 0 ? `+${n} noise · zombie!` : `+${n} noise`,

@@ -58,7 +58,11 @@ function ZombieMarks({
       <rect className="zpill" x={startX - 10} y={y - 9} width={pillW} height={18} rx={9} />
       {shown.map((z, i) => (
         <g key={z.uid} className={`zdot-${z.kind}`}>
-          <title>{texts.zombieKinds[z.kind].name}</title>
+          <title>
+            {z.hp > state.balance.zombies[z.kind].hp
+              ? `${texts.zombieKinds[z.kind].name} (${texts.ui.tougherZombie})`
+              : texts.zombieKinds[z.kind].name}
+          </title>
           <circle
             className={z.alerted ? 'zdot zdot-alert' : 'zdot'}
             cx={startX + i * step}
@@ -68,6 +72,11 @@ function ZombieMarks({
           <text className="zletter" x={startX + i * step} y={y + 3.2} textAnchor="middle">
             {texts.zombieKinds[z.kind].short}
           </text>
+          {z.hp > state.balance.zombies[z.kind].hp && (
+            <text className="ztough" x={startX + i * step + 6} y={y - 3} textAnchor="middle">
+              +
+            </text>
+          )}
         </g>
       ))}
       {zombies.length > MAX_DOTS && (

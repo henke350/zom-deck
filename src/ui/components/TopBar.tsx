@@ -7,13 +7,18 @@ interface StatProps {
   readonly value: string
   readonly tone?: 'danger' | 'warn' | 'good'
   readonly hint?: string
+  /** A small note next to the value (what comes next). */
+  readonly note?: string
 }
 
-function Stat({ label, value, tone, hint }: StatProps) {
+function Stat({ label, value, tone, hint, note }: StatProps) {
   return (
     <div className={`stat${tone ? ` stat-${tone}` : ''}`} title={hint}>
       <span className="stat-label">{label}</span>
-      <span className="stat-value">{value}</span>
+      <span className="stat-value">
+        {value}
+        {note && <small className="stat-note"> {note}</small>}
+      </span>
     </div>
   )
 }
@@ -22,9 +27,15 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
   const { player, balance, piles, turn } = state
   const dusk = turn >= balance.duskFromTurn
   const lowHp = player.hp <= Math.ceil(balance.maxHp / 3)
-  const threshold = noiseThreshold(state)
-  const extraFinds = dangerLevel(state).extraFinds
   const ui = texts.ui
+  const threshold = noiseThreshold(state)
+  // What raises danger next: a pack, or the next few finds.
+  const every = balance.danger.perFindsTaken
+  const dangerNote =
+    state.danger < balance.danger.levels.length && every > 0
+      ? ui.dangerNext(every - (state.stats.cardsTaken.length % every))
+      : undefined
+  const extraFinds = dangerLevel(state).extraFinds
 
   return (
     <header className="topbar" aria-label="Status">
@@ -43,6 +54,7 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
         <Stat
           label={extraFinds > 0 ? ui.dangerBonus(extraFinds) : ui.dangerLabel}
           value={`${state.danger}/${balance.danger.levels.length}`}
+          note={dangerNote}
           tone={
             state.danger >= balance.danger.levels.length
               ? 'danger'
