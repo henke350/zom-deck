@@ -606,7 +606,7 @@ export const texts = {
     },
     repack: {
       name: 'Repack',
-      text: 'Discard a card from your hand. Draw 2 cards.',
+      text: 'Discard a card from your hand. Draw 1 card.',
     },
   },
 

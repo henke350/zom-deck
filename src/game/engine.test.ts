@@ -309,14 +309,14 @@ describe('discarding (Repack)', () => {
     expect(cardOptions(alone, 'h1')[0]?.reason).toBe(texts.reasons.noDiscardTarget)
   })
 
-  it('puts the card on the discard pile, even junk, then draws 2', () => {
+  it('puts the card on the discard pile, even junk, then draws 1', () => {
     const { state: next, events } = applyAction(state, {
       type: 'playCard',
       uid: 'h1',
       target: { discard: 'h2' },
     })
     expect(events).toContainEqual({ type: 'cardDiscarded', uid: 'h2', card: 'heavyLoad' })
-    expect(cardsIn(next.piles.hand)).toEqual(['search', 'run', 'sneak'])
+    expect(cardsIn(next.piles.hand)).toEqual(['search', 'run'])
     expect(cardsIn(next.piles.discard)).toEqual(['heavyLoad'])
     expect(next.piles.removed).toEqual([])
     expect(totalCount(next.piles)).toBe(totalCount(state.piles))

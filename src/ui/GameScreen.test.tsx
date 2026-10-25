@@ -377,7 +377,7 @@ describe('GameScreen: rules and the end of an expedition', () => {
     expect(within(end).getByText(texts.end.tips.moreStars(4))).toBeTruthy()
   })
 
-  it('plays Repack by picking a card to discard, then draws 2', async () => {
+  it('plays Repack by picking a card to discard, then draws 1', async () => {
     const { user } = renderState(makeState({ draw, hand: ['repack', 'nerves', 'run'] }))
     const repack = document.querySelector<HTMLElement>('[data-card="repack"]')!
     await user.click(within(repack).getByRole('button', { name: texts.ui.play }))
@@ -386,7 +386,7 @@ describe('GameScreen: rules and the end of an expedition', () => {
     await user.click(within(nerves).getByRole('button', { name: texts.ui.discard }))
     const log = within(screen.getByRole('region', { name: texts.ui.log }))
     expect(log.getByText(texts.log.cardDiscarded('Nerves'))).toBeTruthy()
-    expect(document.querySelectorAll('[data-card="bandage"]')).toHaveLength(2)
+    expect(document.querySelectorAll('[data-card="bandage"]')).toHaveLength(1)
   })
 
   it('never opens a pop-up window over the game', async () => {
