@@ -8,6 +8,7 @@ import {
   scoutRangeOf,
   targetRangeOf,
   trashFilterOf,
+  needsDiscardTarget,
 } from './rules'
 import { zombiesInRange } from './zombies'
 import { validate } from './validate'
@@ -22,11 +23,12 @@ import type {
 } from './types'
 
 /** What a card mode needs the player to pick before it can be played. */
-export type TargetKind = 'location' | 'trash' | 'zombie' | undefined
+export type TargetKind = 'location' | 'trash' | 'discard' | 'zombie' | undefined
 
 export function targetKindOf(state: GameState, mode: CardMode): TargetKind {
   const effects = activeEffects(state, mode)
   if (trashFilterOf(effects)) return 'trash'
+  if (needsDiscardTarget(effects)) return 'discard'
   if (needsZombieTarget(effects)) return 'zombie'
   if (moveStepsOf(effects) !== undefined || scoutRangeOf(effects) !== undefined) return 'location'
   return undefined
@@ -46,6 +48,10 @@ function candidatesFor(
       return state.piles.hand
         .filter((target) => target.uid !== uid)
         .map((target) => ({ ...base, target: { trash: target.uid } }))
+    case 'discard':
+      return state.piles.hand
+        .filter((target) => target.uid !== uid)
+        .map((target) => ({ ...base, target: { discard: target.uid } }))
     case 'location':
       return Object.keys(content.locations).map((location) => ({ ...base, target: { location } }))
     case 'zombie':
@@ -131,6 +137,7 @@ export function cardOptions(
     const check = validate(state, { type: 'playCard', uid, mode: modeIndex }, content)
     let reason = check.ok ? undefined : check.reason
     if (reason === texts.reasons.chooseTrash) reason = texts.reasons.noTrashTarget
+    if (reason === texts.reasons.chooseDiscard) reason = texts.reasons.noDiscardTarget
     if (reason === texts.reasons.chooseDestination) reason = texts.reasons.noDestination
     return { mode: modeIndex, target, actions, reason }
   })

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 import type { Balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
-import { Dialog } from './Dialog'
+import { Page } from './Page'
 
 /** The whole game on one page. Numbers come from the balance file. */
-export function RulesDialog({
+export function RulesPage({
   balance,
   onClose,
   onShowTips,
@@ -19,7 +19,7 @@ export function RulesDialog({
   const rules = texts.rules
 
   return (
-    <Dialog labelledBy="rules-title" wide onEscape={onClose}>
+    <Page labelledBy="rules-title" onEscape={onClose}>
       <h2 id="rules-title" ref={heading} tabIndex={-1}>
         {rules.title}
       </h2>
@@ -36,7 +36,7 @@ export function RulesDialog({
           </section>
         ))}
       </div>
-      <div className="dialog-actions">
+      <div className="page-actions">
         {onShowTips && (
           <button type="button" className="btn" onClick={onShowTips}>
             {texts.ui.showTips}
@@ -46,6 +46,6 @@ export function RulesDialog({
           {rules.close}
         </button>
       </div>
-    </Dialog>
+    </Page>
   )
 }

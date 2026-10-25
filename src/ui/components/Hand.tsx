@@ -6,7 +6,7 @@ import { CardFace } from './CardFace'
 export interface PendingPlay {
   readonly uid: string
   readonly mode: number
-  readonly kind: 'location' | 'trash' | 'zombie'
+  readonly kind: 'location' | 'trash' | 'discard' | 'zombie'
   /** The card's mode, or a piece of gear being used (the Crossbow). */
   readonly options: ModeOption | GearOption
 }
@@ -16,11 +16,11 @@ interface HandProps {
   readonly content: Content
   readonly optionsByUid: ReadonlyMap<string, readonly ModeOption[]>
   readonly pending: PendingPlay | null
-  /** While a card or a service waits for a card to trash: the action for each card you can pick. */
-  readonly trashTargets: ReadonlyMap<string, Action> | null
+  /** While a card or a service waits for a card in hand: the action for each card you can pick. */
+  readonly pickTargets: ReadonlyMap<string, Action> | null
   readonly keepUid: string | null
   readonly onPlay: (uid: string, option: ModeOption) => void
-  readonly onTrash: (uid: string) => void
+  readonly onPick: (uid: string) => void
   readonly onToggleKeep: (uid: string) => void
 }
 
@@ -41,19 +41,19 @@ function CardView({
   content,
   optionsByUid,
   pending,
-  trashTargets,
+  pickTargets,
   keepUid,
   onPlay,
-  onTrash,
+  onPick,
   onToggleKeep,
 }: HandProps & { card: CardInstance }) {
   const def = content.cards[card.card]
   const info = cardText(card.card)
   const options = optionsByUid.get(card.uid) ?? []
   const isPendingCard = pending?.uid === card.uid
-  const trashTarget = trashTargets?.has(card.uid) ?? false
+  const pickTarget = pickTargets?.has(card.uid) ?? false
   // A card or service is waiting for a choice: other buttons are off until it is made or cancelled.
-  const choosing = pending !== null || trashTargets !== null
+  const choosing = pending !== null || pickTargets !== null
   const reasons = [
     ...new Set(
       options.flatMap((o) => {
@@ -70,7 +70,7 @@ function CardView({
     'card',
     def?.kind === 'junk' && 'card-junk',
     isPendingCard && 'card-pending',
-    trashTarget && 'card-target',
+    pickTarget && 'card-target',
     kept && 'card-kept',
   ]
     .filter(Boolean)
@@ -86,10 +86,14 @@ function CardView({
       <CardFace card={card.card} state={state} content={content} showFollowUp />
 
       <div className="card-actions">
-        {trashTargets ? (
-          trashTarget && (
-            <button type="button" className="btn btn-danger" onClick={() => onTrash(card.uid)}>
-              {texts.ui.trash}
+        {pickTargets ? (
+          pickTarget && (
+            <button
+              type="button"
+              className={pending?.kind === 'discard' ? 'btn' : 'btn btn-danger'}
+              onClick={() => onPick(card.uid)}
+            >
+              {pending?.kind === 'discard' ? texts.ui.discard : texts.ui.trash}
             </button>
           )
         ) : (

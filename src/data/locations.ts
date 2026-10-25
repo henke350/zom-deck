@@ -12,6 +12,7 @@ const houseLoot = [
   { card: 'knife', weight: 1 },
   { card: 'silentTakedown', weight: 1 },
   { card: 'travelLight', weight: 1 },
+  { card: 'repack', weight: 2 },
   { card: 'bicycle', weight: 1 },
 ] as const satisfies readonly LootEntry[]
 
@@ -99,6 +100,7 @@ export const locations = {
       { card: 'travelLight', weight: 2 },
       { card: 'painkillers', weight: 2 },
       { card: 'bandage', weight: 2 },
+      { card: 'repack', weight: 1 },
       { card: 'knife', weight: 1 },
       { card: 'bicycle', weight: 1 },
     ],

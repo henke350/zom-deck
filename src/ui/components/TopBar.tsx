@@ -33,7 +33,10 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
   const every = balance.danger.perFindsTaken
   const dangerNote =
     state.danger < balance.danger.levels.length && every > 0
-      ? ui.dangerNext(every - (state.stats.cardsTaken.length % every))
+      ? ui.dangerNext(
+          every - (state.stats.cardsTaken.length % every),
+          player.packs < balance.danger.calmPacks,
+        )
       : undefined
   const extraFinds = dangerLevel(state).extraFinds
 

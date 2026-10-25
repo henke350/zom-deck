@@ -27,9 +27,9 @@ npm run dev      # starter spillet på http://localhost:5173
 3. Klik på et af de stiplede nabosteder på kortet for at gå dertil gratis (én gang pr. tur).
 4. Spil kort med **Play**. Kort som Run beder dig vælge et sted på kortet; Toolbox beder dig vælge et kort at fjerne.
 5. Klik **Keep** på ét kort for at gemme det til næste tur, og klik **End turn**.
-6. Stå i en bygning og spil **Search**, eller brug **Quick search** i sidepanelet (2 AP, ingen kort). Vælg ét fund, skrot et kort fra hånden, eller tag ingenting.
+6. Stå i en bygning og spil **Search**, eller brug **Quick search** i sidepanelet (2 AP, ingen kort). Fundene vises der, hvor hånden ligger: vælg ét, eller tag ingenting (du kan ikke skrotte kort her – brug Toolbox, Painkillers eller en tjeneste). Spillet har ingen pop-up-vinduer.
 7. Supermarket har altid en forsyningspakke; fire andre ligger tilfældigt. Hver pakke lægger et Heavy Load i dit dæk.
-8. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★). Spillet spørger først **Go home now?**, så du kan vælge at tage én bygning mere.
+8. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★). Spillet spørger først **Go home now?** i linjen over hånden, så du kan vælge at tage én bygning mere.
 9. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol). Der er fire typer, vist med et bogstav i prikken: **W**alker (følger 1 skridt), **R**unner (hurtig, følger 2 skridt, 1 liv), **B**rute (4 liv, slår for 2, følger aldrig) og **S**creamer (bider ikke, men skriger og laver støj).
 10. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
 11. **Fare (Danger):** Starter på 1 og stiger for hver pakke, hvert sjældent fund og hvert 4. fund i dækket (op til 4). Fra fare 3 har alle zombier +1 liv, og zombierne i en bygning bestemmes først, når du går ind. Nye zombier bliver hurtigere og hårdere, men fundene bliver også bedre: fra fare 3 giver hver søgning +1 fund, og sjældne fund dukker oftere op.

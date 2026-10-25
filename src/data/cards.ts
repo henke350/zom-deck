@@ -297,6 +297,18 @@ export const cards = {
       },
     ],
   },
+  repack: {
+    id: 'repack',
+    kind: 'action',
+    cost: 0,
+    tags: ['tool'],
+    trashable: true,
+    modes: [
+      {
+        effects: [{ kind: 'discardFromHand' }, { kind: 'draw', amount: 2 }],
+      },
+    ],
+  },
 
   // Rare finds: seldom in searches, always in locked stashes.
   shotgun: {

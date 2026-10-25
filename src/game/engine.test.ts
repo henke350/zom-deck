@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
 import { totalCount } from './deck'
+import { cardOptions } from './actions'
 import { applyAction } from './engine'
 import { cardsIn, makeState, uidsIn } from './testkit'
 import type { Action, GameState } from './types'
@@ -287,5 +288,37 @@ describe('ending the turn', () => {
   it('lets you end the turn even with nothing useful to do', () => {
     const state = makeState({ hand: ['nerves', 'heavyLoad', 'search'], ap: 0, draw })
     expect(validate(state, { type: 'endTurn' }).ok).toBe(true)
+  })
+})
+
+describe('discarding (Repack)', () => {
+  const state = makeState({
+    hand: ['repack', 'heavyLoad', 'search'],
+    draw: ['run', 'sneak', 'crowbar'],
+  })
+
+  it('needs another card in hand to discard', () => {
+    expect(reasonFor(state, { type: 'playCard', uid: 'h1' })).toBe(texts.reasons.chooseDiscard)
+    expect(reasonFor(state, { type: 'playCard', uid: 'h1', target: { discard: 'h1' } })).toBe(
+      texts.reasons.discardSelf,
+    )
+    expect(reasonFor(state, { type: 'playCard', uid: 'h1', target: { discard: 'd1' } })).toBe(
+      texts.reasons.discardNotInHand,
+    )
+    const alone = makeState({ hand: ['repack'], draw: ['run'] })
+    expect(cardOptions(alone, 'h1')[0]?.reason).toBe(texts.reasons.noDiscardTarget)
+  })
+
+  it('puts the card on the discard pile, even junk, then draws 2', () => {
+    const { state: next, events } = applyAction(state, {
+      type: 'playCard',
+      uid: 'h1',
+      target: { discard: 'h2' },
+    })
+    expect(events).toContainEqual({ type: 'cardDiscarded', uid: 'h2', card: 'heavyLoad' })
+    expect(cardsIn(next.piles.hand)).toEqual(['search', 'run', 'sneak'])
+    expect(cardsIn(next.piles.discard)).toEqual(['heavyLoad'])
+    expect(next.piles.removed).toEqual([])
+    expect(totalCount(next.piles)).toBe(totalCount(state.piles))
   })
 })

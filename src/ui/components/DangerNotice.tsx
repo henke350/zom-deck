@@ -1,16 +1,13 @@
-import { useEffect } from 'react'
 import type { Balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
 import type { Content } from '../../game'
 
-/** How long the banner stays before it closes by itself. */
-const SHOW_MS = 6000
-
 /**
- * A short notice when the danger meter rises: what changed at the new level. Like moving the
- * marker on a board game's danger track, so the ramp-up is felt, not just logged.
+ * A short notice above the hand when the danger meter rises: what changed at the new level. Like
+ * moving the marker on a board game's danger track, so the ramp-up is felt, not just logged. It
+ * is no pop-up: it stays in the line above the hand until you close it or do something else.
  */
-export function DangerBanner({
+export function DangerNotice({
   level,
   balance,
   content,
@@ -21,11 +18,6 @@ export function DangerBanner({
   content: Content
   onClose: () => void
 }) {
-  useEffect(() => {
-    const timer = window.setTimeout(onClose, SHOW_MS)
-    return () => window.clearTimeout(timer)
-  }, [level, onClose])
-
   const b = texts.ui.dangerBanner
   const levels = balance.danger.levels
   const now = levels[level - 1]
@@ -46,16 +38,15 @@ export function DangerBanner({
   if (newKinds.length > 0) lines.push(b.newKinds(newKinds.join(', ')))
 
   return (
-    <div className="danger-banner" role="status" onClick={onClose}>
-      <b>{b.title(level)}</b> <span>{b.intro}</span>
-      <ul>
-        {lines.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-      <button type="button" className="btn btn-small" onClick={onClose}>
+    <p className="prompt danger-notice" role="status">
+      <b>{b.title(level)}</b>
+      <span>{b.intro}</span>
+      {lines.map((line) => (
+        <span key={line}>{line}</span>
+      ))}
+      <button type="button" className="btn btn-quiet btn-small" onClick={onClose}>
         {b.close}
       </button>
-    </div>
+    </p>
   )
 }

@@ -47,6 +47,8 @@ export interface DangerBalance {
   /** Level 1 first. */
   readonly levels: readonly DangerLevel[]
   readonly perPack: number
+  /** The first this many packs you find do not raise danger (a calm start). */
+  readonly calmPacks: number
   readonly perRareFind: number
   /** Danger also rises by one each time you have taken this many finds (0: never). */
   readonly perFindsTaken: number
@@ -100,6 +102,8 @@ export interface Balance {
   readonly rareFindWeight: number
   /** Taken finds go straight into your hand (true) or onto your discard pile (false). */
   readonly findsToHand: boolean
+  /** When choosing finds, you may scrap a card from your hand instead (off since tuning 5). */
+  readonly scrapInFinds: boolean
   /** The most finds one body search can show, however many zombies a card killed. */
   readonly bodyLootMax: number
   /** Buildings that hide a locked stash of rare finds (placed at random). */
@@ -156,6 +160,8 @@ export const balance: Balance = {
       { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 1, zombieHpBonus: 1 },
     ],
     perPack: 1,
+    // Tuning 6 (25 Oct 2026, user's call): the first pack you find does not raise danger.
+    calmPacks: 1,
     perRareFind: 1,
     // Tuning 4 (25 Oct 2026, after a playtest where zombies got too easy): danger follows the
     // deck too, zombies get tougher from danger 3, and buildings roll their zombies when seen.
@@ -176,6 +182,9 @@ export const balance: Balance = {
   findsToHand: true,
   bodyLootMax: 3,
   rareFindWeight: 0.25,
+  // Tuning 5 (25 Oct 2026, user's call): no scrapping a card while choosing finds. Trashing is
+  // done with Toolbox, Painkillers and the Dismantle / Patch up services.
+  scrapInFinds: false,
   stashesOnMap: 2,
   stashOptions: 2,
   stashToolCost: 1,
