@@ -4,6 +4,7 @@ import type { CardDef, CardMode, Content, Effect, EffectKind, GameState } from '
 /** Effects the engine can resolve. A card with any other effect is refused with a reason. */
 export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'equip',
+  'kill',
   'gainAp',
   'draw',
   'heal',
@@ -45,7 +46,15 @@ export function trashFilterOf(effects: readonly Effect[]): 'any' | 'junk' | unde
 
 /** True if the effects need the player to pick one zombie at their location. */
 export function needsZombieTarget(effects: readonly Effect[]): boolean {
-  return effects.some((e) => (e.kind === 'damage' || e.kind === 'neutralize') && e.target === 'one')
+  return effects.some(
+    (e) =>
+      (e.kind === 'damage' || e.kind === 'neutralize' || e.kind === 'kill') && e.target === 'one',
+  )
+}
+
+/** True if the effects may only target a zombie that has not seen you (Silent Takedown). */
+export function needsUnawareTarget(effects: readonly Effect[]): boolean {
+  return effects.some((e) => e.kind === 'kill' && e.unaware === true)
 }
 
 /** How far away a single zombie target may be (0: only where you stand). */

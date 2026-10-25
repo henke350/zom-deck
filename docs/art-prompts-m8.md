@@ -1,12 +1,12 @@
 # Codex prompt: the missing illustrations (M8)
 
 Paste everything in the box below into Codex, with this repository open. It generates the
-14 missing pictures in the same style as the existing ones, adds them to the game and opens a
+16 missing pictures in the same style as the existing ones, adds them to the game and opens a
 pull request.
 
 ```
 You are working in the repository for "One More Building", a small turn-based zombie
-survival deckbuilder (React + TypeScript). Your job: create the 14 missing illustrations in
+survival deckbuilder (React + TypeScript). Your job: create the 16 missing illustrations in
 EXACTLY the same style as the existing ones, and add them to the game.
 
 ## Look first
@@ -18,7 +18,7 @@ reference and the new images must look like they belong to the same set:
 Also read docs/card-art-prompt.md and docs/location-art/prompt.md (the prompts used for
 those images).
 
-## Style (same for all 14)
+## Style (same for all 16)
 
 - Landscape 3:2, 1536 x 1024 px, PNG. Full-bleed, no border, no frame, no transparency.
 - Match the existing art: gritty, painterly, hand-inked graphic-novel illustration, muted
@@ -39,7 +39,7 @@ those images).
   signs and posters must be blank or unreadable). No close-up faces. Do not copy any
   existing franchise, brand, character or game artwork.
 
-## The 14 images
+## The 16 images
 
 Rare cards (in the game they get a gold frame, so they may feel a little special: a warm
 shaft of light, a found treasure, but still the same muted style):
@@ -58,6 +58,8 @@ Ordinary weapon cards (no gold frame):
 | --------------- | ------ | ------- |
 | knife           | teal   | A plain sturdy kitchen or hunting knife lying on a worn wooden cutting board, its blade catching a thin line of light. No blood. |
 | bow             | teal   | A simple recurve bow and a quiver with a few arrows leaning against a gym bench, like it was taken from a school sports hall. |
+| headShot        | red    | A steady hand holding a heavy wrench or pistol grip close-up, aiming down at something out of frame, a single sharp line of light; tense focus. No blood, no target shown. |
+| silentTakedown  | teal   | A silhouette's gloved hand reaching around a doorframe from the shadows, a dark zombie silhouette turned away in the corridor beyond. Quiet, stealthy, no violence shown. |
 
 Places:
 
@@ -75,7 +77,7 @@ Places:
 
 1. Generate shotgun.png and gasStation.png first and show them to me before going on.
    Check that they match the reference images and contain no text.
-2. Generate the other twelve. If an image contains any text or drifts in style, regenerate it.
+2. Generate the other fourteen. If an image contains any text or drifts in style, regenerate it.
 3. Save the originals (1536 x 1024 PNG):
    - cards: art-source/cards/<id>.png
    - places: art-source/locations/<id>.png
@@ -84,7 +86,7 @@ Places:
    - places: src/assets/locations/<id>.webp
    (The game picks them up automatically by file name; no code change is needed.)
 5. Empty the `awaitingArt` lists in src/ui/cardImages.test.ts and
-   src/ui/locationImages.test.ts (they name exactly these 14 ids), so the tests now require
+   src/ui/locationImages.test.ts (they name exactly these 16 ids), so the tests now require
    the new images.
 6. Run `npm install` (once) and `npm run check`. It must pass.
 7. Commit on a new branch (never on main), with a commit message in English, and open a

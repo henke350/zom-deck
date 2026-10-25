@@ -61,11 +61,11 @@ describe('card catalog', () => {
     }
   })
 
-  it('has 18 find cards and 5 rare finds', () => {
+  it('has 20 find cards and 5 rare finds', () => {
     const starters = new Set<string>(starterCardIds)
     const defs: readonly [string, CardDef][] = all
     const finds = defs.filter(([id, def]) => def.kind === 'action' && !starters.has(id))
-    expect(finds.filter(([, def]) => !def.rare)).toHaveLength(18)
+    expect(finds.filter(([, def]) => !def.rare)).toHaveLength(20)
     expect(finds.filter(([, def]) => def.rare).map(([id]) => id)).toEqual([
       'shotgun',
       'chainsaw',

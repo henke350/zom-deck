@@ -110,3 +110,55 @@ describe('Crossbow', () => {
     expect(gearOptions(empty, 'g1')?.reason).toBe(texts.reasons.noZombiesInRange(1))
   })
 })
+
+describe('Head Shot', () => {
+  it('deals 1 damage alone, and kills any zombie after a Weapon card', () => {
+    const alone = makeState({
+      location: 'police',
+      hand: ['headShot'],
+      zombies: [{ at: 'police', kind: 'brute' }],
+    })
+    const hit = play(alone, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+    expect(hit.zombies[0]?.hp).toBe(balance.zombies.brute.hp - 1)
+    const combo = makeState({
+      location: 'police',
+      hand: ['headShot'],
+      tags: ['weapon'],
+      zombies: [{ at: 'police', kind: 'brute' }],
+    })
+    const dead = play(combo, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+    expect(dead.zombies).toHaveLength(0)
+  })
+})
+
+describe('Silent Takedown', () => {
+  it('kills a zombie that has not seen you, without a sound', () => {
+    const state = makeState({
+      location: 'police',
+      hand: ['silentTakedown'],
+      zombies: [{ at: 'police', kind: 'brute', alerted: false }],
+    })
+    const next = play(state, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+    expect(next.zombies).toHaveLength(0)
+    expect(next.noise).toBe(0)
+  })
+
+  it('cannot take down a zombie that has seen you, unless it is distracted', () => {
+    const seen = makeState({
+      location: 'police',
+      hand: ['silentTakedown'],
+      zombies: [{ at: 'police', alerted: true }],
+    })
+    expect(reasonFor(seen, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })).toBe(
+      texts.reasons.zombieSeesYou,
+    )
+    const sneaky = makeState({
+      location: 'police',
+      hand: ['sneak', 'silentTakedown'],
+      zombies: [{ at: 'police', alerted: true }],
+    })
+    const distracted = play(sneaky, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+    const done = play(distracted, { type: 'playCard', uid: 'h2', target: { zombie: 'z1' } })
+    expect(done.zombies).toHaveLength(0)
+  })
+})

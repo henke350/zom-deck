@@ -238,6 +238,11 @@ function resolveEffect(
           : zombiesAt(state, here).map((z) => z.uid)
       return damageZombies(state, targets, effect.amount, events)
     }
+    case 'kill': {
+      const target = state.zombies.find((z) => z.uid === action.target?.zombie)
+      if (!target) throw new Error('kill: validated zombie is missing')
+      return damageZombies(state, [target.uid], target.hp, events)
+    }
     case 'neutralize': {
       const targets =
         effect.target === 'one'

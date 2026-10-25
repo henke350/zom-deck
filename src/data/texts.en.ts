@@ -555,6 +555,14 @@ export const texts = {
       text: 'Heal 3. Use up: heal 6 instead.',
       modes: ['Heal 3', 'Use up: heal 6'],
     },
+    headShot: {
+      name: 'Head Shot',
+      text: 'Deal 1 damage. Follow-up Weapon: kill a zombie here instead, whatever its health.',
+    },
+    silentTakedown: {
+      name: 'Silent Takedown',
+      text: 'Kill a zombie here that has not seen you (or is distracted). Silent.',
+    },
     knife: { name: 'Knife', text: 'Deal 1 damage. Silent. Follow-up Quiet: deal 2 instead.' },
     bow: {
       name: 'Bow',
@@ -619,6 +627,7 @@ export const texts = {
     zombieOutOfRange: (range: number) =>
       `That zombie is out of range (here or ${range === 1 ? '1 step' : `${range} steps`} away, where you can see it).`,
     noSuchGear: 'That gear is not in front of you.',
+    zombieSeesYou: 'That zombie has seen you. Sneak, distract it or arrive unnoticed first.',
     gearNotUsable: 'This gear works by itself; there is nothing to use.',
   },
 } as const

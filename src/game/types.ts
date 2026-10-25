@@ -35,6 +35,8 @@ export type Effect =
   | { readonly kind: 'burnBuilding' }
   /** Gear: the card stays in front of you (see `CardDef.gear`) instead of being discarded. */
   | { readonly kind: 'equip' }
+  /** Kills one zombie here outright, whatever its health. `unaware`: only one that has not seen you. */
+  | { readonly kind: 'kill'; readonly target: 'one'; readonly unaware?: boolean }
 
 /** What a piece of gear does while it lies in front of you. */
 export type GearEffect =
