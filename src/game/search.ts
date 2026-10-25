@@ -11,24 +11,44 @@ import type {
   GameState,
   LocationId,
   LootEntry,
+  PackKind,
   SiteState,
   Validation,
   Zombie,
 } from './types'
 
+/** What earlier campaign days left behind in the city. */
+export interface CityMemory {
+  /** Searches already used in each building. */
+  readonly searchesUsed?: Readonly<Record<LocationId, number>>
+  readonly burned?: readonly LocationId[]
+  /** Campaign: every pack is food or water. */
+  readonly packKinds?: boolean
+}
+
 /**
  * Places supply packs (always in `alwaysHasPack` buildings, the rest at random among the
- * others) and the locked stashes (at random among all buildings).
+ * others) and the locked stashes (at random among all buildings). In a campaign, plundered
+ * and burned buildings hold no pack, so the packs move further out day by day; when too few
+ * buildings are left, fewer packs are placed.
  */
 export function placePacks(
   content: Content,
   balance: Balance,
   rng: number,
-): [sites: Record<LocationId, SiteState>, rng: number] {
+  memory: CityMemory = {},
+): [sites: Record<LocationId, SiteState>, rng: number, placed: number] {
+  const burned = new Set(memory.burned ?? [])
+  const searchesLeft = (id: LocationId) =>
+    burned.has(id) ? 0 : Math.max(0, balance.searchesPerBuilding - (memory.searchesUsed?.[id] ?? 0))
   const buildings = Object.values(content.locations).filter((l) => l.kind === 'building')
-  const fixed = buildings.filter((l) => l.alwaysHasPack).map((l) => l.id)
-  const others = buildings.filter((l) => !l.alwaysHasPack).map((l) => l.id)
-  const randomCount = balance.packsOnMap - fixed.length
+  const open = buildings.filter((l) => searchesLeft(l.id) > 0)
+  const fixed = open.filter((l) => l.alwaysHasPack).map((l) => l.id)
+  const others = open.filter((l) => !l.alwaysHasPack).map((l) => l.id)
+  const plundered = open.length < buildings.length
+  const randomCount = plundered
+    ? Math.min(Math.max(0, balance.packsOnMap - fixed.length), others.length)
+    : balance.packsOnMap - fixed.length
   if (randomCount < 0 || randomCount > others.length) {
     throw new Error(`Cannot place ${balance.packsOnMap} packs in ${buildings.length} buildings`)
   }
@@ -39,23 +59,33 @@ export function placePacks(
 
   const [shuffled, afterPacks] = shuffle(others, rng)
   const withPack = new Set([...fixed, ...shuffled.slice(0, randomCount)])
-  const [stashOrder, next] = shuffle(
-    buildings.map((l) => l.id),
+  // A stash is found by the first search, so it only goes where searches are left.
+  const [stashOrder, afterStashes] = shuffle(
+    (plundered ? open : buildings).map((l) => l.id),
     afterPacks,
   )
   const withStash = new Set(stashOrder.slice(0, balance.stashesOnMap))
+  let next = afterStashes
   const sites: Record<LocationId, SiteState> = {}
   for (const building of buildings) {
+    const hasPack = withPack.has(building.id)
+    let packKind: PackKind | undefined
+    if (memory.packKinds && hasPack) {
+      const [roll, after] = nextFloat(next)
+      next = after
+      packKind = roll < 0.5 ? 'food' : 'water'
+    }
     sites[building.id] = {
-      searchesLeft: balance.searchesPerBuilding,
-      hasPack: withPack.has(building.id),
+      searchesLeft: searchesLeft(building.id),
+      hasPack,
       packTaken: false,
       scouted: false,
-      burned: false,
+      burned: burned.has(building.id),
       stash: withStash.has(building.id) ? 'hidden' : 'none',
+      ...(packKind ? { packKind } : {}),
     }
   }
-  return [sites, next]
+  return [sites, next, withPack.size]
 }
 
 /** Can the player search where they stand? */
@@ -119,11 +149,13 @@ export function performSearch(
   const site = state.sites[location]
   // Rare finds only count part of their weight in an ordinary search; more at higher danger.
   const danger = dangerLevel(state)
-  const pool = (content.locations[location]?.lootPool ?? []).map((entry) =>
-    content.cards[entry.card]?.rare
-      ? { ...entry, weight: entry.weight * danger.rareFindWeight }
-      : entry,
-  )
+  const pool = (content.locations[location]?.lootPool ?? [])
+    .filter((entry) => !entry.campaignOnly || state.campaignDay !== undefined)
+    .map((entry) =>
+      content.cards[entry.card]?.rare
+        ? { ...entry, weight: entry.weight * danger.rareFindWeight }
+        : entry,
+    )
   if (!site) throw new Error(`performSearch: ${location} cannot be searched`)
 
   const peaceful = zombiesAt(state, location).length === 0
@@ -165,7 +197,8 @@ export function performSearch(
         [location]: { ...(next.sites[location] ?? site), hasPack: false, packTaken: true },
       },
     }
-    events.push({ type: 'packFound', location, packs })
+    const kind = site.packKind
+    events.push({ type: 'packFound', location, packs, ...(kind ? { kind } : {}) })
     for (let i = 0; i < state.balance.heavyLoadPerPack; i++) {
       next = gainCard(next, content.packCard, 'pack', events)
     }

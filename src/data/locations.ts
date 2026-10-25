@@ -367,3 +367,22 @@ export const largeMap: {
     ['square', 'b7'],
   ],
 }
+
+/**
+ * Campaign: how often each building offers Salvage (materials for the base) among its finds.
+ * Workshops and petrol stations are full of scrap; homes have a little.
+ */
+export const salvageWeights: Readonly<Record<string, number>> = {
+  workshop: 5,
+  gasStation: 4,
+  school: 3,
+  apartments: 3,
+  sportsShop: 2,
+  supermarket: 2,
+  police: 2,
+  hospital: 2,
+  pharmacy: 1,
+  church: 2,
+  houseA: 2,
+  houseB: 2,
+}

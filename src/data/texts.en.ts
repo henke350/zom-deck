@@ -358,6 +358,25 @@ export const texts = {
     ],
   },
 
+  /** Version 2: the campaign and the base between days. */
+  campaign: {
+    upgrades: {
+      lookout: {
+        name: 'Lookout',
+        text: 'At the start of each expedition, see the exact zombies (and any pack) in 2 buildings.',
+      },
+      workbench: { name: 'Workbench', text: 'Start each expedition with one Nerves fewer.' },
+      infirmary: { name: 'Infirmary', text: 'Start each expedition with +2 health.' },
+      locker: { name: 'Locker', text: 'Keep 1 card you found for the next expedition.' },
+      rainCollector: { name: 'Rain Collector', text: '+1 water every second night.' },
+      garden: { name: 'Garden', text: '+1 food every second night.' },
+    },
+    reasons: {
+      over: 'The campaign is over.',
+      built: 'Already built.',
+      materials: (cost: number, have: number) => `Needs ${cost} materials. You have ${have}.`,
+    },
+  },
   confirmHome: {
     title: 'Go home now?',
     body: (packs: number, stars: number) =>
@@ -523,6 +542,10 @@ export const texts = {
     heavyLoad: {
       name: 'Heavy Load',
       text: "Unplayable. Can't be trashed. While it's in your hand, your free move costs 1 AP.",
+    },
+    salvage: {
+      name: 'Salvage',
+      text: "Material for your base. Unplayable. Can't be trashed. While it's in your hand, your free move costs 1 AP.",
     },
     wound: {
       name: 'Wound',

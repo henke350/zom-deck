@@ -47,7 +47,8 @@ export function checkInvariants(state: GameState, baseContent: Content = default
 
   // Packs: found plus still hidden (or burned with the building) is always the number placed.
   const hidden = Object.values(state.sites).filter((s) => s.hasPack).length
-  if (player.packs + hidden !== balance.packsOnMap) fail('supply packs do not add up')
+  const placed = state.packsPlaced ?? balance.packsOnMap
+  if (player.packs + hidden !== placed) fail('supply packs do not add up')
   if (stats.packsFound !== player.packs) fail('packs found do not match the stats')
   for (const [id, site] of Object.entries(state.sites)) {
     if (site.searchesLeft < 0 || site.searchesLeft > balance.searchesPerBuilding) {

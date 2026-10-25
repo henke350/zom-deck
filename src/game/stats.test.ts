@@ -95,6 +95,9 @@ describe('expedition result', () => {
     expect(expeditionResult(home)).toEqual({
       outcome: { result: 'won', cause: 'home', stars: 1 },
       packs: 2,
+      food: 0,
+      water: 0,
+      materials: 0,
       hpLeft: balance.maxHp,
       turnsUsed: 1,
       cardsFound: [],

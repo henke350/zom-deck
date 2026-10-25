@@ -1,16 +1,38 @@
-import type { Content } from '../game/types'
+import type { Content, LocationDef } from '../game/types'
 import { cards } from './cards'
-import { connections, extraBuildings, largeMap, locations, startLocation } from './locations'
+import {
+  connections,
+  extraBuildings,
+  largeMap,
+  locations,
+  salvageWeights,
+  startLocation,
+} from './locations'
+
+/** Adds Salvage to every building's finds; it only turns up in a campaign (`campaignOnly`). */
+function withSalvage<L extends Partial<LocationDef>>(
+  all: Readonly<Record<string, L>>,
+): Record<string, L> {
+  return Object.fromEntries(
+    Object.entries(all).map(([id, loc]) => {
+      const weight = salvageWeights[id] ?? 0
+      if (!loc.lootPool || weight <= 0) return [id, loc]
+      const salvage = { card: 'salvage', weight, campaignOnly: true }
+      return [id, { ...loc, lootPool: [...loc.lootPool, salvage] }]
+    }),
+  )
+}
 
 /** The game's content. Tests and the campaign can pass their own. */
 export const defaultContent: Content = {
   cards,
-  locations,
+  locations: withSalvage(locations),
   connections,
   startLocation,
   packCard: 'heavyLoad',
   woundCard: 'wound',
-  extraBuildings,
+  salvageCard: 'salvage',
+  extraBuildings: withSalvage(extraBuildings),
   largeMap,
   // What zombies carry: small, everyday things. The good finds wait in the special buildings.
   bodyLoot: [

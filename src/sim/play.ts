@@ -1,5 +1,5 @@
 import { defaultContent } from '../data/content'
-import { applyAction, expeditionResult, newGame, ownedCount, validate } from '../game'
+import { applyAction, expeditionResult, newGame, ownedCount, resultWith, validate } from '../game'
 import type { Balance } from '../data/balance'
 import type {
   CardId,
@@ -99,14 +99,9 @@ export function playGame(bot: Bot, seed: number, options: PlayOptions = {}): Gam
     }
   }
 
-  const result = expeditionResult(state) ?? {
-    outcome: { result: 'lost', cause: 'darkness' },
-    packs: state.player.packs,
-    hpLeft: state.player.hp,
-    turnsUsed: state.turn,
-    cardsFound: state.stats.cardsTaken,
-    stats: state.stats,
-  }
+  const result =
+    expeditionResult(state, content) ??
+    resultWith(state, { result: 'lost', cause: 'darkness' }, content)
   return {
     seed,
     result,

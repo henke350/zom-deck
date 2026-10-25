@@ -9,6 +9,9 @@ function result(outcome: Outcome, packs: number, stats: Partial<Stats> = {}): Ex
   return {
     outcome,
     packs,
+    food: 0,
+    water: 0,
+    materials: 0,
     hpLeft: 0,
     turnsUsed: 6,
     cardsFound: stats.cardsTaken ?? [],

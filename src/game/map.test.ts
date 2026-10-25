@@ -95,7 +95,9 @@ describe('loot pools', () => {
       const cards = new Set(loc.lootPool?.map((entry) => entry.card))
       expect(cards.size).toBeGreaterThanOrEqual(5)
       for (const entry of loc.lootPool ?? []) {
-        expect(defaultContent.cards[entry.card]?.kind).toBe('action')
+        // Salvage (campaign only) is the one find that is not a playable card.
+        const kind = entry.campaignOnly ? 'junk' : 'action'
+        expect(defaultContent.cards[entry.card]?.kind).toBe(kind)
         expect(entry.weight).toBeGreaterThan(0)
       }
     }

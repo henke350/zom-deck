@@ -122,11 +122,13 @@ export function maybeRollCity(
 /**
  * Does the player know what this building is? Places that are not buildings always are. With
  * hidden buildings, a building is known once the player has stood on it or next to it, or
- * scouted it.
+ * scouted it (in a campaign: on any day so far).
  */
 export function buildingKnown(state: GameState, content: Content, id: LocationId): boolean {
   const def = content.locations[id]
   if (!state.balance.hiddenBuildings || def?.kind !== 'building') return true
   if (state.visited.includes(id) || state.sites[id]?.scouted) return true
+  // Campaign: what you learned about the city on earlier days stays known.
+  if (state.known?.includes(id)) return true
   return neighbors(content, id).some((n) => state.visited.includes(n))
 }

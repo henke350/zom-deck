@@ -21,6 +21,45 @@ export interface ZombieStats {
   readonly loot: number
 }
 
+/** What you can build at the base between campaign days (texts in texts.en.ts). */
+export type UpgradeId =
+  'lookout' | 'workbench' | 'infirmary' | 'locker' | 'rainCollector' | 'garden'
+
+/**
+ * Version 2: a campaign of days (docs/plan.md, section 12). Each day is one expedition in the
+ * same city; in the evening you eat and drink, then build on the base with materials.
+ */
+export interface CampaignBalance {
+  readonly days: number
+  /** Eaten and drunk every evening. */
+  readonly foodPerNight: number
+  readonly waterPerNight: number
+  /** No food in the evening: this many extra Nerves in the next expedition. */
+  readonly hungerNerves: number
+  /** No water in the evening: the next expedition starts with this much less health. */
+  readonly thirstHp: number
+  /** Killed or caught by the dark: today's finds are lost and tomorrow starts with Wounds. */
+  readonly woundsAfterLoss: number
+  /** How many lost days you can survive; one more ends the campaign. */
+  readonly lossesAllowed: number
+  /** Packs you need to go home at the end of a day (0: you may go home empty-handed). */
+  readonly packsToGoHome: number
+  /** More start zombies in every building as the days go by (day 1 first; last value repeats). */
+  readonly extraZombiesByDay: readonly number[]
+  readonly startFood: number
+  readonly startWater: number
+  /** Materials each upgrade costs. */
+  readonly upgradeCost: Readonly<Record<UpgradeId, number>>
+  /** Lookout: buildings scouted at the start of each expedition. */
+  readonly lookoutBuildings: number
+  /** Workbench: Nerves taken out of the start deck. */
+  readonly workbenchNerves: number
+  /** Infirmary: extra health (and maximum health) in every expedition. */
+  readonly infirmaryHp: number
+  /** Rain Collector and Garden produce 1 every this many nights. */
+  readonly productionEvery: number
+}
+
 /** One step of the danger meter. */
 export interface DangerLevel {
   /** Noise that brings zombies at this level. */
@@ -123,6 +162,7 @@ export interface Balance {
     readonly sneak: number
     readonly nerves: number
   }
+  readonly campaign: CampaignBalance
 }
 
 export const balance: Balance = {
@@ -191,6 +231,33 @@ export const balance: Balance = {
   stashForce: { cost: 2, noise: 2 },
   wounds: { enabled: false, damageInOnePhase: 2 },
   starterDeck: { search: 4, crowbar: 2, run: 1, sneak: 1, nerves: 2 },
+  // Version 2, K1–K2 (25 Oct 2026): first numbers from docs/plan.md section 12, to be tuned
+  // with campaign simulations and playtests.
+  campaign: {
+    days: 7,
+    foodPerNight: 1,
+    waterPerNight: 1,
+    hungerNerves: 1,
+    thirstHp: 2,
+    woundsAfterLoss: 2,
+    lossesAllowed: 1,
+    packsToGoHome: 0,
+    extraZombiesByDay: [0, 0, 0, 1, 1, 1, 2],
+    startFood: 0,
+    startWater: 0,
+    upgradeCost: {
+      lookout: 2,
+      workbench: 3,
+      infirmary: 3,
+      locker: 4,
+      rainCollector: 4,
+      garden: 6,
+    },
+    lookoutBuildings: 2,
+    workbenchNerves: 1,
+    infirmaryHp: 2,
+    productionEvery: 2,
+  },
 }
 
 export function starterDeckSize(b: Balance): number {

@@ -54,6 +54,16 @@ export const cards = {
     freeMoveCostWhileInHand: 1,
   },
   wound: { id: 'wound', kind: 'junk', cost: 0, tags: [], trashable: true, modes: [] },
+  // Campaign only: material for the base. It weighs on you like a Heavy Load until you are home.
+  salvage: {
+    id: 'salvage',
+    kind: 'junk',
+    cost: 0,
+    tags: [],
+    trashable: false,
+    modes: [],
+    freeMoveCostWhileInHand: 1,
+  },
 
   // Finds: Quiet
   softSoles: {

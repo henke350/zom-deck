@@ -6,7 +6,7 @@ export { buildingKnown, cityContent } from './city'
 export { distance, distancesFrom, neighbors } from './map'
 export { freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
 export { newGame, starterDeck } from './setup'
-export { expeditionResult } from './stats'
+export { expeditionResult, resultWith } from './stats'
 export { validate, validateServiceHere } from './validate'
 export {
   dangerLevel,
@@ -19,3 +19,16 @@ export {
 } from './zombies'
 export type { EndTurnPreview, NoisePreview, ZombieInfo } from './zombies'
 export type * from './types'
+export {
+  build,
+  chooseLocker,
+  dayBalance,
+  daySeed,
+  daySetup,
+  finishDay,
+  lockerChoices,
+  newCampaign,
+  upgradeIds,
+  validateBuild,
+} from './campaign'
+export type { CampaignState, DayReport } from './campaign'
