@@ -60,8 +60,9 @@ src/sim/   bots and balance reports (from M6), run in Node
   what a player sees (`view.ts`), never hidden packs or unvisited zombie counts. `npm run sim`
   writes `docs/balance-report.md` (generated, never edit by hand); `npm run fuzz` plays 10 000
   random games. Built by `vite.sim.config.ts`, typechecked by `tsconfig.sim.json`.
-- Random cities live in `src/game/city.ts`: `state.city` places buildings in the classic map's
-  building slots; every engine entry point first calls `cityContent(state, content)`.
+- Random cities live in `src/game/city.ts`: `state.city` places buildings in the building slots of
+  the map `balance.cityMap` picks (`mapContent`: classic 3 × 3, or `content.largeMap` 5 × 3 with
+  empty slots and downtown slots that take downtown buildings first); every engine entry point first calls `cityContent(state, content)`.
   `buildingKnown` hides buildings the player has not been next to. `makeState` and
   `classicBalance` (testkit) use the classic map so tests can name places.
 - Search lives in `src/game/search.ts`: pack placement, weighted finds, the

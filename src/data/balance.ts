@@ -77,6 +77,11 @@ export interface Balance {
   readonly hiddenDanger: boolean
   /** Each new city picks its buildings at random and places them in random slots. */
   readonly randomCity: boolean
+  /**
+   * The shape of a random city: the classic 3 × 3 map (6 buildings), or the large 5 × 3 map
+   * (10 buildings, a far downtown). Without `randomCity` the classic map is always used.
+   */
+  readonly cityMap: 'classic' | 'large'
   /** A building shows as unknown until the player has stood next to it (or scouted it). */
   readonly hiddenBuildings: boolean
   readonly heavyLoadPerPack: number
@@ -148,6 +153,7 @@ export const balance: Balance = {
   zombieFollow: 'chase',
   hiddenDanger: true,
   randomCity: true,
+  cityMap: 'large',
   hiddenBuildings: true,
   heavyLoadPerPack: 1,
   locationServiceCost: 1,

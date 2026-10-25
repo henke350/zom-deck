@@ -38,6 +38,22 @@ export const texts = {
       name: 'Hospital',
       description: 'Plenty of medicine, plenty of the dead. You can patch up here.',
     },
+    apartments: {
+      name: 'Apartment Block',
+      description: 'Many small flats, many locked doors. Medicine cabinets and noisy neighbours.',
+    },
+    church: {
+      name: 'Church',
+      description: 'Quiet and cool. A good place to calm your nerves (patch up).',
+    },
+    sportsShop: {
+      name: 'Sports Shop',
+      description: 'Shoes, bats and bikes. Runners like it here too.',
+    },
+    square: {
+      name: 'Town Square',
+      description: 'An open square with roads in four directions. Nothing to search.',
+    },
   },
 
   locationKinds: {

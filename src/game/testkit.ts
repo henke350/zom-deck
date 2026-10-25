@@ -62,6 +62,7 @@ function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] 
 export const classicBalance: Balance = {
   ...defaultBalance,
   randomCity: false,
+  cityMap: 'classic',
   hiddenBuildings: false,
 }
 

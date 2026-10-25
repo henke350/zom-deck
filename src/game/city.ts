@@ -4,35 +4,69 @@ import { shuffle } from './rng'
 import type { City, Content, GameState, LocationDef, LocationId } from './types'
 
 /**
- * Random cities. The classic map in `content` gives the shape of the city: its positions,
- * roads and building slots (named after the classic building in each slot). A random city
- * puts a building from the pool into every slot, so some buildings are left out each time.
+ * Random cities. A map gives the shape of the city: its positions, roads and building slots.
+ * The classic map in `content` names each slot after its classic building; the large map
+ * (`content.largeMap`) has empty slots. A random city puts a building from the pool into every
+ * slot, so some buildings are left out each time, and downtown buildings go downtown first.
  */
 
-/** Every building a city can use: the classic ones and the extra ones. */
+const mapCache = new WeakMap<Content, Content>()
+
+/**
+ * The content with the city map the balance asks for. For the large map, the locations and
+ * roads come from `content.largeMap`, and every building (classic and extra) is in the pool.
+ */
+export function mapContent(content: Content, map: Balance['cityMap']): Content {
+  if (map !== 'large' || !content.largeMap) return content
+  const known = mapCache.get(content)
+  if (known) return known
+  const result: Content = {
+    ...content,
+    locations: content.largeMap.locations,
+    connections: content.largeMap.connections,
+    extraBuildings: buildingPool(content),
+  }
+  mapCache.set(content, result)
+  return result
+}
+
+/** Every building a city can use: the classic ones (not empty slots) and the extra ones. */
 export function buildingPool(
   content: Content,
 ): Readonly<Record<LocationId, Omit<LocationDef, 'mapPos'>>> {
-  const classic = Object.values(content.locations).filter((l) => l.kind === 'building')
+  const classic = Object.values(content.locations).filter((l) => l.kind === 'building' && !l.slot)
   return { ...Object.fromEntries(classic.map((l) => [l.id, l])), ...content.extraBuildings }
 }
 
 /** Picks the buildings of a new city and their slots. Buildings with a sure pack are always in. */
 export function rollCity(content: Content, rng: number): [city: City, rng: number] {
-  const slots = Object.values(content.locations)
-    .filter((l) => l.kind === 'building')
-    .map((l) => l.id)
+  const slotDefs = Object.values(content.locations).filter((l) => l.kind === 'building')
   const pool = Object.values(buildingPool(content))
+  if (pool.length < slotDefs.length) {
+    throw new Error(`A city needs ${slotDefs.length} buildings, the pool has ${pool.length}`)
+  }
   const required = pool.filter((b) => b.alwaysHasPack).map((b) => b.id)
   const optional = pool.filter((b) => !b.alwaysHasPack).map((b) => b.id)
   const [shuffledOptional, afterPick] = shuffle(optional, rng)
-  const chosen = [...required, ...shuffledOptional.slice(0, slots.length - required.length)]
+  const chosen = [...required, ...shuffledOptional.slice(0, slotDefs.length - required.length)]
   const [placed, next] = shuffle(chosen, afterPick)
+
+  // Downtown slots take downtown buildings first; every other building keeps its shuffled order.
+  const isDowntown = (id: LocationId) => pool.find((b) => b.id === id)?.downtown === true
+  const downtownSlots = slotDefs.filter((s) => s.downtown)
+  const queue = [...placed.filter(isDowntown), ...placed.filter((id) => !isDowntown(id))]
   const city: Record<LocationId, LocationId> = {}
-  slots.forEach((slot, i) => {
-    const building = placed[i]
-    if (building) city[slot] = building
-  })
+  for (const s of downtownSlots) {
+    const building = queue.shift()
+    if (building) city[s.id] = building
+  }
+  const rest = placed.filter((id) => !Object.values(city).includes(id))
+  slotDefs
+    .filter((s) => !s.downtown)
+    .forEach((s, i) => {
+      const building = rest[i]
+      if (building) city[s.id] = building
+    })
   return [city, next]
 }
 
@@ -45,7 +79,9 @@ const derived = new WeakSet<Content>()
  * content is returned unchanged. Every engine entry point calls this first.
  */
 export function cityContent(state: GameState, content: Content): Content {
-  return state.city ? contentForCity(state.city, content) : content
+  return state.city
+    ? contentForCity(state.city, mapContent(content, state.balance.cityMap))
+    : content
 }
 
 /** The content of one city (see `cityContent`). */
@@ -80,7 +116,7 @@ export function maybeRollCity(
   balance: Balance,
   rng: number,
 ): [city: City | undefined, rng: number] {
-  return balance.randomCity ? rollCity(content, rng) : [undefined, rng]
+  return balance.randomCity ? rollCity(mapContent(content, balance.cityMap), rng) : [undefined, rng]
 }
 
 /**

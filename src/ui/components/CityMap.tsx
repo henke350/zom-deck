@@ -90,6 +90,12 @@ export function CityMap({
   const lastPointer = useRef('mouse')
   const here = state.player.location
   const pos = (id: LocationId) => content.locations[id]?.mapPos ?? { x: 0, y: 0 }
+  // The drawing fits the map: the same margin on the far side as on the near side.
+  const all = Object.values(content.locations).map((l) => l.mapPos)
+  const size = {
+    width: Math.max(...all.map((p) => p.x)) + Math.min(...all.map((p) => p.x)),
+    height: Math.max(...all.map((p) => p.y)) + Math.min(...all.map((p) => p.y)),
+  }
   const herePos = pos(here)
 
   const onKey = (id: LocationId) => (event: KeyboardEvent) => {
@@ -101,7 +107,7 @@ export function CityMap({
 
   return (
     <figure className="city-map">
-      <svg viewBox="0 0 640 400" role="group" aria-label={texts.ui.map}>
+      <svg viewBox={`0 0 ${size.width} ${size.height}`} role="group" aria-label={texts.ui.map}>
         <g className="edges">
           {content.connections.map(([a, b]) => (
             <line key={`${a}-${b}`} x1={pos(a).x} y1={pos(a).y} x2={pos(b).x} y2={pos(b).y} />

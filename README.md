@@ -23,7 +23,7 @@ npm run dev      # starter spillet på http://localhost:5173
 ## Sådan prøver du spillet (M6)
 
 1. Klik **Start expedition**. Første gang vises reglerne på én side. Du kan altid åbne dem igen med **How to play** på forsiden eller **Rules** i toplinjen.
-2. **Hver by er ny:** bygningerne vælges og placeres tilfældigt, og en bygning står som _Unknown_, indtil du har stået ved siden af den. Find Supermarket – den har altid en pakke.
+2. **Hver by er ny:** byen har 10 bygninger på et kort på 5 × 3 felter. Bygningerne vælges og placeres tilfældigt, og en bygning står som _Unknown_, indtil du har stået ved siden af den. Længst væk ligger _downtown_ med de farlige, rige bygninger (Police Station, Hospital, Apartment Block, Sports Shop). Find Supermarket – den har altid en pakke.
 3. Klik på et af de stiplede nabosteder på kortet for at gå dertil gratis (én gang pr. tur).
 4. Spil kort med **Play**. Kort som Run beder dig vælge et sted på kortet; Toolbox beder dig vælge et kort at fjerne.
 5. Klik **Keep** på ét kort for at gemme det til næste tur, og klik **End turn**.

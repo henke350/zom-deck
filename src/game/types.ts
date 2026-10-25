@@ -106,6 +106,13 @@ export interface LocationDef {
   }
   /** Something you can do here for AP (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly service?: LocationService
+  /** An empty building slot on a bigger map: a random city always puts a building here. */
+  readonly slot?: boolean
+  /**
+   * Downtown: on a slot, the far, rich part of a bigger map; on a building, it belongs there.
+   * A random city puts downtown buildings in downtown slots first.
+   */
+  readonly downtown?: boolean
 }
 
 export type ServiceId = 'dismantle' | 'patchUp'
@@ -189,6 +196,14 @@ export interface Content {
    * Their map position comes from the building slot they are placed in.
    */
   readonly extraBuildings?: Readonly<Record<LocationId, Omit<LocationDef, 'mapPos'>>>
+  /**
+   * A bigger city (`balance.cityMap: 'large'`): its own roads and empty building slots. A
+   * random city fills every slot with a building from the classic map and `extraBuildings`.
+   */
+  readonly largeMap?: {
+    readonly locations: Readonly<Record<LocationId, LocationDef>>
+    readonly connections: readonly (readonly [LocationId, LocationId])[]
+  }
 }
 
 /**
