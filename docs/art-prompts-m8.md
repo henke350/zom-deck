@@ -58,7 +58,7 @@ Ordinary weapon cards (no gold frame):
 | --------------- | ------ | ------- |
 | knife           | teal   | A plain sturdy kitchen or hunting knife lying on a worn wooden cutting board, its blade catching a thin line of light. No blood. |
 | bow             | teal   | A simple recurve bow and a quiver with a few arrows leaning against a gym bench, like it was taken from a school sports hall. |
-| headShot        | red    | A steady hand holding a heavy wrench or pistol grip close-up, aiming down at something out of frame, a single sharp line of light; tense focus. No blood, no target shown. |
+| headShot        | red    | Seen over the shoulder: a gloved hand steadying a pistol, a simple iron-sight or scope crosshair lined up on a blurred dark silhouette far down a ruined corridor. Calm, precise focus. No blood, no wound, nothing hit. |
 | silentTakedown  | teal   | A silhouette's gloved hand reaching around a doorframe from the shadows, a dark zombie silhouette turned away in the corridor beyond. Quiet, stealthy, no violence shown. |
 
 Places:
