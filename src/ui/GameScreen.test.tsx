@@ -294,10 +294,18 @@ describe('GameScreen: ranged weapons', () => {
 })
 
 describe('GameScreen: the danger ramp', () => {
+  it('says only finds raise danger next while the first pack is still calm', () => {
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    render(<GameScreen seed={1} initialState={makeState({})} {...handlers} />)
+    const every = balance.danger.perFindsTaken
+    expect(screen.getByText(texts.ui.dangerNext(every, true), { exact: false })).toBeTruthy()
+  })
+
   it('shows a notice when danger rises, says what raises it next, and marks tougher zombies', async () => {
     const state = makeState({
       location: 'pharmacy',
       packsAt: ['pharmacy'],
+      packs: 1,
       danger: 2,
       zombies: [{ at: 'street' }],
     })

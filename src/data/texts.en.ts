@@ -86,7 +86,8 @@ export const texts = {
     burnedShort: 'Burned',
     noiseLabel: 'Noise',
     dangerLabel: 'Danger',
-    dangerNext: (finds: number) => `next: a pack or ${finds} ${finds === 1 ? 'find' : 'finds'}`,
+    dangerNext: (finds: number, calmPack = false) =>
+      `next: ${calmPack ? '' : 'a pack or '}${finds} ${finds === 1 ? 'find' : 'finds'}`,
     dangerBanner: {
       title: (level: number) => `Danger ${level}`,
       intro: 'You are getting stronger, and so is the city.',
@@ -315,7 +316,7 @@ export const texts = {
             {
               heading: 'Danger',
               items: [
-                `The city gets wilder the better you do, and richer. Danger starts at 1 and rises by one for every pack and every rare find you take${b.danger.perFindsTaken > 0 ? `, and for every ${b.danger.perFindsTaken} finds you add to your deck` : ''}, up to ${b.danger.levels.length}.`,
+                `The city gets wilder the better you do, and richer. Danger starts at 1 and rises by one for every pack${b.danger.calmPacks > 0 ? ` (not the first${b.danger.calmPacks === 1 ? '' : ` ${b.danger.calmPacks}`})` : ''} and every rare find you take${b.danger.perFindsTaken > 0 ? `, and for every ${b.danger.perFindsTaken} finds you add to your deck` : ''}, up to ${b.danger.levels.length}.`,
                 ...b.danger.levels.flatMap((l, i) =>
                   l.zombieHpBonus > 0 &&
                   (b.danger.levels[i - 1]?.zombieHpBonus ?? 0) < l.zombieHpBonus

@@ -496,7 +496,7 @@ describe('danger meter', () => {
   const kinds = (state: GameState) => state.zombies.map((z) => z.kind)
 
   it('rises with a pack and brings a horde to the street', () => {
-    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'] })
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], packs: 1 })
     const { state: next, events } = applyAction(state, { type: 'quickSearch' })
     expect(next.danger).toBe(2)
     expect(events).toContainEqual({ type: 'dangerRose', level: 2, reason: 'pack' })
@@ -504,9 +504,9 @@ describe('danger meter', () => {
     expect(next.stats.dangerReached).toBe(2)
   })
 
-  it('leaves the first packs calm when calmPacks is set', () => {
-    const calm = { ...balance, danger: { ...balance.danger, calmPacks: 1 } }
-    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], balance: calm })
+  it('leaves the first pack calm (calmPacks), then rises with the next', () => {
+    expect(balance.danger.calmPacks).toBe(1)
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'] })
     const first = applyAction(state, { type: 'quickSearch' })
     expect(first.state.danger).toBe(1)
     expect(first.events.some((e) => e.type === 'dangerRose')).toBe(false)
@@ -529,7 +529,7 @@ describe('danger meter', () => {
 
   it('stops at the last level, with no more hordes', () => {
     const top = balance.danger.levels.length
-    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], danger: top })
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], packs: 1, danger: top })
     const next = play(state, { type: 'quickSearch' })
     expect(next.danger).toBe(top)
     expect(next.zombies).toHaveLength(0)
@@ -551,6 +551,7 @@ describe('danger meter', () => {
     const state = makeState({
       location: 'pharmacy',
       packsAt: ['pharmacy'],
+      packs: 1,
       danger: 2,
       noise: three.noiseThreshold,
     })
@@ -564,7 +565,12 @@ describe('danger meter', () => {
 
   it('sends a horde to the street when hordes are switched on', () => {
     const hordes = { ...classicBalance, danger: { ...classicBalance.danger, hordeSize: 1 } }
-    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], balance: hordes })
+    const state = makeState({
+      location: 'pharmacy',
+      packsAt: ['pharmacy'],
+      packs: 1,
+      balance: hordes,
+    })
     const next = play(state, { type: 'quickSearch' })
     expect(zombiesAt(next, 'street')).toHaveLength(1)
     expect(next.stats.zombiesFromHordes).toBe(1)
@@ -596,7 +602,7 @@ describe('danger meter', () => {
 
   it('can be switched off', () => {
     const off = { ...classicBalance, danger: { ...classicBalance.danger, enabled: false } }
-    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], balance: off })
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], packs: 1, balance: off })
     const next = play(state, { type: 'quickSearch' })
     expect(next.danger).toBe(1)
     expect(next.zombies).toHaveLength(0)
@@ -624,6 +630,7 @@ describe('zombies that grow with you', () => {
     const state = makeState({
       location: 'pharmacy',
       packsAt: ['pharmacy'],
+      packs: 1,
       danger: 2,
       zombies: [{ at: 'street' }],
     })

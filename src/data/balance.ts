@@ -160,7 +160,8 @@ export const balance: Balance = {
       { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 1, zombieHpBonus: 1 },
     ],
     perPack: 1,
-    calmPacks: 0,
+    // Tuning 6 (25 Oct 2026, user's call): the first pack you find does not raise danger.
+    calmPacks: 1,
     perRareFind: 1,
     // Tuning 4 (25 Oct 2026, after a playtest where zombies got too easy): danger follows the
     // deck too, zombies get tougher from danger 3, and buildings roll their zombies when seen.
