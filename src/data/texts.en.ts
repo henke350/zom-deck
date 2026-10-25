@@ -183,6 +183,8 @@ export const texts = {
     chooseZombieInRange:
       'Choose the zombie to hit. Tap a nearby place on the map to see zombies there.',
     chooseTrashTarget: 'Choose a card in your hand to trash.',
+    chooseDiscardTarget: 'Choose a card in your hand to discard.',
+    discard: 'Discard',
     useService: (name: string, cost: number) => `${name} (${cost} AP)`,
     rare: 'Rare',
     unknownBuilding: 'Unknown building',
@@ -439,6 +441,7 @@ export const texts = {
     healed: (n: number) => `You heal ${n}.`,
     hpLost: (n: number) => `You lose ${n} health.`,
     cardTrashed: (name: string) => `You trash ${name}.`,
+    cardDiscarded: (name: string) => `You discard ${name}.`,
     serviceUsed: (service: string, place: string) => `You use ${service} at the ${place}.`,
     stashFound: (place: string) => `You find a locked stash in ${place}.`,
     stashOpened: (tool: string) =>
@@ -600,6 +603,10 @@ export const texts = {
       name: 'Painkillers',
       text: 'Trash a Nerves or Wound from your hand. Draw 1 card.',
     },
+    repack: {
+      name: 'Repack',
+      text: 'Discard a card from your hand. Draw 2 cards.',
+    },
   },
 
   /** Why an action is not allowed. Shown next to disabled controls. */
@@ -621,6 +628,10 @@ export const texts = {
     keepTooMany: (max: number) => `You can keep at most ${max} card${max === 1 ? '' : 's'}.`,
     keepNotInHand: 'You can only keep cards from your hand.',
     noTrashTarget: 'You have no card in hand that this can trash.',
+    chooseDiscard: 'Choose a card in your hand to discard.',
+    discardNotInHand: 'The card to discard must be in your hand.',
+    discardSelf: "A card can't discard itself.",
+    noDiscardTarget: 'You have no other card in hand to discard.',
     noServiceHere: 'There is nothing to use here.',
     noStashHere: 'There is no locked stash here to open.',
     notATool: 'Only a Tool card can open a stash.',

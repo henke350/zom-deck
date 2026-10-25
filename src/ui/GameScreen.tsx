@@ -24,15 +24,15 @@ import type {
 } from '../game'
 import type { Balance } from '../data/balance'
 import { CityMap } from './components/CityMap'
-import { DangerBanner } from './components/DangerBanner'
-import { ConfirmHomeDialog } from './components/ConfirmHomeDialog'
+import { DangerNotice } from './components/DangerNotice'
+import { HomePrompt } from './components/HomePrompt'
 import { GearRow } from './components/GearRow'
 import { EventLog } from './components/EventLog'
-import { FindDialog } from './components/FindDialog'
+import { FindChoice } from './components/FindChoice'
 import { GameOverPanel } from './components/GameOverPanel'
 import { Hand, type PendingPlay } from './components/Hand'
 import { LocationPanel } from './components/LocationPanel'
-import { RulesDialog } from './components/RulesDialog'
+import { RulesPage } from './components/RulesPage'
 import { TopBar } from './components/TopBar'
 import { EndTurnPreview } from './components/EndTurnPreview'
 import { cardText } from './names'
@@ -69,14 +69,14 @@ export function GameScreen({
   // The buildings of this city, where they stand and how the roads connect them.
   const content = useMemo(() => cityContent(state, defaultContent), [state])
   const [rulesOpen, setRulesOpen] = useState(showRulesOnStart)
-  // A banner when the danger meter rises, so the ramp-up is felt.
+  // A notice above the hand when the danger meter rises, so the ramp-up is felt.
   const [dangerShown, setDangerShown] = useState(state.danger)
-  const [dangerBanner, setDangerBanner] = useState<number | null>(null)
+  const [dangerNotice, setDangerNotice] = useState<number | null>(null)
   if (state.danger !== dangerShown) {
     setDangerShown(state.danger)
-    setDangerBanner(state.danger > dangerShown ? state.danger : null)
+    setDangerNotice(state.danger > dangerShown ? state.danger : null)
   }
-  const closeDangerBanner = useCallback(() => setDangerBanner(null), [])
+  const closeDangerNotice = useCallback(() => setDangerNotice(null), [])
   const [tipsOn, setTipsOn] = useState(() => !tipsHidden())
   const showTips = (on: boolean) => {
     setTipsHidden(!on)
@@ -109,10 +109,11 @@ export function GameScreen({
     return result
   }, [pending, serviceOpen, state, content])
 
-  // Cards you can pick right now to trash, with the action each pick makes.
-  const trashTargets = useMemo((): ReadonlyMap<string, Action> | null => {
-    if (pending?.kind === 'trash') {
-      return new Map(pending.options.actions.map((a) => [a.target?.trash ?? '', a as Action]))
+  // Cards you can pick right now to trash or discard, with the action each pick makes.
+  const pickTargets = useMemo((): ReadonlyMap<string, Action> | null => {
+    if (pending?.kind === 'trash' || pending?.kind === 'discard') {
+      const key = pending.kind
+      return new Map(pending.options.actions.map((a) => [a.target?.[key] ?? '', a as Action]))
     }
     if (serviceOpen) {
       return new Map(
@@ -127,6 +128,9 @@ export function GameScreen({
   const act = (action: Action, confirmed = false) => {
     setPending(null)
     setServiceOpen(false)
+    setHomeMove(null)
+    // The danger notice stays while you pick the find of the search that raised danger.
+    if (state.phase !== 'chooseFind') setDangerNotice(null)
     if (!confirmed && previewOutcome(state, action, content)?.result === 'won') {
       setHomeMove(action)
       return
@@ -178,8 +182,8 @@ export function GameScreen({
     }
   }
 
-  const onTrash = (targetUid: string) => {
-    const action = trashTargets?.get(targetUid)
+  const onPick = (targetUid: string) => {
+    const action = pickTargets?.get(targetUid)
     if (!action) return
     if (keepUid === targetUid || keepUid === pending?.uid) setKeepUid(null)
     act(action)
@@ -249,6 +253,31 @@ export function GameScreen({
     setPending({ uid, mode: 0, kind: 'zombie', options: option })
   }
 
+  // Rules and the end of the expedition are pages of their own, not pop-ups over the game.
+  if (rulesOpen) {
+    return (
+      <RulesPage
+        balance={state.balance}
+        onClose={closeRules}
+        onShowTips={tipsOn ? undefined : () => showTips(true)}
+      />
+    )
+  }
+  if (result) {
+    return (
+      <GameOverPanel
+        result={result}
+        balance={state.balance}
+        seed={state.seed}
+        onNewExpedition={onNewExpedition}
+        onRestart={onRestart}
+        onExit={onExit}
+      />
+    )
+  }
+
+  const choosingFind = state.phase === 'chooseFind' ? state.pendingFind : undefined
+
   return (
     <div className="game">
       <TopBar state={state} onShowRules={() => setRulesOpen(true)} />
@@ -304,99 +333,95 @@ export function GameScreen({
 
       <section className="hand-area" aria-label={texts.ui.hand}>
         <GearRow state={state} content={content} onUse={onUseGear} busy={pending !== null} />
-        <div className="hand-bar">
-          {pending || serviceOpen ? (
-            <p className="prompt" role="status">
-              <b>{pendingName}:</b>{' '}
-              {
-                {
-                  location: texts.ui.chooseOnMap,
-                  trash: texts.ui.chooseTrashTarget,
-                  zombie: ranged ? texts.ui.chooseZombieInRange : texts.ui.chooseZombieTarget,
-                }[pending?.kind ?? 'trash']
-              }{' '}
-              <button type="button" className="btn btn-quiet" onClick={cancelChoice}>
-                {texts.ui.cancel}
-              </button>
-            </p>
-          ) : (
-            <TipLine
-              hint={tipsOn ? currentHint(state, content) : null}
-              keep={state.balance.keepCards}
-              onHide={() => showTips(false)}
-            />
-          )}
-          {preview && <EndTurnPreview preview={preview} />}
-          <button
-            type="button"
-            className="btn btn-primary"
-            aria-describedby="end-turn-preview"
-            disabled={
-              pending !== null || serviceOpen || !validate(state, { type: 'endTurn' }, content).ok
+        {choosingFind ? (
+          <FindChoice
+            state={state}
+            content={content}
+            find={choosingFind}
+            onChoose={act}
+            notice={
+              dangerNotice !== null && (
+                <DangerNotice
+                  level={dangerNotice}
+                  balance={state.balance}
+                  content={content}
+                  onClose={closeDangerNotice}
+                />
+              )
             }
-            onClick={endTurn}
-          >
-            {keepInHand
-              ? texts.ui.endTurnKeeping(cardText(cardIdFor(keepInHand)).name)
-              : texts.ui.endTurn}
-          </button>
-        </div>
-        <Hand
-          state={state}
-          content={content}
-          optionsByUid={optionsByUid}
-          pending={pending}
-          trashTargets={trashTargets}
-          keepUid={keepInHand}
-          onPlay={onPlay}
-          onTrash={onTrash}
-          onToggleKeep={(uid) => setKeepUid((current) => (current === uid ? null : uid))}
-        />
+          />
+        ) : (
+          <>
+            <div className="hand-bar">
+              {pending || serviceOpen ? (
+                <p className="prompt" role="status">
+                  <b>{pendingName}:</b>{' '}
+                  {
+                    {
+                      location: texts.ui.chooseOnMap,
+                      trash: texts.ui.chooseTrashTarget,
+                      discard: texts.ui.chooseDiscardTarget,
+                      zombie: ranged ? texts.ui.chooseZombieInRange : texts.ui.chooseZombieTarget,
+                    }[pending?.kind ?? 'trash']
+                  }{' '}
+                  <button type="button" className="btn btn-quiet" onClick={cancelChoice}>
+                    {texts.ui.cancel}
+                  </button>
+                </p>
+              ) : homeMove && homeOutcome ? (
+                <HomePrompt
+                  packs={state.player.packs}
+                  stars={homeOutcome.stars ?? 0}
+                  nextStarAt={state.balance.starThresholds.find((n) => n > state.player.packs)}
+                  onConfirm={() => act(homeMove, true)}
+                  onCancel={() => setHomeMove(null)}
+                />
+              ) : dangerNotice !== null ? (
+                <DangerNotice
+                  level={dangerNotice}
+                  balance={state.balance}
+                  content={content}
+                  onClose={closeDangerNotice}
+                />
+              ) : (
+                <TipLine
+                  hint={tipsOn ? currentHint(state, content) : null}
+                  keep={state.balance.keepCards}
+                  onHide={() => showTips(false)}
+                />
+              )}
+              {preview && <EndTurnPreview preview={preview} />}
+              <button
+                type="button"
+                className="btn btn-primary"
+                aria-describedby="end-turn-preview"
+                disabled={
+                  pending !== null ||
+                  serviceOpen ||
+                  homeMove !== null ||
+                  !validate(state, { type: 'endTurn' }, content).ok
+                }
+                onClick={endTurn}
+              >
+                {keepInHand
+                  ? texts.ui.endTurnKeeping(cardText(cardIdFor(keepInHand)).name)
+                  : texts.ui.endTurn}
+              </button>
+            </div>
+            <Hand
+              state={state}
+              content={content}
+              optionsByUid={optionsByUid}
+              pending={pending}
+              pickTargets={pickTargets}
+              keepUid={keepInHand}
+              onPlay={onPlay}
+              onPick={onPick}
+              onToggleKeep={(uid) => setKeepUid((current) => (current === uid ? null : uid))}
+            />
+          </>
+        )}
       </section>
-
-      {state.phase === 'chooseFind' && state.pendingFind && (
-        <FindDialog state={state} content={content} find={state.pendingFind} onChoose={act} />
-      )}
-
-      {result && (
-        <GameOverPanel
-          result={result}
-          balance={state.balance}
-          seed={state.seed}
-          onNewExpedition={onNewExpedition}
-          onRestart={onRestart}
-          onExit={onExit}
-        />
-      )}
-
-      {homeMove && homeOutcome && (
-        <ConfirmHomeDialog
-          packs={state.player.packs}
-          stars={homeOutcome.stars ?? 0}
-          nextStarAt={state.balance.starThresholds.find((n) => n > state.player.packs)}
-          onConfirm={() => {
-            setHomeMove(null)
-            act(homeMove, true)
-          }}
-          onCancel={() => setHomeMove(null)}
-        />
-      )}
-
-      {dangerBanner !== null && (
-        <DangerBanner
-          level={dangerBanner}
-          balance={state.balance}
-          content={content}
-          onClose={closeDangerBanner}
-        />
-      )}
-      {rulesOpen && (
-        <RulesDialog
-          balance={state.balance}
-          onClose={closeRules}
-          onShowTips={tipsOn ? undefined : () => showTips(true)}
-        />
-      )}
     </div>
   )
 }

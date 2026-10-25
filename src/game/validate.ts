@@ -11,6 +11,7 @@ import {
   implementedEffects,
   moveStepsOf,
   needsZombiesHere,
+  needsDiscardTarget,
   needsZombieTarget,
   scoutRangeOf,
   trashFilterOf,
@@ -205,6 +206,15 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
     const targetDef = content.cards[target.card]
     if (!targetDef?.trashable) return no(texts.reasons.notTrashable)
     if (filter === 'junk' && targetDef.kind !== 'junk') return no(texts.reasons.trashJunkOnly)
+  }
+
+  if (needsDiscardTarget(effects)) {
+    const discardUid = action.target?.discard
+    if (!discardUid) return no(texts.reasons.chooseDiscard)
+    if (discardUid === action.uid) return no(texts.reasons.discardSelf)
+    if (!state.piles.hand.some((c) => c.uid === discardUid)) {
+      return no(texts.reasons.discardNotInHand)
+    }
   }
 
   const here = zombiesAt(state, state.player.location)

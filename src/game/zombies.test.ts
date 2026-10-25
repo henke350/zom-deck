@@ -504,6 +504,18 @@ describe('danger meter', () => {
     expect(next.stats.dangerReached).toBe(2)
   })
 
+  it('leaves the first packs calm when calmPacks is set', () => {
+    const calm = { ...balance, danger: { ...balance.danger, calmPacks: 1 } }
+    const state = makeState({ location: 'pharmacy', packsAt: ['pharmacy'], balance: calm })
+    const first = applyAction(state, { type: 'quickSearch' })
+    expect(first.state.danger).toBe(1)
+    expect(first.events.some((e) => e.type === 'dangerRose')).toBe(false)
+
+    // The second pack raises it as usual.
+    const onePack = { ...state, player: { ...state.player, packs: 1 } }
+    expect(applyAction(onePack, { type: 'quickSearch' }).state.danger).toBe(2)
+  })
+
   it('rises when you take a rare find, not a common one', () => {
     const base = makeState({ location: 'police' })
     const choosing = (card: 'shotgun' | 'bandage'): GameState => ({

@@ -97,3 +97,30 @@ Places:
 
 Brug samme tekst, men bed om ét billede ad gangen og gem dem selv med filnavnene ovenfor
 (`shotgun.png`, `gasStation.png` osv.). Send mig billederne, så lægger jeg dem ind i spillet.
+
+## Nyt kort: Repack (oktober 2026)
+
+Kortet **Repack** mangler et billede. Indsæt denne tekst i Codex:
+
+```
+You are working in the repository for "One More Building". Create ONE new card illustration in
+EXACTLY the same style as the existing card art, and add it to the game.
+
+Look first: art-source/cards/search.png, crowbar.png, flashlight.png, painkillers.png and
+docs/card-art-prompt.md. Use the same style rules as there: landscape 3:2, 1536 x 1024 px PNG,
+full-bleed, gritty painterly graphic-novel look, muted and desaturated, one accent colour,
+ONE clear object in the centre (about 60 %), a calm margin of at least 10 % on every side,
+no text, letters, logos or watermarks, no faces, no gore.
+
+Card: repack. Accent: teal #2a7462.
+Subject: an open, worn hiking backpack on a concrete floor, seen from above, half its
+contents laid out beside it in neat rows (a torch, a bandage roll, a water bottle, a folded
+map without text). Two gloved hands pull one item out to make room. Calm, practical mood.
+
+Steps:
+1. Save the original as art-source/cards/repack.png (1536 x 1024).
+2. Make the game copy: 768 x 512 WebP, quality about 80, at src/assets/cards/repack.webp.
+3. Remove 'repack' from the awaitingArt list in src/ui/cardImages.test.ts.
+4. Run `npm run check`. It must pass.
+5. Commit on a new branch (never main) and open a pull request named "Add art for Repack".
+```

@@ -31,6 +31,8 @@ export type Effect =
   | { readonly kind: 'gainAp'; readonly amount: number }
   | { readonly kind: 'draw'; readonly amount: number }
   | { readonly kind: 'trashFromHand'; readonly filter: 'any' | 'junk' }
+  /** Repack: put a card from your hand on your discard pile (any card, even junk). */
+  | { readonly kind: 'discardFromHand' }
   | { readonly kind: 'scout'; readonly scope: 'one' | 'all'; readonly range?: number }
   | { readonly kind: 'burnBuilding' }
   /** Gear: the card stays in front of you (see `CardDef.gear`) instead of being discarded. */
@@ -365,6 +367,8 @@ export interface PlayCardAction {
   readonly mode?: number
   readonly target?: {
     readonly trash?: string
+    /** uid of a card in your hand to discard (Repack). */
+    readonly discard?: string
     readonly location?: LocationId
     /** uid of a zombie at your location (or in range, for ranged weapons). */
     readonly zombie?: string
@@ -524,6 +528,7 @@ export type GameEvent =
   | { readonly type: 'healed'; readonly amount: number }
   | { readonly type: 'hpLost'; readonly amount: number; readonly source: 'zombies' | 'card' }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }
+  | { readonly type: 'cardDiscarded'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'serviceUsed'; readonly service: ServiceId; readonly location: LocationId }
   | { readonly type: 'stashFound'; readonly location: LocationId }
   | {

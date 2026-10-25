@@ -218,6 +218,19 @@ function resolveEffect(
         },
       }
     }
+    case 'discardFromHand': {
+      const target = piles.hand.find((c) => c.uid === action.target?.discard)
+      if (!target) throw new Error('discardFromHand: validated target is missing')
+      events.push({ type: 'cardDiscarded', uid: target.uid, card: target.card })
+      return {
+        ...state,
+        piles: {
+          ...piles,
+          hand: withoutCard(piles.hand, target.uid),
+          discard: [...piles.discard, target],
+        },
+      }
+    }
     case 'search':
       return performSearch(
         state,

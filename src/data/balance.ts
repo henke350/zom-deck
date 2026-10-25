@@ -47,6 +47,8 @@ export interface DangerBalance {
   /** Level 1 first. */
   readonly levels: readonly DangerLevel[]
   readonly perPack: number
+  /** The first this many packs you find do not raise danger (a calm start). */
+  readonly calmPacks: number
   readonly perRareFind: number
   /** Danger also rises by one each time you have taken this many finds (0: never). */
   readonly perFindsTaken: number
@@ -158,6 +160,7 @@ export const balance: Balance = {
       { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 1, zombieHpBonus: 1 },
     ],
     perPack: 1,
+    calmPacks: 0,
     perRareFind: 1,
     // Tuning 4 (25 Oct 2026, after a playtest where zombies got too easy): danger follows the
     // deck too, zombies get tougher from danger 3, and buildings roll their zombies when seen.

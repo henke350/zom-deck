@@ -10,6 +10,7 @@ export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'heal',
   'loseHp',
   'trashFromHand',
+  'discardFromHand',
   'searchBonus',
   'block',
   'move',
@@ -42,6 +43,11 @@ export function trashFilterOf(effects: readonly Effect[]): 'any' | 'junk' | unde
     if (effect.kind === 'trashFromHand') return effect.filter
   }
   return undefined
+}
+
+/** True if the effects need the player to pick a card in hand to discard (Repack). */
+export function needsDiscardTarget(effects: readonly Effect[]): boolean {
+  return effects.some((e) => e.kind === 'discardFromHand')
 }
 
 /** True if the effects need the player to pick one zombie at their location. */

@@ -169,7 +169,7 @@ export function performSearch(
     for (let i = 0; i < state.balance.heavyLoadPerPack; i++) {
       next = gainCard(next, content.packCard, 'pack', events)
     }
-    next = raiseDanger(next, content, 'pack', events)
+    if (packs > state.balance.danger.calmPacks) next = raiseDanger(next, content, 'pack', events)
   }
   return next
 }

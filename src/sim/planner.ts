@@ -64,6 +64,7 @@ const baseValue: Readonly<Record<string, number>> = {
   districtMap: 3,
   bandage: 5,
   painkillers: 4,
+  repack: 4,
   shotgun: 8,
   chainsaw: 8,
   bicycle: 8,
@@ -80,7 +81,7 @@ const styleBonus: Readonly<Record<Style, (id: string, def: CardDef) => number>> 
   quiet: (_id, def) => (def.tags.includes('quiet') ? 3 : 0),
   fighter: (id, def) => (def.tags.includes('weapon') || id === 'kevlarVest' ? 3 : 0),
   runner: (_id, def) => (def.tags.includes('move') ? 3 : 0),
-  light: (id) => (['toolbox', 'travelLight', 'painkillers'].includes(id) ? 4 : 0),
+  light: (id) => (['toolbox', 'travelLight', 'painkillers', 'repack'].includes(id) ? 4 : 0),
 }
 
 /** A find must be worth at least this to be taken; below `scrapBelow` the bot scraps junk instead. */
@@ -283,6 +284,10 @@ function tempo(ctx: Ctx): Action | undefined {
     if (def.cost > 0) continue
     if ([...kinds].every((k) => k === 'gainAp' || k === 'draw')) return a
     if (kinds.has('trashFromHand') && isJunk(defOf(state, content, a.target?.trash))) return a
+    // Repack: cycle a card you cannot use (Nerves, Heavy Load) for two new ones.
+    if (kinds.has('discardFromHand') && defOf(state, content, a.target?.discard)?.kind === 'junk') {
+      return a
+    }
     if (
       kinds.has('searchBonus') &&
       !kinds.has('loseHp') &&

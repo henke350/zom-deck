@@ -12,7 +12,7 @@ interface CardFaceProps {
   readonly showFollowUp?: boolean
 }
 
-/** Cost, name, noise, rules text and tags of a card. Used in the hand and in the find dialog. */
+/** Cost, name, noise, rules text and tags of a card. Used in the hand and when choosing finds. */
 export function CardFace({ card, state, content, showFollowUp = false }: CardFaceProps) {
   const def = content.cards[card]
   const info = cardText(card)

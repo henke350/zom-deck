@@ -3,7 +3,7 @@ import type { Balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
 import type { ExpeditionResult } from '../../game'
 import { endSummary, resultCode } from '../summary'
-import { Dialog } from './Dialog'
+import { Page } from './Page'
 
 interface GameOverPanelProps {
   readonly result: ExpeditionResult
@@ -51,7 +51,7 @@ export function GameOverPanel({
   }
 
   return (
-    <Dialog labelledBy="game-over-title" wide>
+    <Page labelledBy="game-over-title">
       <h2 id="game-over-title">{ui.outcomeTitle[outcome.cause]}</h2>
       {outcome.stars ? (
         <p className="stars">{ui.outcomeStars(outcome.stars, balance.starThresholds.length)}</p>
@@ -66,7 +66,7 @@ export function GameOverPanel({
         <b>{end.tipHeading}:</b> {summary.tip}
       </p>
 
-      <div className="dialog-actions">
+      <div className="page-actions">
         <button ref={first} type="button" className="btn btn-primary" onClick={onNewExpedition}>
           {ui.newExpedition}
         </button>
@@ -103,6 +103,6 @@ export function GameOverPanel({
         </div>
         {copyState === 'failed' && <p className="reason">{end.copyFailed}</p>}
       </section>
-    </Dialog>
+    </Page>
   )
 }

@@ -122,7 +122,7 @@ describe('GameScreen', () => {
     for (let i = 0; i < balance.turnLimit; i++) {
       await user.click(screen.getByRole('button', { name: texts.ui.endTurn }))
     }
-    const dialog = screen.getByRole('dialog', { name: texts.ui.outcomeTitle.darkness })
+    const dialog = screen.getByRole('region', { name: texts.ui.outcomeTitle.darkness })
     await user.click(within(dialog).getByRole('button', { name: texts.ui.sameCity }))
     expect(onRestart).toHaveBeenCalledOnce()
   })
@@ -163,12 +163,12 @@ describe('GameScreen: searching', () => {
     await user.click(houseA())
     const searchCard = view.container.querySelector<HTMLElement>('[data-card="search"]')
     await user.click(within(searchCard!).getByRole('button', { name: texts.ui.play }))
-    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    const dialog = screen.getByRole('region', { name: texts.ui.findTitle })
     const takes = within(dialog).getAllByRole('button', { name: takeFindButton })
     // No zombies in House A, so the search is "in peace": +1 find.
     expect(takes).toHaveLength(balance.searchOptions + balance.peacefulSearchBonus)
     await user.click(takes[0]!)
-    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.queryByRole('region', { name: texts.ui.findTitle })).toBeNull()
     expect(log().getByText(/^You take .+ It goes into your discard pile\.$/)).toBeTruthy()
     expect(houseA().textContent).toContain(texts.ui.mapSearches(1, 2))
   })
@@ -177,7 +177,7 @@ describe('GameScreen: searching', () => {
     const { log, houseA, user } = renderAt(false)
     await user.click(houseA())
     await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
-    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    const dialog = screen.getByRole('region', { name: texts.ui.findTitle })
     expect(within(dialog).getAllByRole('button', { name: takeFindButton })).toHaveLength(
       balance.quickSearch.options + balance.peacefulSearchBonus,
     )
@@ -189,7 +189,7 @@ describe('GameScreen: searching', () => {
     const { houseA, user } = renderAt(false)
     await user.click(houseA())
     await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
-    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    const dialog = screen.getByRole('region', { name: texts.ui.findTitle })
     expect(within(dialog).queryByText(texts.ui.scrapHeading)).toBeNull()
     expect(within(dialog).queryByRole('button', { name: texts.ui.scrap('Nerves') })).toBeNull()
   })
@@ -198,7 +198,7 @@ describe('GameScreen: searching', () => {
     const { houseA, user } = renderAt(true)
     await user.click(houseA())
     await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
-    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    const dialog = screen.getByRole('region', { name: texts.ui.findTitle })
     expect(within(dialog).getByText(texts.ui.packBanner(1))).toBeTruthy()
     await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
     expect(screen.getByText(`1/${balance.packsToWin}`)).toBeTruthy()
@@ -228,7 +228,7 @@ describe('GameScreen: searching', () => {
     const { houseA, user } = renderAt(false)
     await user.click(houseA())
     await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
-    const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
+    const dialog = screen.getByRole('region', { name: texts.ui.findTitle })
     expect(within(dialog).getByText(texts.ui.findNoise(1, 0))).toBeTruthy()
     await user.click(within(dialog).getByRole('button', { name: texts.ui.takeNothing }))
     const noiseStat = screen.getByText(texts.ui.noiseLabel).parentElement!
@@ -294,7 +294,7 @@ describe('GameScreen: ranged weapons', () => {
 })
 
 describe('GameScreen: the danger ramp', () => {
-  it('shows a banner when danger rises, says what raises it next, and marks tougher zombies', async () => {
+  it('shows a notice when danger rises, says what raises it next, and marks tougher zombies', async () => {
     const state = makeState({
       location: 'pharmacy',
       packsAt: ['pharmacy'],
@@ -334,39 +334,61 @@ describe('GameScreen: rules and the end of an expedition', () => {
 
   it('opens the rules from the status bar and closes them with Escape', async () => {
     const { user } = renderState(makeState({ draw }))
-    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.queryByRole('region', { name: texts.rules.title })).toBeNull()
     await user.click(screen.getByRole('button', { name: texts.rules.short }))
-    const rules = screen.getByRole('dialog', { name: texts.rules.title })
+    const rules = screen.getByRole('region', { name: texts.rules.title })
     expect(within(rules).getByRole('heading', { name: 'Zombies' })).toBeTruthy()
     await user.keyboard('{Escape}')
-    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.queryByRole('region', { name: texts.rules.title })).toBeNull()
   })
 
   it('can show the rules as soon as the game starts', async () => {
     const { user } = renderState(makeState({ draw }), true)
-    const rules = screen.getByRole('dialog', { name: texts.rules.title })
+    const rules = screen.getByRole('region', { name: texts.rules.title })
     await user.click(within(rules).getByRole('button', { name: texts.rules.close }))
-    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.queryByRole('region', { name: texts.rules.title })).toBeNull()
   })
 
   it('asks before a move home ends the expedition', async () => {
     const { node, user } = renderState(makeState({ draw, location: 'street', packs: 3 }))
     await user.click(node('Shelter'))
-    let ask = screen.getByRole('dialog', { name: texts.confirmHome.title })
+    let ask = screen.getByRole('group', { name: texts.confirmHome.title })
     expect(within(ask).getByText(texts.confirmHome.body(3, 2))).toBeTruthy()
     expect(within(ask).getByText(texts.confirmHome.next(4))).toBeTruthy()
 
     await user.click(within(ask).getByRole('button', { name: texts.confirmHome.no }))
-    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.queryByRole('group', { name: texts.confirmHome.title })).toBeNull()
     expect(node('Street').getAttribute('aria-label')).toContain(texts.ui.youAreHere)
 
     await user.click(node('Shelter'))
-    ask = screen.getByRole('dialog', { name: texts.confirmHome.title })
+    ask = screen.getByRole('group', { name: texts.confirmHome.title })
     await user.click(within(ask).getByRole('button', { name: texts.confirmHome.yes }))
-    const end = screen.getByRole('dialog', { name: texts.ui.outcomeTitle.home })
+    const end = screen.getByRole('region', { name: texts.ui.outcomeTitle.home })
     expect(within(end).getByText(texts.ui.outcomeStars(2, 3))).toBeTruthy()
     expect(within(end).getByText(texts.end.home(1, 3))).toBeTruthy()
     expect(within(end).getByText(texts.end.tips.moreStars(4))).toBeTruthy()
+  })
+
+  it('plays Repack by picking a card to discard, then draws 2', async () => {
+    const { user } = renderState(makeState({ draw, hand: ['repack', 'nerves', 'run'] }))
+    const repack = document.querySelector<HTMLElement>('[data-card="repack"]')!
+    await user.click(within(repack).getByRole('button', { name: texts.ui.play }))
+    expect(screen.getByRole('status').textContent).toContain(texts.ui.chooseDiscardTarget)
+    const nerves = document.querySelector<HTMLElement>('[data-card="nerves"]')!
+    await user.click(within(nerves).getByRole('button', { name: texts.ui.discard }))
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.cardDiscarded('Nerves'))).toBeTruthy()
+    expect(document.querySelectorAll('[data-card="bandage"]')).toHaveLength(2)
+  })
+
+  it('never opens a pop-up window over the game', async () => {
+    const { user } = renderState(makeState({ draw, location: 'street', packs: 3 }))
+    await user.click(screen.getByRole('button', { name: /^Shelter/ }))
+    // The question about going home sits above the hand, with the hand and map still there.
+    expect(screen.getByRole('group', { name: texts.confirmHome.title })).toBeTruthy()
+    expect(screen.getByRole('list', { name: texts.ui.hand })).toBeTruthy()
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(document.querySelector('[aria-modal]')).toBeNull()
   })
 
   it('uses the Workshop service to trash a card from your hand', async () => {
@@ -396,7 +418,7 @@ describe('GameScreen: rules and the end of an expedition', () => {
       screen.getByRole('button', { name: texts.ui.forceStash(2, 2) }).hasAttribute('disabled'),
     ).toBe(false)
     await user.click(screen.getByRole('button', { name: texts.ui.openStashWith('Crowbar', 1) }))
-    const dialog = screen.getByRole('dialog', { name: texts.ui.stashTitle })
+    const dialog = screen.getByRole('region', { name: texts.ui.stashTitle })
     expect(within(dialog).getAllByText(texts.ui.rare)).toHaveLength(2)
     const log = within(screen.getByRole('region', { name: texts.ui.log }))
     expect(log.getByText(texts.log.stashOpened('Crowbar'))).toBeTruthy()
@@ -416,7 +438,7 @@ describe('GameScreen: rules and the end of an expedition', () => {
   it('does not ask when walking home without enough packs', async () => {
     const { node, user } = renderState(makeState({ draw, location: 'street', packs: 1 }))
     await user.click(node('Shelter'))
-    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.queryByRole('group', { name: texts.confirmHome.title })).toBeNull()
     expect(node('Shelter').getAttribute('aria-label')).toContain(texts.ui.youAreHere)
   })
 
@@ -424,7 +446,7 @@ describe('GameScreen: rules and the end of an expedition', () => {
     const state = makeState({ draw, hp: 1, location: 'houseA', zombies: [{ at: 'houseA' }] })
     const { onNewExpedition, user } = renderState(state)
     await user.click(screen.getByRole('button', { name: texts.ui.endTurn }))
-    const end = screen.getByRole('dialog', { name: texts.ui.outcomeTitle.killed })
+    const end = screen.getByRole('region', { name: texts.ui.outcomeTitle.killed })
     expect(within(end).getByText(texts.end.killed(1))).toBeTruthy()
     expect(within(end).getByText(texts.end.zombieDamage(1, 0, 1))).toBeTruthy()
     expect(within(end).getByText(texts.end.tips.attacked)).toBeTruthy()
