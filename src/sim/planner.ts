@@ -264,14 +264,17 @@ function chooseFind(o: PlannerOptions, state: GameState, content: Content): Acti
 
 // ---------------------------------------------------------------- playing the hand
 
-/** Free helpers that are always worth it: Travel Light, Painkillers, Flashlight before a search. */
+/** Helpers that are always worth it: gear, Travel Light, Painkillers, a free search bonus. */
 function tempo(ctx: Ctx): Action | undefined {
   const { state, content, plan, o } = ctx
   for (const a of cardPlays(ctx)) {
     const def = defOf(state, content, a.uid)
-    if (!def || def.cost > 0) continue
+    if (!def) continue
     const effects = modeEffects(def, a.mode)
     const kinds = new Set(effects.map((e) => e.kind))
+    // Gear works every turn from now on, so it is worth its AP at once.
+    if (kinds.has('equip') && !gearOn(state, def.id) && def.cost <= state.player.ap) return a
+    if (def.cost > 0) continue
     if ([...kinds].every((k) => k === 'gainAp' || k === 'draw')) return a
     if (kinds.has('trashFromHand') && isJunk(defOf(state, content, a.target?.trash))) return a
     if (
@@ -286,6 +289,11 @@ function tempo(ctx: Ctx): Action | undefined {
     }
   }
   return undefined
+}
+
+/** Gear is put on as soon as it is in hand (one piece of each kind at a time). */
+function gearOn(state: GameState, card: string): boolean {
+  return state.piles.gear.some((g) => g.card === card)
 }
 
 /** Attack where you are going to search, if it kills a zombie or you can finish the job. */
@@ -418,7 +426,8 @@ function defend(ctx: Ctx): Action | undefined {
     const def = a.type === 'playCard' ? defOf(state, content, a.uid) : undefined
     const effects = def && a.type === 'playCard' ? modeEffects(def, a.mode) : []
     const defensive = effects.some(
-      (e) => e.kind === 'block' || e.kind === 'neutralize' || e.kind === 'damage',
+      (e) =>
+        e.kind === 'block' || e.kind === 'neutralize' || e.kind === 'damage' || e.kind === 'equip',
     )
     const flees =
       (a.type === 'freeMove' && a.to === home) ||

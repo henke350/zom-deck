@@ -3,7 +3,13 @@ import type { CardId, CardInstance, GameEvent, GameState, Piles } from './types'
 
 /** Cards the player owns: everything except used-up and trashed cards. */
 export function ownedCount(piles: Piles): number {
-  return piles.draw.length + piles.hand.length + piles.inPlay.length + piles.discard.length
+  return (
+    piles.draw.length +
+    piles.hand.length +
+    piles.inPlay.length +
+    piles.discard.length +
+    piles.gear.length
+  )
 }
 
 /** Every card in the game, including removed ones. */

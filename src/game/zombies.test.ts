@@ -265,7 +265,7 @@ describe('zombie phase', () => {
     expect(off.zombies[0]?.location).toBe('houseA')
   })
 
-  it('Kevlar Vest blocks damage', () => {
+  it('Kevlar Vest takes some of the damage', () => {
     let state = makeState({
       location: 'police',
       hand: ['kevlarVest'],
@@ -274,8 +274,8 @@ describe('zombie phase', () => {
     })
     state = play(state, { type: 'playCard', uid: 'h1' })
     const result = applyAction(state, { type: 'endTurn' })
-    expect(result.state.player.hp).toBe(balance.maxHp - 1)
-    expect(result.events).toContainEqual({ type: 'damageBlocked', amount: 2 })
+    expect(result.state.player.hp).toBe(balance.maxHp - 2)
+    expect(result.events).toContainEqual({ type: 'gearAbsorbed', uid: 'h1', amount: 1 })
   })
 
   it('kills you before dusk and darkness are checked', () => {

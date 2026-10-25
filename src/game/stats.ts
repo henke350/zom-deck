@@ -61,6 +61,7 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
         else s.damageFromCards += e.amount
         break
       case 'damageBlocked':
+      case 'gearAbsorbed':
         s.damageBlocked += e.amount
         break
       case 'zombieAttacked':

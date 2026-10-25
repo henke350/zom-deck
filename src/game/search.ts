@@ -1,6 +1,7 @@
 import { texts } from '../data/texts.en'
 import type { Balance } from '../data/balance'
 import { gainCard, withoutCard } from './deck'
+import { gearSearchBonus } from './gear'
 import { nextFloat, shuffle } from './rng'
 import { addNoise, dangerLevel, raiseDanger, zombiesAt } from './zombies'
 import type {
@@ -131,7 +132,8 @@ export function performSearch(
     spec.extra +
     state.player.searchBonus +
     (peaceful ? state.balance.peacefulSearchBonus : 0) +
-    danger.extraFinds
+    danger.extraFinds +
+    gearSearchBonus(state, content)
   const [options, rng] = drawFinds(pool, count, state.rng)
   events.push({ type: 'searched', location, options, quick: spec.quick })
   const stashFound = site.stash === 'hidden'

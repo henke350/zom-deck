@@ -1,5 +1,6 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
 import { defaultContent } from '../data/content'
+import { freshGear } from './gear'
 import { emptyStats } from './stats'
 import type {
   CardId,
@@ -19,6 +20,9 @@ export interface StateSpec {
   readonly discard?: readonly CardId[]
   readonly inPlay?: readonly CardId[]
   readonly removed?: readonly CardId[]
+  /** Gear in front of you (uids g1, g2, …), with what it has left (default: fresh). */
+  readonly gear?: readonly CardId[]
+  readonly gearLeft?: Readonly<Record<string, number>>
   readonly location?: LocationId
   readonly hp?: number
   readonly ap?: number
@@ -90,6 +94,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     discard: instances('x', spec.discard),
     inPlay: instances('p', spec.inPlay),
     removed: instances('r', spec.removed),
+    gear: instances('g', spec.gear),
   }
   const hp = spec.hp ?? balance.maxHp
   return {
@@ -113,6 +118,15 @@ export function makeState(spec: StateSpec = {}): GameState {
     nextZombieUid: zombies.length + 1,
     noise: spec.noise ?? 0,
     danger: spec.danger ?? 1,
+    gearLeft: {
+      ...Object.fromEntries(
+        piles.gear.flatMap((g) => {
+          const def = defaultContent.cards[g.card]?.gear
+          return def ? [[g.uid, freshGear(def)]] : []
+        }),
+      ),
+      ...spec.gearLeft,
+    },
     visited: spec.visited ?? [...new Set(['shelter', location])],
     tagsPlayedThisTurn: spec.tags ?? [],
     nextUid: 1000,

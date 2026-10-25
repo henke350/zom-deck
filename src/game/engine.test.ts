@@ -176,16 +176,6 @@ describe('Follow-up', () => {
     const next = play(play(state, { type: 'playCard', uid: 'h1' }), { type: 'endTurn' })
     expect(next.tagsPlayedThisTurn).toEqual([])
   })
-
-  it('Kevlar Vest blocks 3 instead of 2 after a Weapon', () => {
-    const plain = play(makeState({ hand: ['kevlarVest'] }), { type: 'playCard', uid: 'h1' })
-    expect(plain.player.block).toBe(2)
-    const armed = play(makeState({ hand: ['kevlarVest'], tags: ['weapon'] }), {
-      type: 'playCard',
-      uid: 'h1',
-    })
-    expect(armed.player.block).toBe(3)
-  })
 })
 
 describe('trashing', () => {
@@ -246,19 +236,14 @@ describe('Travel Light', () => {
 })
 
 describe('temporary effects', () => {
-  it('search bonus and block add up and reset when the turn ends', () => {
+  it('search bonus adds up and resets when the turn ends', () => {
     const state = makeState({
-      hand: ['crowbar', 'flashlight', 'kevlarVest'],
+      hand: ['crowbar', 'crowbar'],
       draw: ['run', 'run', 'run', 'run', 'run'],
     })
     let next = play(state, { type: 'playCard', uid: 'h1', mode: 1 })
-    next = play(next, { type: 'playCard', uid: 'h2' })
-    next = play(next, { type: 'playCard', uid: 'h3' })
-    // Tags belong to the card, not the mode: the prying Crowbar is still a Tool
-    // and a Weapon. Flashlight follows the Tool (+1 search, draws a card) and
-    // Kevlar Vest follows the Weapon (blocks 3 instead of 2).
+    next = play(next, { type: 'playCard', uid: 'h2', mode: 1 })
     expect(next.player.searchBonus).toBe(2)
-    expect(next.player.block).toBe(3)
     const ended = play(next, { type: 'endTurn' })
     expect(ended.player).toMatchObject({ searchBonus: 0, block: 0 })
   })

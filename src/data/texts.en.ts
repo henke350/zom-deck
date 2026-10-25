@@ -128,6 +128,15 @@ export const texts = {
     cancel: 'Cancel',
     chooseDestination: 'Choose where to go on the map.',
     goHere: 'Go here',
+    gear: 'Gear',
+    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns', n: number) =>
+      lasts === 'absorbs'
+        ? `takes ${n} more damage`
+        : lasts === 'untilHit'
+          ? 'until a zombie hurts you'
+          : n === 1
+            ? 'last turn'
+            : `${n} turns left`,
     chooseTrashTarget: 'Choose a card in your hand to trash.',
     useService: (name: string, cost: number) => `${name} (${cost} AP)`,
     rare: 'Rare',
@@ -276,6 +285,7 @@ export const texts = {
           'Trash weak cards so your good cards come up more often. Nerves and Wound are junk. Heavy Load cannot be trashed.',
           'Follow-up: a card gets stronger if you already played a card with the named tag this turn.',
           'Use up: the card is removed for good after you play it.',
+          'Gear (Kevlar Vest, Running Shoes, Flashlight) stays in front of you after you play it and keeps working until it wears out. Then it goes to your discard pile, and you can draw it again.',
           `Workshop: Dismantle and Pharmacy: Patch up trash a card from your hand for ${b.locationServiceCost} AP. Patch up only takes Nerves and Wound.`,
         ],
       },
@@ -402,6 +412,14 @@ export const texts = {
     zombieLostTrack: (kind: string) => `A ${kind} loses track of you.`,
     zombieAttacked: (damage: number, kind: string) => `A ${kind} attacks you (${damage} damage).`,
     zombieScreamed: (noise: number) => `A Screamer shrieks: +${noise} noise.`,
+    gearEquipped: (card: string) => `You put on ${card}. It stays in front of you.`,
+    gearAbsorbed: (n: number) => `Your vest takes ${n} damage.`,
+    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns') =>
+      reason === 'absorbs'
+        ? `${card} is worn out.`
+        : reason === 'untilHit'
+          ? `You stumble: ${card} comes off.`
+          : `${card} runs out.`,
     bodySearched: (n: number) =>
       `You search the body: ${n === 1 ? '1 find' : `${n} finds`} to choose from.`,
     damageBlocked: (n: number) => `You block ${n} damage.`,
@@ -455,7 +473,7 @@ export const texts = {
     },
     flashlight: {
       name: 'Flashlight',
-      text: 'Your next search this turn reveals +1 find. Follow-up Tool: draw 1 card.',
+      text: 'Gear: every search reveals +1 find. Lasts this turn and the next.',
     },
     alarmClock: {
       name: 'Alarm Clock',
@@ -470,9 +488,12 @@ export const texts = {
     },
     kevlarVest: {
       name: 'Kevlar Vest',
-      text: 'Prevent up to 2 damage this turn. Follow-up Weapon: prevent 3 instead.',
+      text: 'Gear: takes 1 damage in each zombie phase. Wears out after 3 damage.',
     },
-    runningShoes: { name: 'Running Shoes', text: 'Move up to 2. Follow-up Move: draw 1 card.' },
+    runningShoes: {
+      name: 'Running Shoes',
+      text: 'Gear: your free move may go 2 steps. Lost when a zombie hurts you.',
+    },
     adrenaline: { name: 'Adrenaline', text: 'Gain 2 AP. Lose 1 health.' },
     travelLight: {
       name: 'Travel Light',

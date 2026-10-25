@@ -67,6 +67,8 @@ src/sim/   bots and balance reports (from M6), run in Node
   searches after kills (`searchBodies`, `content.bodyLoot`), rare finds (`rare` on the card, weight scaled by
   `rareFindWeight`) and locked stashes (`openStash`). A search is always the last effect
   of a card mode, because the game then waits for the player.
+- Gear lives in `src/game/gear.ts`: cards with `gear` on their `CardDef` and an `equip` effect stay
+  in `piles.gear` with a counter in `state.gearLeft` until they wear out (`GearLasts`).
 - Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per
   building in `startZombies.kinds` and `content.arrivals`), the danger meter (`raiseDanger`,
   `dangerLevel`, `noiseThreshold`), noticing, noise and arrivals,

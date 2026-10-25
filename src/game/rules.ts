@@ -3,6 +3,7 @@ import type { CardDef, CardMode, Content, Effect, EffectKind, GameState } from '
 
 /** Effects the engine can resolve. A card with any other effect is refused with a reason. */
 export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
+  'equip',
   'gainAp',
   'draw',
   'heal',

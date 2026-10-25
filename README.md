@@ -34,11 +34,12 @@ npm run dev      # starter spillet på http://localhost:5173
 10. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
 11. **Fare (Danger):** Starter på 1 og stiger for hver pakke og hvert sjældent fund (op til 4). Nye zombier bliver hurtigere og hårdere, men fundene bliver også bedre: fra fare 3 giver hver søgning +1 fund, og sjældne fund dukker oftere op.
 12. **Fund og drab:** Et fund, du tager, kommer direkte på hånden. Dræber du en zombie, kan du gennemsøge liget og tage et fund mere (en Brute bærer mere).
-13. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
-14. Grå knapper viser altid, hvorfor de ikke kan bruges.
-15. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
-16. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
-17. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
+13. **Gear:** Kevlar Vest, Running Shoes og Flashlight bliver liggende foran dig (rækken over hånden) og virker hver tur, til de slides op. Så ryger de i afkastbunken.
+14. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
+15. Grå knapper viser altid, hvorfor de ikke kan bruges.
+16. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
+17. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
+18. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 

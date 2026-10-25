@@ -485,7 +485,7 @@ function rulesPages(content: Content, balance: Balance, cardBacks: boolean): str
   <h3>Services</h3>
   <p>Workshop (Dismantle) and Pharmacy or Hospital (Patch up): pay ${b.locationServiceCost} AP to trash a card from your hand. Patch up only takes Nerves and Wound.</p>
   <h3>Card words</h3>
-  <p><b>Follow-up X:</b> stronger if you already played a card with tag X this turn. <b>Use up:</b> trash the card after playing it. <b>Heavy Load</b> can't be trashed. <b>Wound</b> cards are only used in the Wound variant (lose ${b.wounds.damageInOnePhase}+ health in one zombie phase: take a Wound).</p>
+  <p><b>Follow-up X:</b> stronger if you already played a card with tag X this turn. <b>Use up:</b> trash the card after playing it. <b>Gear:</b> lay the card in front of you; it works every turn until it wears out (track it with a die), then put it in your discard pile. <b>Heavy Load</b> can't be trashed. <b>Wound</b> cards are only used in the Wound variant (lose ${b.wounds.damageInOnePhase}+ health in one zombie phase: take a Wound).</p>
   <h3>Differences from the screen version</h3>
   <p>Rare finds only come from stashes. Random picks are d6 tables, so the odds are rounded.</p>
   </div>

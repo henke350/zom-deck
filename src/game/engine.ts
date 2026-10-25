@@ -2,6 +2,7 @@ import { defaultContent } from '../data/content'
 import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
+import { equip, tickGear } from './gear'
 import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
 import { validate } from './validate'
@@ -211,6 +212,8 @@ function resolveEffect(
         { base: state.balance.searchOptions, extra: effect.bonus ?? 0, quick: false, noise: 0 },
         events,
       )
+    case 'equip':
+      return equip(state, action.uid, content, events)
     case 'move': {
       const to = action.target?.location
       if (!to) throw new Error('move: validated destination is missing')
@@ -349,6 +352,7 @@ function endTurn(
   const discarded = next.piles.hand.filter((c) => !keep.has(c.uid))
   if (kept.length > 0) events.push({ type: 'cardsKept', uids: kept.map((c) => c.uid) })
 
+  next = tickGear(next, content, events)
   const cleaned: GameState = {
     ...next,
     player: { ...next.player, searchBonus: 0, block: 0 },
