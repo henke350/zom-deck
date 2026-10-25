@@ -12,9 +12,3 @@ createRoot(root).render(
     <App />
   </StrictMode>,
 )
-
-// The built game installs as an app and works offline (see vite.pwa.ts). Some hosts, such as
-// a preview frame, do not allow a service worker; the game then just runs online.
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {})
-}

@@ -43,11 +43,11 @@ Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 
 ## Spil på tablet (app)
 
-Spillet kan installeres som app på en Android-tablet (en PWA: en hjemmeside, der installeres som app og virker offline). Det er lavet til en tablet på langs: alt er på én skærm, og knapperne er store nok til fingre.
+Spillet kan installeres som app på en Android-tablet (en PWA: en hjemmeside, der installeres som app med eget ikon og fuld skærm). Det kræver net. Det er lavet til en tablet på langs: alt er på én skærm, og knapperne er store nok til fingre.
 
 1. **Én gang:** slå GitHub Pages til i repoet: _Settings → Pages → Source: "GitHub Actions"_. Derefter bygges og udgives spillet automatisk ved hver ændring på main (`.github/workflows/pages.yml`).
 2. Åbn **https://henke350.github.io/zom-deck/** i Chrome på tabletten, og vælg menuen **⋮ → Installér app** (eller "Føj til startskærm").
-3. Appen åbner i fuld skærm og kan spilles uden net. Opdateringer hentes automatisk, næste gang appen startes med net.
+3. Appen åbner i fuld skærm på langs og viser altid den nyeste udgave.
 
 På en berøringsskærm viser første tryk på et sted på kortet, hvad der er der; andet tryk (eller **Go here**) går derhen.
 
