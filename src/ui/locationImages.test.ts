@@ -3,15 +3,7 @@ import { defaultContent } from '../data/content'
 import { locationImages } from './locationImages'
 
 /** Buildings added after the illustrations were made. They show without a picture until art arrives. */
-const awaitingArt = [
-  'gasStation',
-  'school',
-  'hospital',
-  'apartments',
-  'church',
-  'sportsShop',
-  'square',
-]
+const awaitingArt = ['apartments', 'church', 'sportsShop', 'square']
 
 describe('location images', () => {
   it('has an illustration for every place, except the ones still waiting for art', () => {

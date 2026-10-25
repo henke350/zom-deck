@@ -3,7 +3,7 @@ import { defaultContent } from '../data/content'
 import { cardImages } from './cardImages'
 
 /** Cards added after the illustrations were made. They show without a picture until art arrives. */
-const awaitingArt = ['shotgun', 'chainsaw', 'bicycle', 'firstAidKit', 'knife', 'bow', 'crossbow']
+const awaitingArt = ['knife', 'bow', 'crossbow']
 
 describe('card images', () => {
   it('has an illustration for every card, except the ones still waiting for art', () => {
