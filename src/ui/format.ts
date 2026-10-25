@@ -52,6 +52,8 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.bodySearched(event.options.length)
     case 'zombieScreamed':
       return log.zombieScreamed(event.noise)
+    case 'zombiesToughened':
+      return log.zombiesToughened(event.amount)
     case 'dangerRose':
       return log.dangerRose(event.level, event.reason)
     case 'zombieFollowed':

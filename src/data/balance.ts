@@ -14,7 +14,10 @@ export interface ZombieStats {
   readonly followSteps: number
   /** Noise it makes at the end of each turn while it has seen you. */
   readonly screamNoise: number
-  /** Finds you see when you search its body after killing it (0: nothing to search). */
+  /**
+   * Finds you see when you search its body after killing it (0: nothing to search). A fraction
+   * is a chance of one more: 0.5 means one find half the time.
+   */
   readonly loot: number
 }
 
@@ -28,6 +31,8 @@ export interface DangerLevel {
   readonly extraFinds: number
   /** The reward: how much of its weight a rare find counts in a search at this level. */
   readonly rareFindWeight: number
+  /** Extra health for every zombie at this level (they get tougher as you get stronger). */
+  readonly zombieHpBonus: number
 }
 
 /**
@@ -43,6 +48,10 @@ export interface DangerBalance {
   readonly levels: readonly DangerLevel[]
   readonly perPack: number
   readonly perRareFind: number
+  /** Danger also rises by one each time you have taken this many finds (0: never). */
+  readonly perFindsTaken: number
+  /** Start zombies in a building get their kind when you first see inside (with the danger mix). */
+  readonly rollOnReveal: boolean
   /** Zombies that arrive on the street each time the level rises. */
   readonly hordeSize: number
 }
@@ -130,23 +139,28 @@ export const balance: Balance = {
   packsOnMap: 5,
   starThresholds: [2, 3, 4],
   zombies: {
-    walker: { hp: 2, damage: 1, followSteps: 1, screamNoise: 0, loot: 1 },
+    // loot below 1 is a chance: a Walker carries something half the time.
+    walker: { hp: 2, damage: 1, followSteps: 1, screamNoise: 0, loot: 0.5 },
     runner: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0, loot: 1 },
     brute: { hp: 4, damage: 2, followSteps: 0, screamNoise: 0, loot: 2 },
-    screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2, loot: 1 },
+    screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2, loot: 0.5 },
   },
   danger: {
     enabled: true,
     // Tuning 2 (24 Oct 2026, after playtests): no hordes, one zombie per full meter at every
     // level, and a reward for pushing on: more finds and more rare finds as danger rises.
     levels: [
-      { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.25 },
-      { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.5 },
-      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 0.5 },
-      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 1 },
+      { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.25, zombieHpBonus: 0 },
+      { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.5, zombieHpBonus: 0 },
+      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 0.5, zombieHpBonus: 1 },
+      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 1, zombieHpBonus: 1 },
     ],
     perPack: 1,
     perRareFind: 1,
+    // Tuning 4 (25 Oct 2026, after a playtest where zombies got too easy): danger follows the
+    // deck too, zombies get tougher from danger 3, and buildings roll their zombies when seen.
+    perFindsTaken: 4,
+    rollOnReveal: true,
     hordeSize: 0,
   },
   extraStartZombies: 0,

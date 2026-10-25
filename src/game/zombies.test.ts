@@ -322,7 +322,7 @@ describe('combat cards', () => {
   })
 
   it('killing a zombie lets you search its body: take a find into your hand, no noise', () => {
-    const state = here(['axe'])
+    const state = here(['axe'], [{ at: 'police', kind: 'runner' }])
     const { state: looting, events } = applyAction(state, {
       type: 'playCard',
       uid: 'h1',
@@ -330,7 +330,7 @@ describe('combat cards', () => {
     })
     expect(looting.phase).toBe('chooseFind')
     expect(looting.pendingFind).toMatchObject({ fromBody: true, noise: 0, packFound: false })
-    expect(looting.pendingFind?.options).toHaveLength(balance.zombies.walker.loot)
+    expect(looting.pendingFind?.options).toHaveLength(balance.zombies.runner.loot)
     expect(types(events).at(-1)).toBe('bodySearched')
     const card = looting.pendingFind!.options[0]!
     const taken = play(looting, { type: 'takeFind', card })
@@ -345,11 +345,29 @@ describe('combat cards', () => {
     expect(afterBrute.pendingFind?.options).toHaveLength(balance.zombies.brute.loot)
     const crowd = here(
       ['chainsaw'],
-      [1, 2, 3, 4].map(() => ({ at: 'police' })),
+      [1, 2, 3, 4].map(() => ({ at: 'police', kind: 'runner' as const })),
     )
     const afterCrowd = play(crowd, { type: 'playCard', uid: 'h1' })
     expect(afterCrowd.zombies).toHaveLength(0)
     expect(afterCrowd.pendingFind?.options).toHaveLength(balance.bodyLootMax)
+  })
+
+  it('a Walker carries something only some of the time', () => {
+    let searched = 0
+    for (let seed = 1; seed <= 200; seed++) {
+      const state = makeState({
+        seed,
+        location: 'police',
+        hand: ['axe'],
+        draw,
+        zombies: [{ at: 'police' }],
+      })
+      const next = play(state, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+      if (next.phase === 'chooseFind') searched++
+    }
+    expect(balance.zombies.walker.loot).toBe(0.5)
+    expect(searched).toBeGreaterThan(70)
+    expect(searched).toBeLessThan(130)
   })
 
   it('a zombie that is only hurt has nothing to search yet', () => {
@@ -369,7 +387,7 @@ describe('combat cards', () => {
   it('Axe kills a fresh zombie, and Baseball Bat then Axe clears two', () => {
     let state = here(['baseballBat', 'axe'], [{ at: 'police', hp: 1 }, { at: 'police' }])
     state = play(state, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
-    state = play(state, { type: 'declineFind' }) // leave the body
+    if (state.phase === 'chooseFind') state = play(state, { type: 'declineFind' }) // leave the body
     state = play(state, { type: 'playCard', uid: 'h2', target: { zombie: 'z2' } })
     expect(state.zombies).toHaveLength(0)
     expect(state.piles.hand).toHaveLength(1) // the Bat drew a card
@@ -377,7 +395,8 @@ describe('combat cards', () => {
 
   it('Molotov hits every zombie here, burns the building and makes noise', () => {
     const state = here(['molotov', 'search'], [{ at: 'police' }, { at: 'police', hp: 3 }])
-    const next = play(play(state, { type: 'playCard', uid: 'h1' }), { type: 'declineFind' })
+    const played = play(state, { type: 'playCard', uid: 'h1' })
+    const next = played.phase === 'chooseFind' ? play(played, { type: 'declineFind' }) : played
     expect(next.zombies).toEqual([expect.objectContaining({ uid: 'z2', hp: 1 })])
     expect(next.sites.police).toMatchObject({ burned: true, searchesLeft: 0 })
     expect(next.noise).toBe(2)
@@ -569,5 +588,71 @@ describe('danger meter', () => {
     const next = play(state, { type: 'quickSearch' })
     expect(next.danger).toBe(1)
     expect(next.zombies).toHaveLength(0)
+  })
+})
+
+describe('zombies that grow with you', () => {
+  it('danger rises every few finds you take', () => {
+    const every = balance.danger.perFindsTaken
+    const base = makeState({ location: 'police', draw })
+    const state: GameState = {
+      ...base,
+      phase: 'chooseFind',
+      pendingFind: { location: 'police', options: ['bandage'], packFound: false, noise: 0 },
+      stats: { ...base.stats, cardsTaken: Array.from({ length: every - 1 }, () => 'bandage') },
+    }
+    const { state: next, events } = applyAction(state, { type: 'takeFind', card: 'bandage' })
+    expect(next.danger).toBe(2)
+    expect(events).toContainEqual({ type: 'dangerRose', level: 2, reason: 'deck' })
+  })
+
+  it('from danger 3, every zombie has more health, old and new', () => {
+    const bonus = balance.danger.levels[2]!.zombieHpBonus
+    expect(bonus).toBeGreaterThan(0)
+    const state = makeState({
+      location: 'pharmacy',
+      packsAt: ['pharmacy'],
+      danger: 2,
+      zombies: [{ at: 'street' }],
+    })
+    const { state: next, events } = applyAction(state, { type: 'quickSearch' })
+    expect(next.danger).toBe(3)
+    expect(next.zombies[0]?.hp).toBe(balance.zombies.walker.hp + bonus)
+    expect(events).toContainEqual({ type: 'zombiesToughened', amount: bonus })
+    const arrived = addNoise(
+      makeState({ location: 'street', danger: 3 }),
+      3,
+      defaultContent,
+      'noise',
+      [],
+    )
+    const z = arrived.zombies[0]!
+    expect(z.hp).toBe(balance.zombies[z.kind].hp + bonus)
+  })
+
+  it('a building decides its zombies when you first look inside, at that danger level', () => {
+    const kinds = new Set<string>()
+    for (let seed = 1; seed <= 200; seed++) {
+      const base = makeState({ seed, danger: 4, zombies: [{ at: 'houseA' }, { at: 'houseA' }] })
+      const state: GameState = {
+        ...base,
+        zombies: base.zombies.map((z) => ({ ...z, rollOnReveal: true })),
+      }
+      const next = play(state, { type: 'freeMove', to: 'houseA' })
+      for (const z of next.zombies) {
+        expect(z.rollOnReveal).toBeUndefined()
+        expect(z.hp).toBe(balance.zombies[z.kind].hp + balance.danger.levels[3]!.zombieHpBonus)
+        kinds.add(z.kind)
+      }
+    }
+    // Houses hold Walkers and Screamers; at danger 4 Brutes and Runners can turn up too.
+    expect(kinds.has('brute')).toBe(true)
+    expect(kinds.has('runner')).toBe(true)
+  })
+
+  it('new games mark start zombies to be decided later', () => {
+    const state = newGame(5)
+    expect(state.zombies.length).toBeGreaterThan(0)
+    expect(state.zombies.every((z) => z.rollOnReveal)).toBe(true)
   })
 })

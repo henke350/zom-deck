@@ -301,7 +301,18 @@ export const texts = {
             {
               heading: 'Danger',
               items: [
-                `The city gets wilder the better you do, and richer. Danger starts at 1 and rises by one for every pack and every rare find you take, up to ${b.danger.levels.length}.`,
+                `The city gets wilder the better you do, and richer. Danger starts at 1 and rises by one for every pack and every rare find you take${b.danger.perFindsTaken > 0 ? `, and for every ${b.danger.perFindsTaken} finds you add to your deck` : ''}, up to ${b.danger.levels.length}.`,
+                ...b.danger.levels.flatMap((l, i) =>
+                  l.zombieHpBonus > 0 &&
+                  (b.danger.levels[i - 1]?.zombieHpBonus ?? 0) < l.zombieHpBonus
+                    ? [`From danger ${i + 1}, every zombie has +${l.zombieHpBonus} health.`]
+                    : [],
+                ),
+                ...(b.danger.rollOnReveal
+                  ? [
+                      'The zombies inside a building are only decided when you first walk in or scout it, so buildings you leave for later can hold tougher kinds.',
+                    ]
+                  : []),
                 `${b.danger.levels.map((l, i) => `Danger ${i + 1}: ${l.arrivals === 1 ? 'a zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise${l.extraFinds > 0 ? `, +${l.extraFinds} find in every search` : ''}`).join('. ')}.`,
                 'At low danger the noise brings Walkers; higher up come Runners, Screamers and at last Brutes. Rare finds turn up more often the higher the danger.',
                 ...(b.danger.hordeSize > 0
@@ -440,8 +451,9 @@ export const texts = {
           : reason === 'horde'
             ? `A ${kind} gathers at ${place}.`
             : `The noise draws a ${kind} to ${place}!`,
-    dangerRose: (level: number, reason: 'pack' | 'rare') =>
-      `${reason === 'pack' ? 'Word of your haul spreads' : 'Your lucky find draws attention'}: danger rises to ${level}.`,
+    dangerRose: (level: number, reason: 'pack' | 'rare' | 'deck') =>
+      `${reason === 'pack' ? 'Word of your haul spreads' : reason === 'rare' ? 'Your lucky find draws attention' : 'You are getting stronger, and so is the city'}: danger rises to ${level}.`,
+    zombiesToughened: (n: number) => `The dead grow tougher: every zombie has +${n} health.`,
     zombieFollowed: (place: string, kind: string) => `A ${kind} follows you to ${place}.`,
     zombieLostTrack: (kind: string) => `A ${kind} loses track of you.`,
     zombieAttacked: (damage: number, kind: string) => `A ${kind} attacks you (${damage} damage).`,

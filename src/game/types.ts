@@ -172,6 +172,11 @@ export interface Zombie {
   readonly alerted: boolean
   /** Sneak, Alarm Clock or Soft Soles: it won't attack or notice you this turn. */
   readonly neutralized: boolean
+  /**
+   * A start zombie in a building you have not seen inside yet: its kind is rolled again when
+   * you first enter or scout the building, at the danger level of that moment.
+   */
+  readonly rollOnReveal?: boolean
 }
 
 /** A search waiting for the player to choose. */
@@ -472,6 +477,7 @@ export type GameEvent =
     }
   | { readonly type: 'zombieScreamed'; readonly uid: string; readonly noise: number }
   | { readonly type: 'dangerRose'; readonly level: number; readonly reason: DangerReason }
+  | { readonly type: 'zombiesToughened'; readonly amount: number }
   | {
       readonly type: 'zombieArrived'
       readonly uid: string
@@ -536,7 +542,7 @@ export type GameEvent =
 /** Where noise comes from: the player, dusk, or a Screamer that has seen the player. */
 export type NoiseReason = 'noise' | 'dusk' | 'scream' | 'horde'
 
-export type DangerReason = 'pack' | 'rare'
+export type DangerReason = 'pack' | 'rare' | 'deck'
 
 export type Validation = { readonly ok: true } | { readonly ok: false; readonly reason: string }
 

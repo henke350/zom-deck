@@ -13,6 +13,7 @@ import {
   noticeHere,
   zombiePhase,
   zombiesAt,
+  revealZombies,
 } from './zombies'
 import type {
   Action,
@@ -259,7 +260,7 @@ function resolveEffect(
         if (site) sites[id] = { ...site, scouted: true }
       }
       events.push({ type: 'scouted', locations })
-      return { ...state, sites }
+      return locations.reduce((s, id) => revealZombies(s, content, id), { ...state, sites })
     }
     case 'burnBuilding': {
       const site = state.sites[here]
@@ -315,6 +316,7 @@ function arrive(
     player: { ...state.player, location: to },
     visited: state.visited.includes(to) ? state.visited : [...state.visited, to],
   }
+  moved = revealZombies(moved, content, to)
   const atShelter = content.locations[to]?.kind === 'shelter'
   if (atShelter && moved.player.packs >= state.balance.packsToWin) {
     const stars = starsFor(moved, moved.player.packs)

@@ -7,7 +7,14 @@ import type {
   OpenStashAction,
   Validation,
 } from '../../game'
-import { buildingKnown, distance, freeMoveCost, zombieInfo, zombiesAt } from '../../game'
+import {
+  buildingKnown,
+  distance,
+  freeMoveCost,
+  zombieInfo,
+  zombiesAt,
+  zombieMaxHp,
+} from '../../game'
 import { locationImages } from '../locationImages'
 import { cardText, locationText } from '../names'
 import { siteSummary } from '../sites'
@@ -119,7 +126,7 @@ export function LocationPanel({
             {zombies.map((z, i) => {
               const target = zombieTargets?.get(z.uid)
               const status = [
-                ui.zombieHealth(z.hp, state.balance.zombies[z.kind].hp),
+                ui.zombieHealth(z.hp, zombieMaxHp(state, z.kind)),
                 z.alerted ? ui.zombieSeenYou : '',
                 z.neutralized ? ui.zombieDistracted : '',
               ]

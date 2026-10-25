@@ -37,7 +37,7 @@ describe('Knife', () => {
 
 describe('Bow', () => {
   it('hits a zombie one step away that you can see, without noise or being seen', () => {
-    const state = makeState({ hand: ['bow'], zombies: [{ at: 'street' }], draw })
+    const state = makeState({ hand: ['bow'], zombies: [{ at: 'street', kind: 'runner' }], draw })
     const { state: next, events } = applyAction(state, {
       type: 'playCard',
       uid: 'h1',
