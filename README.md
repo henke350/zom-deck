@@ -53,6 +53,8 @@ Vælg **Start campaign** på titelskærmen. En kampagne er 7 dage i samme by:
 3. **Aften:** du spiser 1 mad og drikker 1 vand. Mangler du mad, får du en ekstra Nerves næste dag; mangler du vand, starter du med 2 liv mindre.
 4. Byen er den samme hver dag: det, du har set, forbliver kendt, men plyndrede bygninger kommer kun langsomt igen, så du skal længere ud.
 
+**Hunden (Stray Dog):** nogle gange finder du en hund i et hus eller kirken. Den går ved siden af dig, bider en zombie én gang pr. tur (**Sic**), tager skade for dig og viser med et "sniff"-mærke, hvor der ligger pakker lige ved siden af. Den kan dø. I kampagnen følger den med hjem og skal have mad hver anden aften.
+
 Kampagnen gemmes i browseren, også midt på en dag. **Continue campaign** fortsætter. `npm run sim -- campaign` lader botterne spille hele kampagner.
 
 ## Spil på tablet (app)

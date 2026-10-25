@@ -79,7 +79,8 @@ export function BaseScreen({
             {last.ate ? t.ate : t.hungry} {last.drank ? t.drank : t.thirsty}{' '}
             {last.producedFood + last.producedWater > 0
               ? t.produced(last.producedFood, last.producedWater)
-              : ''}
+              : ''}{' '}
+            {last.dog ? t.dogNews[last.dog] : ''}
           </p>
         </section>
       )}
@@ -93,6 +94,9 @@ export function BaseScreen({
             {campaign.wounds > 0 && <li>{t.penaltyWounds(campaign.wounds)}</li>}
             {!campaign.hungry && !campaign.thirsty && campaign.wounds === 0 && (
               <li>{t.noPenalty}</li>
+            )}
+            {campaign.dog && (
+              <li>{t.dogAtBase(campaign.dog.hp, balance.dog.hp, balance.dog.foodEvery)}</li>
             )}
             <li className="muted">{t.lossesLeft(c.lossesAllowed - campaign.losses)}</li>
           </ul>

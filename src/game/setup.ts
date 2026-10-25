@@ -1,4 +1,5 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
+import { adoptDog } from './dog'
 import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
 import { normalizeSeed, shuffle } from './rng'
@@ -96,5 +97,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   const events: GameEvent[] = []
   const scouted = (setup?.scouted ?? []).filter((id) => sites[id])
   const revealed = scouted.reduce((s, id) => revealZombies(s, here, id), initial)
-  return startTurn(revealed, events)
+  // Campaign: the dog from earlier days comes along.
+  const withDog = setup?.dog ? adoptDog(revealed, setup.dog.hp, events) : revealed
+  return startTurn(withDog, events)
 }

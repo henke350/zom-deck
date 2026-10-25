@@ -183,6 +183,12 @@ export const texts = {
               ? 'last turn'
               : `${n} turns left`,
     shoot: (cost: number) => `Shoot (${cost} AP)`,
+    dog: 'Dog',
+    dogStatus: (hp: number, max: number) => `Stray Dog · ${hp}/${max} health`,
+    sic: 'Sic (0 AP)',
+    chooseDogTarget: 'Choose a zombie for your dog.',
+    dogSmells: 'Your dog smells supplies here',
+    scentMark: 'sniff',
     chooseZombieInRange:
       'Choose the zombie to hit. Tap a nearby place on the map to see zombies there.',
     chooseTrashTarget: 'Choose a card in your hand to trash.',
@@ -358,6 +364,16 @@ export const texts = {
         ],
       },
       {
+        heading: 'The Stray Dog',
+        items: [
+          `Sometimes a search in a house or the church finds a scared dog. It is not a card: it walks with you (${b.dog.hp} health).`,
+          `Sic: once a turn, for 0 AP, it deals ${b.dog.biteDamage} damage to a zombie where you stand, barking (+${b.dog.biteNoise} noise).`,
+          `In each zombie phase it takes ${b.dog.guardPerPhase} damage for you. At 0 health it dies.`,
+          'It smells supply packs: buildings here and next door get a "sniff" mark on the map.',
+          `In a campaign it comes home with you, gets ${b.dog.healPerNight} health back each night and eats 1 food every ${b.dog.foodEvery} nights. No food, and it runs away.`,
+        ],
+      },
+      {
         heading: 'Campaign',
         items: [
           `A campaign is ${b.campaign.days} days in one city; each day is one expedition. You may go home with whatever you have. The city stays the same, so buildings you have seen stay known, and searched buildings get only ${b.campaign.searchesRegrowPerNight} search back each night: the supplies move further out.`,
@@ -426,6 +442,14 @@ export const texts = {
     overSummary: (days: number, food: number, water: number, upgrades: number) =>
       `You lasted ${days} ${days === 1 ? 'day' : 'days'} and built ${upgrades} ${upgrades === 1 ? 'upgrade' : 'upgrades'}. Left in the store: ${food} food and ${water} water.`,
     packKind: { food: 'food', water: 'water' },
+    dogAtBase: (hp: number, max: number, every: number) =>
+      `Your Stray Dog is here (${hp}/${max} health). It eats 1 food every ${every} nights.`,
+    dogNews: {
+      joined: 'A stray dog followed you home.',
+      died: 'Your dog did not come home.',
+      ate: 'Your dog ate 1 food.',
+      ranAway: 'There was no food for your dog. In the morning it was gone.',
+    },
     reasons: {
       over: 'The campaign is over.',
       built: 'Already built.',
@@ -562,6 +586,11 @@ export const texts = {
             ? `${card} is out of bolts.`
             : `${card} runs out.`,
     gearUsed: (card: string) => `You shoot with the ${card}. Not a sound.`,
+    dogFound: (hp: number) => `A scared dog creeps out and follows you. (${hp} health)`,
+    dogBit: (damage: number) => `Your dog attacks, barking: ${damage} damage.`,
+    dogGuarded: (n: number, left: number) =>
+      `Your dog throws itself in the way and takes ${n} damage (${left} health left).`,
+    dogDied: 'Your dog does not get up again.',
     bodySearched: (n: number) =>
       `You search the body: ${n === 1 ? '1 find' : `${n} finds`} to choose from.`,
     damageBlocked: (n: number) => `You block ${n} damage.`,
@@ -685,6 +714,10 @@ export const texts = {
       name: 'Painkillers',
       text: 'Trash a Nerves or Wound from your hand. Draw 1 card.',
     },
+    dog: {
+      name: 'Stray Dog',
+      text: 'Not a card: a dog that walks with you. Once a turn, Sic: 1 damage to a zombie here (+1 noise). It takes 1 damage for you each zombie phase, and smells packs next door. It can die.',
+    },
     repack: {
       name: 'Repack',
       text: 'Discard a card from your hand. Draw 1 card.',
@@ -748,6 +781,8 @@ export const texts = {
     noSuchGear: 'That gear is not in front of you.',
     zombieSeesYou: 'That zombie has seen you. Sneak, distract it or arrive unnoticed first.',
     gearNotUsable: 'This gear works by itself; there is nothing to use.',
+    noDog: 'You have no dog.',
+    dogBitten: 'Your dog has already attacked this turn.',
   },
 } as const
 

@@ -25,7 +25,7 @@ export interface FuzzSetup {
 /** Every playable card plus junk, so random play tries everything. */
 export function everyCardDeck(content: Content = defaultContent): CardId[] {
   const actions = Object.values(content.cards)
-    .filter((c) => c.kind === 'action')
+    .filter((c) => c.kind === 'action' && !c.companion)
     .map((c) => c.id)
   return [...actions, 'search', 'nerves', 'nerves', content.packCard, content.woundCard]
 }
@@ -80,7 +80,7 @@ function campaignSetups(content: Content, deck: readonly CardId[]): FuzzSetup[] 
     {
       name: 'kampagne, plyndret by',
       balance: dayBalance(later, standard),
-      setup: { ...laterSetup, startDeck: [...deck, 'salvage', 'salvage'] },
+      setup: { ...laterSetup, startDeck: [...deck, 'salvage', 'salvage'], dog: { hp: 2 } },
     },
   ]
 }

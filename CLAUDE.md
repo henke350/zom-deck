@@ -88,6 +88,10 @@ src/sim/   bots and balance reports (from M6), run in Node
   in (food, water, Salvage, evening meal, night production). With `state.campaignDay` set, packs
   get a `packKind` and `campaignOnly` loot (Salvage) turns up. `npm run sim -- campaign` plays
   whole campaigns. The UI saves the campaign and the running day in localStorage (`storage.ts`).
+- The Stray Dog lives in `src/game/dog.ts`: a find with `companion` on its `CardDef` sets `state.dog`
+  instead of adding a card. `dogBite` (Sic, the `dogBite` action), `dogGuard` (in the zombie phase
+  after gear), `dogSmells` (sniff marks; the bots may use them). Numbers in `balance.dog`; in a
+  campaign `CampaignState.dog` carries it between days (food, healing).
 - UI: `src/ui/GameScreen.tsx` composes `src/ui/components/*`; `useGame` holds the
   engine state and a readable log. The UI gets choices and reasons from
   `cardOptions`, `freeMoveTargets` and `validate`, never from its own rules.

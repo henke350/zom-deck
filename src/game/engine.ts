@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { dogBite, restDog } from './dog'
 import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
@@ -88,6 +89,10 @@ function step(state: GameState, action: Action, content: Content, events: GameEv
       const used = fireGear(state, action.uid, action.target?.zombie ?? '', content, events)
       return searchKilled(state, used, content, events)
     }
+    case 'dogBite': {
+      const bitten = dogBite(state, action.target?.zombie ?? '', content, events)
+      return searchKilled(state, bitten, content, events)
+    }
     case 'endTurn':
       return endTurn(state, action, content, events)
   }
@@ -104,7 +109,8 @@ export function startTurn(state: GameState, events: GameEvent[]): GameState {
     player: { ...state.player, ap: state.balance.apPerTurn, freeMoveUsed: false },
     tagsPlayedThisTurn: [],
   }
-  const drawn = drawCards(started, state.balance.handSize - started.piles.hand.length, events)
+  const rested = restDog(started)
+  const drawn = drawCards(rested, state.balance.handSize - rested.piles.hand.length, events)
   return noticeHere(drawn)
 }
 

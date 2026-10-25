@@ -2,6 +2,7 @@ import {
   applyAction,
   buildingKnown,
   cityContent,
+  dogOptions,
   distancesFrom,
   freeMoveCost,
   listActions,
@@ -67,6 +68,7 @@ const baseValue: Readonly<Record<string, number>> = {
   painkillers: 4,
   // Campaign only: material for the base.
   salvage: 5,
+  dog: 8,
   repack: 4,
   shotgun: 8,
   chainsaw: 8,
@@ -278,6 +280,13 @@ function chooseFind(o: PlannerOptions, state: GameState, content: Content): Acti
 /** Helpers that are always worth it: gear, Travel Light, Painkillers, a free search bonus. */
 function tempo(ctx: Ctx): Action | undefined {
   const { state, content, plan, o } = ctx
+  // The dog's bite is free: always set it on the weakest zombie here.
+  const bites = dogOptions(state, content)?.actions ?? []
+  if (bites.length > 0) {
+    const hp = (a: Action) =>
+      state.zombies.find((z) => a.type === 'dogBite' && z.uid === a.target?.zombie)?.hp ?? 99
+    return [...bites].sort((a, b) => hp(a) - hp(b))[0]
+  }
   for (const a of cardPlays(ctx)) {
     const def = defOf(state, content, a.uid)
     if (!def) continue

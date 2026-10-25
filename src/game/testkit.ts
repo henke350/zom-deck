@@ -52,6 +52,8 @@ export interface StateSpec {
   readonly noise?: number
   /** Places already visited. Default: the shelter and the player's location. */
   readonly visited?: readonly LocationId[]
+  /** The Stray Dog's health; leave out for no dog. */
+  readonly dog?: number
 }
 
 function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] {
@@ -134,6 +136,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     tagsPlayedThisTurn: spec.tags ?? [],
     nextUid: 1000,
     stats: emptyStats(hp, Object.values(piles).flat().length),
+    ...(spec.dog ? { dog: { hp: spec.dog, bitten: false } } : {}),
   }
 }
 

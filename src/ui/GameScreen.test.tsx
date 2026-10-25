@@ -465,3 +465,30 @@ describe('GameScreen: rules and the end of an expedition', () => {
     expect(onNewExpedition).toHaveBeenCalledOnce()
   })
 })
+
+describe('GameScreen: the Stray Dog', () => {
+  const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+
+  it('shows the dog with a Sic button that bites a zombie here', async () => {
+    const state = makeState({
+      location: 'houseA',
+      dog: balance.dog.hp,
+      zombies: [{ at: 'houseA', hp: 3 }],
+    })
+    render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    expect(screen.getByText(texts.ui.dogStatus(balance.dog.hp, balance.dog.hp))).toBeTruthy()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: texts.ui.sic }))
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.dogBit(balance.dog.biteDamage))).toBeTruthy()
+    expect(screen.getByRole('button', { name: texts.ui.sic })).toHaveProperty('disabled', true)
+  })
+
+  it('marks a building where the dog smells a pack', () => {
+    const state = makeState({ location: 'street', dog: 2, packsAt: ['houseA'] })
+    render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    expect(
+      screen.getByRole('button', { name: new RegExp(`^House A. ${texts.ui.dogSmells}`) }),
+    ).toBeTruthy()
+  })
+})

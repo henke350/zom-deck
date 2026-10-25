@@ -100,6 +100,8 @@ export interface CardDef {
   readonly freeMoveCostWhileInHand?: number
   /** A rare find: seldom in searches, always in locked stashes. */
   readonly rare?: boolean
+  /** The Stray Dog: taking this find gives you a companion instead of a card. */
+  readonly companion?: boolean
   /** Gear: what the card does while it lies in front of you, and how long it lasts. */
   readonly gear?: GearDef
 }
@@ -317,9 +319,18 @@ export interface GameState {
   readonly known?: readonly LocationId[]
   /** Campaign: packs placed this day, when the plundered city had room for fewer. */
   readonly packsPlaced?: number
+  /** The Stray Dog, while it is with you. */
+  readonly dog?: DogState
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
+}
+
+/** The Stray Dog at your side. */
+export interface DogState {
+  readonly hp: number
+  /** It has attacked this turn (Sic works once per turn). */
+  readonly bitten: boolean
 }
 
 export interface Stats {
@@ -368,6 +379,8 @@ export interface ExpeditionResult {
   readonly water: number
   /** Campaign: Salvage cards carried home (materials for the base). */
   readonly materials: number
+  /** The Stray Dog's health at the end, if it is still with you. */
+  readonly dogHp?: number
   readonly hpLeft: number
   readonly turnsUsed: number
   readonly cardsFound: readonly CardId[]
@@ -390,6 +403,8 @@ export interface ExpeditionSetup {
   readonly searchesUsed?: Readonly<Record<LocationId, number>>
   /** Campaign: buildings that burned on earlier days. */
   readonly burned?: readonly LocationId[]
+  /** Campaign: the Stray Dog comes along with this much health. */
+  readonly dog?: { readonly hp: number }
 }
 
 export interface PlayCardAction {
@@ -411,6 +426,13 @@ export interface PlayCardAction {
 export interface UseGearAction {
   readonly type: 'useGear'
   readonly uid: string
+  readonly target?: PlayCardAction['target']
+}
+
+/** Sic: the Stray Dog attacks a zombie where you stand. */
+export interface DogBiteAction {
+  readonly type: 'dogBite'
+  /** `zombie`: uid of a zombie where you stand. */
   readonly target?: PlayCardAction['target']
 }
 
@@ -468,10 +490,15 @@ export type Action =
   | UseServiceAction
   | OpenStashAction
   | UseGearAction
+  | DogBiteAction
   | EndTurnAction
 
 export type GameEvent =
   | { readonly type: 'turnStarted'; readonly turn: number }
+  | { readonly type: 'dogFound'; readonly hp: number }
+  | { readonly type: 'dogBit'; readonly zombie: string; readonly damage: number }
+  | { readonly type: 'dogGuarded'; readonly amount: number; readonly hpLeft: number }
+  | { readonly type: 'dogDied' }
   | { readonly type: 'deckShuffled' }
   | { readonly type: 'cardsDrawn'; readonly uids: readonly string[] }
   | {

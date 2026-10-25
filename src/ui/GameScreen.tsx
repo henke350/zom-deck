@@ -4,6 +4,7 @@ import { texts } from '../data/texts.en'
 import {
   cardOptions,
   cityContent,
+  dogOptions,
   expeditionResult,
   freeMoveTargets,
   gearOptions,
@@ -236,7 +237,9 @@ export function GameScreen({
 
   const serviceHere = content.locations[state.player.location]?.service
   const pendingName = pending
-    ? cardText(cardIdFor(pending.uid)).name
+    ? pending.uid === 'dog'
+      ? cardText('dog').name
+      : cardText(cardIdFor(pending.uid)).name
     : serviceOpen && serviceHere
       ? texts.services[serviceHere.id].name
       : ''
@@ -249,6 +252,19 @@ export function GameScreen({
   }
 
   // Use a piece of gear (the Crossbow): one target goes at once, more open a choice.
+  // Sic: one zombie here is bitten at once; with more, pick one on the panel.
+  const onSic = () => {
+    const option = dogOptions(state, content)
+    const [only] = option?.actions ?? []
+    if (!option || !only) return
+    if (option.actions.length === 1) {
+      act(only)
+      return
+    }
+    setSelected(null)
+    setPending({ uid: 'dog', mode: 0, kind: 'zombie', options: option })
+  }
+
   const onUseGear = (uid: string) => {
     const option = gearOptions(state, uid, content)
     const [only] = option?.actions ?? []
@@ -341,7 +357,13 @@ export function GameScreen({
       </main>
 
       <section className="hand-area" aria-label={texts.ui.hand}>
-        <GearRow state={state} content={content} onUse={onUseGear} busy={pending !== null} />
+        <GearRow
+          state={state}
+          content={content}
+          onUse={onUseGear}
+          onSic={onSic}
+          busy={pending !== null}
+        />
         {choosingFind ? (
           <FindChoice
             state={state}

@@ -10,7 +10,7 @@ import {
   trashFilterOf,
   needsDiscardTarget,
 } from './rules'
-import { zombiesInRange } from './zombies'
+import { zombiesAt, zombiesInRange } from './zombies'
 import { validate } from './validate'
 import type {
   Action,
@@ -20,6 +20,7 @@ import type {
   LocationId,
   PlayCardAction,
   UseGearAction,
+  DogBiteAction,
 } from './types'
 
 /** What a card mode needs the player to pick before it can be played. */
@@ -82,6 +83,9 @@ export function listActions(state: GameState, baseContent: Content = defaultCont
   }
   for (const gear of state.piles.gear) {
     candidates.push(...gearCandidates(state, gear.uid, content))
+  }
+  for (const z of zombiesAt(state, state.player.location)) {
+    candidates.push({ type: 'dogBite', target: { zombie: z.uid } })
   }
 
   for (const to of Object.keys(content.locations)) candidates.push({ type: 'freeMove', to })
@@ -171,6 +175,30 @@ export interface GearOption {
   readonly target: 'zombie'
   readonly actions: readonly UseGearAction[]
   readonly reason?: string
+}
+
+/** For the UI: the zombies your dog can attack right now (Sic), or why it can't. */
+export interface DogOption {
+  readonly target: 'zombie'
+  readonly actions: readonly DogBiteAction[]
+  readonly reason?: string
+}
+
+export function dogOptions(
+  state: GameState,
+  baseContent: Content = defaultContent,
+): DogOption | undefined {
+  const content = cityContent(state, baseContent)
+  if (!state.dog) return undefined
+  const actions: DogBiteAction[] = zombiesAt(state, state.player.location)
+    .map((z): DogBiteAction => ({ type: 'dogBite', target: { zombie: z.uid } }))
+    .filter((a) => validate(state, a, content).ok)
+  const check = validate(state, { type: 'dogBite' }, content)
+  return {
+    target: 'zombie',
+    actions,
+    ...(actions.length === 0 && !check.ok ? { reason: check.reason } : {}),
+  }
 }
 
 export function gearOptions(

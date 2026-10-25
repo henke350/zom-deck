@@ -970,3 +970,18 @@
   flex-wrap: wrap;
   gap: 0.4rem;
 }
+
+/* The Stray Dog smells a pack here */
+.scent rect {
+  fill: var(--teal);
+}
+.scent text {
+  fill: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+.gear-dog b {
+  color: var(--teal);
+}

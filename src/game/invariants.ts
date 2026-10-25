@@ -45,6 +45,10 @@ export function checkInvariants(state: GameState, baseContent: Content = default
     if (!content.cards[card.card]) fail(`unknown card ${card.card}`)
   }
 
+  if (state.dog && (state.dog.hp <= 0 || state.dog.hp > balance.dog.hp)) {
+    fail('the dog has impossible health')
+  }
+
   // Packs: found plus still hidden (or burned with the building) is always the number placed.
   const hidden = Object.values(state.sites).filter((s) => s.hasPack).length
   const placed = state.packsPlaced ?? balance.packsOnMap

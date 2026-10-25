@@ -307,6 +307,16 @@ export const cards = {
       },
     ],
   },
+  // A companion, not a card: taking this find gives you the Stray Dog (src/game/dog.ts).
+  dog: {
+    id: 'dog',
+    kind: 'action',
+    cost: 0,
+    tags: [],
+    trashable: true,
+    modes: [],
+    companion: true,
+  },
   repack: {
     id: 'repack',
     kind: 'action',

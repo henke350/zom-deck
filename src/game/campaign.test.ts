@@ -292,3 +292,49 @@ describe('the base', () => {
     expect(lockerChoices(newCampaign(1))).toEqual([])
   })
 })
+
+describe('the Stray Dog in a campaign', () => {
+  const d = balance.dog
+  const withDog = (state: GameState, hp: number): GameState => ({
+    ...state,
+    dog: { hp, bitten: false },
+  })
+
+  it('comes home with you, heals overnight and comes along the next day', () => {
+    const campaign = newCampaign(9)
+    const next = finishDay(
+      campaign,
+      withDog(ended(startDay(campaign), home, { food: 1, water: 1 }), 1),
+    )
+    expect(next.history[0]?.dog).toBe('joined')
+    expect(next.dog).toEqual({ hp: 1 + d.healPerNight })
+    expect(daySetup(next).dog).toEqual({ hp: 1 + d.healPerNight })
+    expect(startDay(next).dog).toEqual({ hp: 1 + d.healPerNight, bitten: false })
+  })
+
+  it('eats every few nights, or runs away when there is no food', () => {
+    const campaign: CampaignState = { ...newCampaign(9), day: d.foodEvery, dog: { hp: d.hp } }
+    const fed = finishDay(
+      campaign,
+      withDog(ended(startDay(campaign), home, { food: 2, water: 1 }), d.hp),
+    )
+    expect(fed.history[0]?.dog).toBe('ate')
+    expect(fed.food).toBe(2 - c.foodPerNight - 1)
+    expect(fed.dog).toBeDefined()
+
+    const hungry = finishDay(
+      campaign,
+      withDog(ended(startDay(campaign), home, { food: 1, water: 1 }), d.hp),
+    )
+    expect(hungry.history[0]?.dog).toBe('ranAway')
+    expect(hungry.dog).toBeUndefined()
+  })
+
+  it('is gone for good when it died during the day', () => {
+    const campaign: CampaignState = { ...newCampaign(9), dog: { hp: 1 } }
+    const { dog: _died, ...withoutDog } = ended(startDay(campaign), home)
+    const next = finishDay(campaign, withoutDog)
+    expect(next.history[0]?.dog).toBe('died')
+    expect(next.dog).toBeUndefined()
+  })
+})

@@ -21,6 +21,21 @@ export interface ZombieStats {
   readonly loot: number
 }
 
+/** The Stray Dog: a companion you can find. It bites, guards you, and smells supplies. */
+export interface DogBalance {
+  readonly hp: number
+  /** Sic: once per turn, 0 AP, this much damage to a zombie where you stand. */
+  readonly biteDamage: number
+  /** Barking when it attacks. */
+  readonly biteNoise: number
+  /** Damage it takes for you in each zombie phase (after Block and gear). */
+  readonly guardPerPhase: number
+  /** Campaign: health it gets back each night. */
+  readonly healPerNight: number
+  /** Campaign: it eats 1 food every this many nights, or it runs away. */
+  readonly foodEvery: number
+}
+
 /** What you can build at the base between campaign days (texts in texts.en.ts). */
 export type UpgradeId =
   'lookout' | 'workbench' | 'infirmary' | 'locker' | 'rainCollector' | 'garden'
@@ -164,6 +179,7 @@ export interface Balance {
     readonly sneak: number
     readonly nerves: number
   }
+  readonly dog: DogBalance
   readonly campaign: CampaignBalance
 }
 
@@ -233,6 +249,15 @@ export const balance: Balance = {
   stashForce: { cost: 2, noise: 2 },
   wounds: { enabled: false, damageInOnePhase: 2 },
   starterDeck: { search: 4, crowbar: 2, run: 1, sneak: 1, nerves: 2 },
+  // The Stray Dog (25 Oct 2026, the user's idea): it fights, takes hits for you and can die.
+  dog: {
+    hp: 3,
+    biteDamage: 1,
+    biteNoise: 1,
+    guardPerPhase: 1,
+    healPerNight: 1,
+    foodEvery: 2,
+  },
   // Version 2, K1–K2 (25 Oct 2026): first numbers from docs/plan.md section 12, to be tuned
   // with campaign simulations and playtests.
   campaign: {

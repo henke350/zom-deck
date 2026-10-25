@@ -133,6 +133,7 @@ export function resultWith(
     food,
     water,
     materials: salvage ? owned.filter((c) => c.card === salvage).length : 0,
+    ...(state.dog ? { dogHp: state.dog.hp } : {}),
     hpLeft: Math.max(0, state.player.hp),
     turnsUsed: state.turn,
     cardsFound: state.stats.cardsTaken,

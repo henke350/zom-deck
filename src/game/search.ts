@@ -1,4 +1,5 @@
 import { texts } from '../data/texts.en'
+import { adoptDog } from './dog'
 import type { Balance } from '../data/balance'
 import { gainCard, withoutCard } from './deck'
 import { gearSearchBonus } from './gear'
@@ -151,6 +152,8 @@ export function performSearch(
   const danger = dangerLevel(state)
   const pool = (content.locations[location]?.lootPool ?? [])
     .filter((entry) => !entry.campaignOnly || state.campaignDay !== undefined)
+    // Only one dog at a time.
+    .filter((entry) => !(state.dog && content.cards[entry.card]?.companion))
     .map((entry) =>
       content.cards[entry.card]?.rare
         ? { ...entry, weight: entry.weight * danger.rareFindWeight }
@@ -316,6 +319,9 @@ export function chooseFind(
   let next: GameState = { ...state, phase: 'action', pendingFind: undefined }
   if (choice === 'decline') {
     events.push({ type: 'findDeclined' })
+  } else if ('take' in choice && content.cards[choice.take]?.companion) {
+    // The Stray Dog walks with you; it is not a card in your deck.
+    next = adoptDog(next, state.balance.dog.hp, events)
   } else if ('take' in choice) {
     next = gainCard(next, choice.take, 'find', events)
     if (content.cards[choice.take]?.rare) next = raiseDanger(next, content, 'rare', events)

@@ -1,5 +1,13 @@
-export { cardOptions, freeMoveTargets, gearOptions, listActions, targetKindOf } from './actions'
-export type { GearOption, ModeOption, TargetKind } from './actions'
+export {
+  cardOptions,
+  dogOptions,
+  freeMoveTargets,
+  gearOptions,
+  listActions,
+  targetKindOf,
+} from './actions'
+export type { DogOption, GearOption, ModeOption, TargetKind } from './actions'
+export { dogSmells } from './dog'
 export { ownedCount, totalCount } from './deck'
 export { applyAction, previewOutcome } from './engine'
 export { buildingKnown, cityContent } from './city'

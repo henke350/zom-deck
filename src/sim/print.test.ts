@@ -32,7 +32,8 @@ describe('print and play', () => {
     const pool = defaultContent.locations.workshop?.lootPool ?? []
     for (const entry of pool) {
       // Rare finds have their own deck, and Salvage is only for campaigns.
-      const copies = defaultContent.cards[entry.card]?.rare || entry.campaignOnly ? 0 : entry.weight
+      const def = defaultContent.cards[entry.card]
+      const copies = def?.rare || def?.companion || entry.campaignOnly ? 0 : entry.weight
       expect(workshop.filter((c) => c === entry.card)).toHaveLength(copies)
     }
     const rare = cards.filter((c) => c.deck === 'rare').map((c) => c.card)

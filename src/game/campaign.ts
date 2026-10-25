@@ -50,6 +50,8 @@ export interface DayReport {
   /** Rain Collector and Garden overnight. */
   readonly producedFood: number
   readonly producedWater: number
+  /** What happened with the Stray Dog today and tonight, if anything. */
+  readonly dog?: 'joined' | 'died' | 'ate' | 'ranAway'
 }
 
 export interface CampaignState {
@@ -74,6 +76,8 @@ export interface CampaignState {
   readonly burned: readonly LocationId[]
   /** Locker: a card found yesterday that goes with you today. */
   readonly locker?: CardId
+  /** The Stray Dog, if it lives at the base. */
+  readonly dog?: { readonly hp: number }
   readonly history: readonly DayReport[]
   /** survived: all days done. lost: one lost day too many. */
   readonly over?: 'survived' | 'lost'
@@ -155,6 +159,7 @@ export function daySetup(
     known: campaign.known,
     searchesUsed: campaign.searchesUsed,
     burned: campaign.burned,
+    ...(campaign.dog ? { dog: campaign.dog } : {}),
     scouted: campaign.upgrades.includes('lookout')
       ? lookoutTargets(campaign, balance, content)
       : [],
@@ -228,6 +233,23 @@ export function finishDay(
   food = ate ? food - c.foodPerNight : 0
   water = drank ? water - c.waterPerNight : 0
 
+  // The Stray Dog: it joined today, died today, or eats every few nights (or runs away).
+  const d = balance.dog
+  let dog = expedition.dog ? { hp: expedition.dog.hp } : undefined
+  let dogNews: DayReport['dog']
+  if (dog && !campaign.dog) dogNews = 'joined'
+  if (!dog && campaign.dog) dogNews = 'died'
+  if (dog && campaign.day % d.foodEvery === 0) {
+    if (food >= 1) {
+      food -= 1
+      dogNews = dogNews ?? 'ate'
+    } else {
+      dog = undefined
+      dogNews = 'ranAway'
+    }
+  }
+  if (dog) dog = { hp: Math.min(d.hp, dog.hp + d.healPerNight) }
+
   // Night: the base produces every few nights.
   const producing = campaign.day % c.productionEvery === 0
   const producedFood = producing && campaign.upgrades.includes('garden') ? 1 : 0
@@ -244,13 +266,15 @@ export function finishDay(
     drank,
     producedFood,
     producedWater,
+    ...(dogNews ? { dog: dogNews } : {}),
   }
   const losses = campaign.losses + (home ? 0 : 1)
   const over: CampaignState['over'] =
     losses > c.lossesAllowed ? 'lost' : campaign.day >= c.days ? 'survived' : undefined
-  const { locker: _yesterday, ...rest } = campaign
+  const { locker: _yesterday, dog: _dog, ...rest } = campaign
   return {
     ...rest,
+    ...(dog ? { dog } : {}),
     day: over ? campaign.day : campaign.day + 1,
     food: food + producedFood,
     water: water + producedWater,
