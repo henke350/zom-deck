@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { balance } from '../data/balance'
+import { build, chooseLocker, dayBalance, daySeed, daySetup, finishDay, newCampaign } from '../game'
+import type { CampaignState, GameState } from '../game'
 import { GameScreen } from './GameScreen'
+import { BaseScreen } from './components/BaseScreen'
 import { TitleScreen } from './components/TitleScreen'
 import { randomSeed, readSeedFromSearch } from './seed'
-import { rulesSeen } from './storage'
+import { clearCampaign, loadCampaign, rulesSeen, saveCampaign } from './storage'
 
 type Screen =
   | { readonly kind: 'title' }
@@ -13,9 +17,19 @@ type Screen =
       /** First expedition on this device: show the rules over the map. */
       readonly showRules: boolean
     }
+  /** Campaign: the base between days. */
+  | { readonly kind: 'base'; readonly campaign: CampaignState }
+  /** Campaign: today's expedition, possibly resumed from a save. */
+  | {
+      readonly kind: 'day'
+      readonly campaign: CampaignState
+      readonly resume?: GameState
+      readonly showRules: boolean
+    }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'title' })
+  const [saved, setSaved] = useState(() => loadCampaign())
 
   // Keep the seed in the address so a game can be reloaded or shared.
   useEffect(() => {
@@ -30,6 +44,21 @@ export default function App() {
     }
   }, [screen])
 
+  const toBase = (campaign: CampaignState) => {
+    saveCampaign({ campaign })
+    setSaved({ campaign })
+    setScreen({ kind: 'base', campaign })
+  }
+  const campaignDay = screen.kind === 'day' ? screen.campaign : undefined
+  // Save today's expedition after every action, so closing the page loses nothing.
+  const saveDay = useCallback(
+    (expedition: GameState) => {
+      if (!campaignDay || expedition.outcome) return
+      saveCampaign({ campaign: campaignDay, expedition })
+    },
+    [campaignDay],
+  )
+
   if (screen.kind === 'title') {
     return (
       <TitleScreen
@@ -41,6 +70,63 @@ export default function App() {
             showRules: !rulesSeen(),
           })
         }
+        onNewCampaign={() => {
+          clearCampaign()
+          toBase(newCampaign(randomSeed(), balance))
+        }}
+        {...(saved
+          ? {
+              savedCampaign: {
+                day: saved.campaign.day,
+                onContinue: () =>
+                  saved.expedition
+                    ? setScreen({
+                        kind: 'day',
+                        campaign: saved.campaign,
+                        resume: saved.expedition,
+                        showRules: false,
+                      })
+                    : setScreen({ kind: 'base', campaign: saved.campaign }),
+              },
+            }
+          : {})}
+      />
+    )
+  }
+
+  if (screen.kind === 'base') {
+    const { campaign } = screen
+    return (
+      <BaseScreen
+        campaign={campaign}
+        balance={balance}
+        onBuild={(id) => toBase(build(campaign, id, balance))}
+        onLocker={(card) => toBase(chooseLocker(campaign, card))}
+        onSetOut={() => setScreen({ kind: 'day', campaign, showRules: !rulesSeen() })}
+        onNewCampaign={() => {
+          clearCampaign()
+          toBase(newCampaign(randomSeed(), balance))
+        }}
+        onExit={() => setScreen({ kind: 'title' })}
+      />
+    )
+  }
+
+  if (screen.kind === 'day') {
+    const { campaign } = screen
+    return (
+      <GameScreen
+        key={`day-${campaign.seed}-${campaign.day}`}
+        seed={daySeed(campaign)}
+        balance={dayBalance(campaign, balance)}
+        setup={daySetup(campaign, balance)}
+        {...(screen.resume ? { initialState: screen.resume } : {})}
+        showRulesOnStart={screen.showRules}
+        onStateChange={saveDay}
+        onDayOver={(final) => toBase(finishDay(campaign, final, balance))}
+        onNewExpedition={() => setScreen({ kind: 'base', campaign })}
+        onRestart={() => setScreen({ kind: 'base', campaign })}
+        onExit={() => setScreen({ kind: 'title' })}
       />
     )
   }

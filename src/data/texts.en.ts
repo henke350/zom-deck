@@ -142,8 +142,8 @@ export const texts = {
     findTitle: 'Choose a find',
     findIntro: (place: string) =>
       `You searched ${place}. Take one find into your hand, or take nothing.`,
-    packBanner: (packs: number) =>
-      `You found a supply pack! You now carry ${packs}. It adds a Heavy Load to your deck.`,
+    packBanner: (packs: number, kind?: string) =>
+      `You found a supply pack${kind ? ` of ${kind}` : ''}! You now carry ${packs}. It adds a Heavy Load to your deck.`,
     take: 'Take',
     scrapHeading: 'Or scrap one card from your hand for good',
     scrap: (name: string) => `Scrap ${name}`,
@@ -160,6 +160,8 @@ export const texts = {
     hints: {
       goHome:
         'You have enough supplies. Walk back to the Shelter to win, or risk one more building for more stars.',
+      campaignHome:
+        'You carry food and water for tonight. Walk back to the Shelter, or push on for more and for Salvage.',
       zombies: 'Zombies here attack when you end the turn. Hit them, sneak, or walk away first.',
       search:
         'Play Search (or Quick search in the panel) to look for supplies. The first search finds a hidden pack.',
@@ -355,6 +357,15 @@ export const texts = {
           `At 0 health you die. At the end of turn ${b.turnLimit} night falls and the expedition is lost.`,
         ],
       },
+      {
+        heading: 'Campaign',
+        items: [
+          `A campaign is ${b.campaign.days} days in one city; each day is one expedition. You may go home with whatever you have. The city stays the same, so buildings you have seen stay known, and searched buildings get only ${b.campaign.searchesRegrowPerNight} search back each night: the supplies move further out.`,
+          `Every pack is food or water. Each evening you eat ${b.campaign.foodPerNight} food and drink ${b.campaign.waterPerNight} water. No food: ${b.campaign.hungerNerves} extra Nerves the next day. No water: ${b.campaign.thirstHp} less health the next day.`,
+          'Salvage is a find only in campaigns: material for the base. It weighs like a Heavy Load until you are home. Build upgrades at the base between days.',
+          `Not home (killed or caught by the dark): today's finds are lost and the next day starts with ${b.campaign.woundsAfterLoss} Wound. After ${b.campaign.lossesAllowed + 1} lost days the campaign is over.`,
+        ],
+      },
     ],
   },
 
@@ -371,6 +382,50 @@ export const texts = {
       rainCollector: { name: 'Rain Collector', text: '+1 water every second night.' },
       garden: { name: 'Garden', text: '+1 food every second night.' },
     },
+    start: 'Start campaign',
+    continue: (day: number) => `Continue campaign (day ${day})`,
+    restart: 'New campaign',
+    startNote: 'A campaign is several days in one city. Each day is one expedition.',
+    dayStat: 'Day',
+    dayHeading: (day: number, days: number) => `Day ${day} of ${days}`,
+    intro:
+      'Your base. Every evening you eat 1 food and drink 1 water. Build with materials, then set out again. The city stays the same, so what you learn about it stays known.',
+    stock: { food: 'Food', water: 'Water', materials: 'Materials' },
+    stockLabel: 'Your store',
+    yesterdayHeading: 'Last night',
+    cameHome: (day: number, food: number, water: number, materials: number) =>
+      `Day ${day}: you came home with ${food} food, ${water} water and ${materials} materials.`,
+    lostDay: (day: number) => `Day ${day}: you did not make it home. Everything you found is lost.`,
+    ate: 'You ate.',
+    hungry: 'There was nothing to eat.',
+    drank: 'You drank.',
+    thirsty: 'There was nothing to drink.',
+    produced: (food: number, water: number) =>
+      `Overnight the base made ${[food ? `${food} food` : '', water ? `${water} water` : ''].filter(Boolean).join(' and ')}.`,
+    todayHeading: 'Today',
+    penaltyHungry: (n: number) => `Hungry: ${n} extra Nerves in your deck.`,
+    penaltyThirsty: (n: number) => `Thirsty: you start with ${n} less health.`,
+    penaltyWounds: (n: number) => `Hurt: ${n} Wounds in your deck.`,
+    noPenalty: 'You are fed, watered and ready.',
+    lossesLeft: (n: number) =>
+      n === 0
+        ? 'One more lost day ends the campaign.'
+        : `You can survive ${n} more lost ${n === 1 ? 'day' : 'days'}.`,
+    baseHeading: 'Build',
+    build: (cost: number) => `Build (${cost})`,
+    built: 'Built',
+    lockerHeading: 'Locker: take one of yesterday’s finds along',
+    keepNone: 'Take none',
+    setOut: (day: number) => `Set out on day ${day}`,
+    backToTitle: 'Back to title',
+    backToBase: 'Back to the base',
+    dayOverTip:
+      'At the base you eat, drink and build. Packs are food or water; Salvage is material for building.',
+    survived: (days: number) => `You survived ${days} days`,
+    lostCampaign: 'The campaign is over',
+    overSummary: (days: number, food: number, water: number, upgrades: number) =>
+      `You lasted ${days} ${days === 1 ? 'day' : 'days'} and built ${upgrades} ${upgrades === 1 ? 'upgrade' : 'upgrades'}. Left in the store: ${food} food and ${water} water.`,
+    packKind: { food: 'food', water: 'water' },
     reasons: {
       over: 'The campaign is over.',
       built: 'Already built.',
@@ -382,6 +437,8 @@ export const texts = {
     body: (packs: number, stars: number) =>
       `Walking into the Shelter ends the expedition with ${packs} supply packs: ${'★'.repeat(stars)}.`,
     next: (packs: number) => `With ${packs} packs you would get one more star.`,
+    dayBody: (day: number, food: number, water: number, materials: number) =>
+      `Walking into the Shelter ends day ${day}. You bring home ${food} food, ${water} water and ${materials} Salvage.`,
     yes: 'Go home',
     no: 'Not yet',
   },
@@ -472,7 +529,8 @@ export const texts = {
     cardsKept: (names: string) => `You keep ${names} for next turn.`,
     searched: (place: string, n: number, quick: boolean) =>
       `You ${quick ? 'quickly search' : 'search'} ${place} and find ${n} thing${n === 1 ? '' : 's'}.`,
-    packFound: (packs: number) => `You find a supply pack! You carry ${packs}.`,
+    packFound: (packs: number, kind?: string) =>
+      `You find a supply pack${kind ? ` of ${kind}` : ''}! You carry ${packs}.`,
     heavyLoadGained: 'A Heavy Load goes into your discard pile.',
     findTaken: (name: string) => `You take ${name}. It goes into your discard pile.`,
     cardScrapped: (name: string) => `You scrap ${name} for good.`,

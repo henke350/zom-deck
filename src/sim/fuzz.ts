@@ -1,7 +1,16 @@
 import { balance as standard, type Balance } from '../data/balance'
 import { defaultContent } from '../data/content'
-import { applyAction, listActions, newGame, previewEndTurn, validate } from '../game'
-import type { Action, CardId, Content, ExpeditionSetup, GameState } from '../game'
+import {
+  applyAction,
+  dayBalance,
+  daySetup,
+  listActions,
+  newCampaign,
+  newGame,
+  previewEndTurn,
+  validate,
+} from '../game'
+import type { Action, CampaignState, CardId, Content, ExpeditionSetup, GameState } from '../game'
 import { checkInvariants } from '../game/invariants'
 import { randomBot } from './bot'
 import { makeRandom, type Random } from './random'
@@ -38,6 +47,41 @@ export function fuzzSetups(content: Content = defaultContent): FuzzSetup[] {
       setup: { startDeck: deck },
     },
     { name: 'lavt liv', balance: standard, setup: { startDeck: deck, startHp: 3 } },
+    ...campaignSetups(content, deck),
+  ]
+}
+
+/** Campaign days: day 1, and a later day in a half-plundered city with upgrades and Salvage. */
+function campaignSetups(content: Content, deck: readonly CardId[]): FuzzSetup[] {
+  const first = newCampaign(1, standard, content)
+  const buildings = Object.keys(
+    newGame(1, { balance: dayBalance(first, standard), setup: daySetup(first, standard, content) })
+      .sites,
+  )
+  const half = buildings.slice(0, Math.floor(buildings.length / 2))
+  const later: CampaignState = {
+    ...first,
+    day: 5,
+    upgrades: ['lookout', 'infirmary', 'workbench'],
+    hungry: true,
+    thirsty: true,
+    wounds: 1,
+    known: buildings.slice(0, 4),
+    searchesUsed: Object.fromEntries(half.map((id) => [id, standard.searchesPerBuilding])),
+    burned: buildings.slice(-1),
+  }
+  const laterSetup = daySetup(later, standard, content)
+  return [
+    {
+      name: 'kampagne dag 1',
+      balance: dayBalance(first, standard),
+      setup: daySetup(first, standard, content),
+    },
+    {
+      name: 'kampagne, plyndret by',
+      balance: dayBalance(later, standard),
+      setup: { ...laterSetup, startDeck: [...deck, 'salvage', 'salvage'] },
+    },
   ]
 }
 

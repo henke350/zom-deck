@@ -231,14 +231,25 @@ describe('the city remembers', () => {
       ...state,
       sites: { ...state.sites, [target]: { ...state.sites[target]!, searchesLeft: 0 } },
     }
-    const next = finishDay(campaign, ended(plundered, home))
+    // Without regrowth the building stays empty.
+    const still = { ...balance, campaign: { ...c, searchesRegrowPerNight: 0 } }
+    const next = finishDay(campaign, ended(plundered, home), still)
     expect(next.known).toContain(target)
     expect(next.searchesUsed[target]).toBe(balance.searchesPerBuilding)
-
-    const day2 = startDay(next)
+    const day2 = newGame(daySeed(next), {
+      balance: dayBalance(next, still),
+      setup: daySetup(next, still),
+    })
     expect(day2.known).toContain(target)
     expect(day2.sites[target]).toMatchObject({ searchesLeft: 0, hasPack: false, stash: 'none' })
     expect(checkInvariants(day2, defaultContent)).toEqual([])
+
+    // With regrowth it gets some searches back overnight.
+    const regrown = finishDay(campaign, ended(plundered, home))
+    expect(regrown.searchesUsed[target]).toBe(
+      balance.searchesPerBuilding - c.searchesRegrowPerNight,
+    )
+    expect(startDay(regrown).sites[target]?.searchesLeft).toBe(c.searchesRegrowPerNight)
   })
 
   it('places fewer packs when too few buildings are left', () => {

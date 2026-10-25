@@ -58,6 +58,8 @@ export interface CampaignBalance {
   readonly infirmaryHp: number
   /** Rain Collector and Garden produce 1 every this many nights. */
   readonly productionEvery: number
+  /** Searches a plundered building gets back each night (others move in, things wash up). */
+  readonly searchesRegrowPerNight: number
 }
 
 /** One step of the danger meter. */
@@ -239,8 +241,8 @@ export const balance: Balance = {
     waterPerNight: 1,
     hungerNerves: 1,
     thirstHp: 2,
-    woundsAfterLoss: 2,
-    lossesAllowed: 1,
+    woundsAfterLoss: 1,
+    lossesAllowed: 2,
     packsToGoHome: 0,
     extraZombiesByDay: [0, 0, 0, 1, 1, 1, 2],
     startFood: 0,
@@ -257,6 +259,9 @@ export const balance: Balance = {
     workbenchNerves: 1,
     infirmaryHp: 2,
     productionEvery: 2,
+    // First campaign simulation (25 Oct 2026): with no regrowth and one lost day allowed, no bot
+    // survived 7 days; with these values 10–63 % do (players can also go home early).
+    searchesRegrowPerNight: 1,
   },
 }
 

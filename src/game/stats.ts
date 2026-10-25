@@ -103,13 +103,22 @@ export function expeditionResult(
   return state.outcome ? resultWith(state, state.outcome, content) : undefined
 }
 
+/** Campaign: the packs you carry, by kind. */
+export function packsCarried(state: GameState): { food: number; water: number } {
+  const taken = Object.values(state.sites).filter((s) => s.packTaken)
+  return {
+    food: taken.filter((s) => s.packKind === 'food').length,
+    water: taken.filter((s) => s.packKind === 'water').length,
+  }
+}
+
 /** The result of an expedition with this outcome (the simulator also uses it for unfinished games). */
 export function resultWith(
   state: GameState,
   outcome: Outcome,
   content: Content = defaultContent,
 ): ExpeditionResult {
-  const taken = Object.values(state.sites).filter((s) => s.packTaken)
+  const { food, water } = packsCarried(state)
   const salvage = content.salvageCard
   const owned = [
     ...state.piles.draw,
@@ -121,8 +130,8 @@ export function resultWith(
   return {
     outcome,
     packs: state.player.packs,
-    food: taken.filter((s) => s.packKind === 'food').length,
-    water: taken.filter((s) => s.packKind === 'water').length,
+    food,
+    water,
     materials: salvage ? owned.filter((c) => c.card === salvage).length : 0,
     hpLeft: Math.max(0, state.player.hp),
     turnsUsed: state.turn,

@@ -44,6 +44,17 @@ npm run dev      # starter spillet på http://localhost:5173
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 
+## Kampagne (version 2, første udgave)
+
+Vælg **Start campaign** på titelskærmen. En kampagne er 7 dage i samme by:
+
+1. **Basen:** her ser du lageret (mad, vand, materialer), hvad der skete i går, og hvad du kan bygge. Klik **Set out** for at tage ud.
+2. **Dagen:** en almindelig ekspedition. Pakker er mad eller vand. **Salvage** er materialer til basen og vejer som et Heavy Load. Du må gå hjem, når du vil.
+3. **Aften:** du spiser 1 mad og drikker 1 vand. Mangler du mad, får du en ekstra Nerves næste dag; mangler du vand, starter du med 2 liv mindre.
+4. Byen er den samme hver dag: det, du har set, forbliver kendt, men plyndrede bygninger kommer kun langsomt igen, så du skal længere ud.
+
+Kampagnen gemmes i browseren, også midt på en dag. **Continue campaign** fortsætter. `npm run sim -- campaign` lader botterne spille hele kampagner.
+
 ## Spil på tablet (app)
 
 Spillet kan installeres som app på en Android-tablet (en PWA: en hjemmeside, der installeres som app med eget ikon og fuld skærm). Det kræver net. Det er lavet til en tablet på langs: alt er på én skærm, og knapperne er store nok til fingre.

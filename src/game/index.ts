@@ -6,7 +6,7 @@ export { buildingKnown, cityContent } from './city'
 export { distance, distancesFrom, neighbors } from './map'
 export { freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
 export { newGame, starterDeck } from './setup'
-export { expeditionResult, resultWith } from './stats'
+export { expeditionResult, packsCarried, resultWith } from './stats'
 export { validate, validateServiceHere } from './validate'
 export {
   dangerLevel,

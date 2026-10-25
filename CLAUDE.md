@@ -11,6 +11,8 @@ turn-based, single-player zombie survival deckbuilder that runs in the browser.
   tests by 2–3 other players are missing. **M8 (polish and release) is in progress**: tips for
   new players are in (`src/ui/hints.ts`); the missing art is ordered (`docs/art-prompts-m8.md`). Balance changes are the user's call; show them the effect with
   `npm run sim -- --set …` first.
+  **Version 2 (campaign) is started** at the user's request: a first version of K1 + K2 is in
+  (`src/game/campaign.ts`, `balance.campaign`, base page `src/ui/components/BaseScreen.tsx`).
   Work one milestone at a time and meet its "done" criteria before moving on.
 
 ## Talking to the user
@@ -80,6 +82,12 @@ src/sim/   bots and balance reports (from M6), run in Node
   `revealZombies`), noticing, noise and arrivals,
   the zombie phase (follow → attack), `previewEndTurn` and `zombieInfo` (hidden
   danger). Previews must reuse the real rules, never re-implement them.
+- Campaign (version 2) lives in `src/game/campaign.ts`: `newCampaign` rolls one city for all days;
+  `daySetup`/`dayBalance` turn the base and yesterday's penalties into an `ExpeditionSetup` (same
+  city, known buildings, used searches, Lookout) and `finishDay` folds the `ExpeditionResult` back
+  in (food, water, Salvage, evening meal, night production). With `state.campaignDay` set, packs
+  get a `packKind` and `campaignOnly` loot (Salvage) turns up. `npm run sim -- campaign` plays
+  whole campaigns. The UI saves the campaign and the running day in localStorage (`storage.ts`).
 - UI: `src/ui/GameScreen.tsx` composes `src/ui/components/*`; `useGame` holds the
   engine state and a readable log. The UI gets choices and reasons from
   `cardOptions`, `freeMoveTargets` and `validate`, never from its own rules.

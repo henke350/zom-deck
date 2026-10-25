@@ -18,6 +18,7 @@ import type {
   Effect,
   GameState,
   LocationId,
+  LootEntry,
   PlayCardAction,
 } from '../game'
 import { buildingPool } from '../game/city'
@@ -64,6 +65,8 @@ const baseValue: Readonly<Record<string, number>> = {
   districtMap: 3,
   bandage: 5,
   painkillers: 4,
+  // Campaign only: material for the base.
+  salvage: 5,
   repack: 4,
   shotgun: 8,
   chainsaw: 8,
@@ -205,9 +208,10 @@ function poolValue(
   o: PlannerOptions,
   state: GameState,
   content: Content,
-  lootPool: readonly { readonly card: string; readonly weight: number }[] | undefined,
+  lootPool: readonly LootEntry[] | undefined,
 ): number {
-  const pool = lootPool ?? []
+  // Salvage only turns up in a campaign, so a single expedition does not count on it.
+  const pool = (lootPool ?? []).filter((e) => !e.campaignOnly || state.campaignDay !== undefined)
   const total = pool.reduce((sum, entry) => sum + entry.weight, 0)
   if (total === 0) return 0
   return pool.reduce((sum, e) => sum + e.weight * findValue(o, state, content, e.card), 0) / total

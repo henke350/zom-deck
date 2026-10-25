@@ -209,12 +209,12 @@ export function finishDay(
       ...buildings.filter((id) => buildingKnown(expedition, content, id)),
     ]),
   ]
-  const searchesUsed: Record<LocationId, number> = { ...campaign.searchesUsed }
+  // Overnight a plundered building gets some searches back.
+  const searchesUsed: Record<LocationId, number> = {}
   for (const id of buildings) {
     const left = expedition.sites[id]?.searchesLeft ?? 0
-    const atStart = Math.max(0, balance.searchesPerBuilding - (campaign.searchesUsed[id] ?? 0))
-    const used = atStart - left
-    if (used > 0) searchesUsed[id] = (searchesUsed[id] ?? 0) + used
+    const used = Math.max(0, balance.searchesPerBuilding - left - c.searchesRegrowPerNight)
+    if (used > 0) searchesUsed[id] = used
   }
   const burned = [
     ...new Set([...campaign.burned, ...buildings.filter((id) => expedition.sites[id]?.burned)]),

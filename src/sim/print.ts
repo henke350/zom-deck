@@ -78,7 +78,8 @@ export function printDecks(content: Content, balance: Balance): PrintCard[] {
   }
   for (const building of buildings(content)) {
     for (const entry of building.lootPool ?? []) {
-      if (content.cards[entry.card]?.rare) continue
+      // Rare finds have their own deck; the print-and-play game has no campaign (Salvage).
+      if (content.cards[entry.card]?.rare || entry.campaignOnly) continue
       for (let i = 0; i < entry.weight; i++) out.push({ card: entry.card, deck: building.id })
     }
   }
