@@ -24,6 +24,8 @@ export const defaultContent: Content = {
     { card: 'molotov', weight: 1 },
     { card: 'pistol', weight: 1 },
     { card: 'knife', weight: 1 },
+    { card: 'headShot', weight: 1 },
+    { card: 'silentTakedown', weight: 1 },
     { card: 'firstAidKit', weight: 1 },
   ],
   // Noise mostly brings Walkers; dusk brings more Runners, so the walk home gets faster and harder.

@@ -394,7 +394,7 @@ function playerBoard(content: Content, balance: Balance): string {
     ? levels
         .map(
           (l, i) =>
-            `<tr><td><b>${i + 1}</b></td><td>${l.arrivals === 1 ? '1 zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise</td><td>${mixRow(byDanger[i])}</td><td>${l.extraFinds > 0 ? `+${l.extraFinds} find` : '–'}</td></tr>`,
+            `<tr><td><b>${i + 1}</b></td><td>${l.arrivals === 1 ? '1 zombie' : `${l.arrivals} zombies`} every ${l.noiseThreshold} noise</td><td>${mixRow(byDanger[i])}</td><td>${l.extraFinds > 0 ? `+${l.extraFinds} find` : '–'}</td><td>${l.zombieHpBonus > 0 ? `+${l.zombieHpBonus} health` : '–'}</td></tr>`,
         )
         .join('')
     : ''
@@ -414,7 +414,7 @@ function playerBoard(content: Content, balance: Balance): string {
   <div class="tables">
     ${
       balance.danger.enabled
-        ? `<table><caption>Danger: what noise brings (roll d6 for each zombie) and what searches give</caption><tr><th>Level</th><th>Noise</th><th>Kind</th><th>Search</th></tr>${dangerRows}</table>`
+        ? `<table><caption>Danger: what noise brings (roll d6 for each zombie) and what searches give</caption><tr><th>Level</th><th>Noise</th><th>Kind</th><th>Search</th><th>Zombies</th></tr>${dangerRows}</table>`
         : `<table><caption>Noise brings (roll d6)</caption><tr><td>${mixRow(content.arrivals?.noise)}</td></tr></table>`
     }
     <table><caption>Dusk brings (roll d6)</caption><tr><td>${mixRow(content.arrivals?.dusk)}</td></tr></table>
@@ -479,7 +479,7 @@ function rulesPages(content: Content, balance: Balance, cardBacks: boolean): str
   <p>When the noise marker reaches the threshold, zombies arrive where you stand (on the Street if you are in the Shelter) and the marker drops by the threshold. Roll d6 for each zombie's kind. They have seen you (unless they wait on the Street while you are in the Shelter).</p>
   ${
     b.danger.enabled
-      ? `<h3>Danger</h3><p>Danger starts at 1 and rises by one for every pack and every rare find you take, up to ${levels.length}. The table on the player board shows how much noise brings zombies at each level, which kinds come, and how many extra cards every search draws.${b.danger.hordeSize > 0 ? ` Each rise sends ${b.danger.hordeSize === 1 ? 'one zombie' : `${b.danger.hordeSize} zombies`} to the Street (roll its kind on the danger table).` : ''}</p>`
+      ? `<h3>Danger</h3><p>Danger starts at 1 and rises by one for every pack and every rare find you take${b.danger.perFindsTaken > 0 ? `, and for every ${b.danger.perFindsTaken} finds you add to your deck` : ''}, up to ${levels.length}. The table on the player board shows how much noise brings zombies at each level, which kinds come, and how many extra cards every search draws.${b.danger.hordeSize > 0 ? ` Each rise sends ${b.danger.hordeSize === 1 ? 'one zombie' : `${b.danger.hordeSize} zombies`} to the Street (roll its kind on the danger table).` : ''}</p>`
       : ''
   }
   <h3>Services</h3>

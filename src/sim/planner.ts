@@ -71,6 +71,8 @@ const baseValue: Readonly<Record<string, number>> = {
   knife: 5,
   bow: 6,
   crossbow: 8,
+  headShot: 6,
+  silentTakedown: 5,
 }
 
 const styleBonus: Readonly<Record<Style, (id: string, def: CardDef) => number>> = {
@@ -605,6 +607,7 @@ function maxDamage(def: CardDef): number {
   for (const m of def.modes) {
     for (const e of [...m.effects, ...(m.followUp?.effects ?? [])]) {
       if (e.kind === 'damage') best = Math.max(best, e.amount)
+      if (e.kind === 'kill') best = Math.max(best, 4)
     }
   }
   return best

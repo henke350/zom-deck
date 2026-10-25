@@ -76,7 +76,8 @@ src/sim/   bots and balance reports (from M6), run in Node
   effect) targets zombies from `zombiesInRange`: here, or that far away where zombies are known.
 - Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per
   building in `startZombies.kinds` and `content.arrivals`), the danger meter (`raiseDanger`,
-  `dangerLevel`, `noiseThreshold`), noticing, noise and arrivals,
+  `dangerLevel`, `noiseThreshold`, `zombieMaxHp`; start zombies get their kind on first look via
+  `revealZombies`), noticing, noise and arrivals,
   the zombie phase (follow → attack), `previewEndTurn` and `zombieInfo` (hidden
   danger). Previews must reuse the real rules, never re-implement them.
 - UI: `src/ui/GameScreen.tsx` composes `src/ui/components/*`; `useGame` holds the

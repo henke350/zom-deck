@@ -14,6 +14,7 @@ export {
   noiseThreshold,
   previewEndTurn,
   zombieInfo,
+  zombieMaxHp,
   zombiesAt,
 } from './zombies'
 export type { EndTurnPreview, NoisePreview, ZombieInfo } from './zombies'
