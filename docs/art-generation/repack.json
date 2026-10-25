@@ -1,0 +1,12 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "id": "repack",
+      "accent": "safe teal #2a7462",
+      "original": "art-source/cards/repack.png",
+      "gameCopy": "src/assets/cards/repack.webp",
+      "prompt": "Use case: stylized-concept. Card illustration for \"One More Building\".\nMatch the supplied Search, Crowbar, Flashlight and Painkillers reference art EXACTLY: gritty painterly hand-inked graphic-novel illustration, rough charcoal contours, restrained flat tonal planes, weathered paper/screen-print texture. Muted desaturated concrete greys, dusty off-white, charcoal and ONE accent colour only: safe teal #2a7462.\nFORMAT: Landscape 3:2, exactly 1536x1024 pixels, PNG. Full-bleed opaque background, no frame or border.\nSUBJECT: An open, worn hiking backpack on a concrete floor, viewed from above. Half its contents are laid out beside it in neat rows: a torch, a bandage roll, a water bottle, a folded map without text. Exactly two gloved hands pull one item out of the backpack to make room. Calm, practical, resourceful mood.\nCOMPOSITION: Backpack is the ONE dominant clear central subject, about 60% of the image. The laid-out supplies are small secondary elements close beside it, organised in rows. Keep the complete arrangement comfortably inside the frame with at least 10% quiet concrete-floor margin on every side. Show only hands and a little wrist, no body or face. Readable at 200 px width, strong subject/background contrast, clear open bag silhouette. Top-down view, soft low window light, simple concrete floor only, no detailed scenery.\nCOLOUR: Muted teal backpack and/or glove details; torch, bandage, water bottle, map, floor and other details neutral grey/off-white/charcoal, no amber or red accent.\nSTRICT: No text, letters, numbers, readable map labels, brand marks, logos, watermarks, signatures or UI anywhere. Bottle and torch entirely unlabelled. Map can have abstract street lines only, no writing. No faces, blood, gore or violence. No photorealism, 3D, cute or anime style. No franchise or branded artwork.\nREFERENCE ROLES: All attached images are STYLE REFERENCES ONLY, Search primary; match their ink, shading and texture while creating the new repacking scene."
+    }
+  ]
+}
