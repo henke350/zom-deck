@@ -185,13 +185,13 @@ describe('GameScreen: searching', () => {
     expect(log().getByText(texts.log.findDeclined)).toBeTruthy()
   })
 
-  it('can scrap a card from hand instead of taking a find', async () => {
-    const { log, houseA, user } = renderAt(false)
+  it('offers no scrapping while choosing finds', async () => {
+    const { houseA, user } = renderAt(false)
     await user.click(houseA())
     await user.click(screen.getByRole('button', { name: texts.ui.quickSearch(2, 2) }))
     const dialog = screen.getByRole('dialog', { name: texts.ui.findTitle })
-    await user.click(within(dialog).getByRole('button', { name: texts.ui.scrap('Nerves') }))
-    expect(log().getByText(texts.log.cardScrapped('Nerves'))).toBeTruthy()
+    expect(within(dialog).queryByText(texts.ui.scrapHeading)).toBeNull()
+    expect(within(dialog).queryByRole('button', { name: texts.ui.scrap('Nerves') })).toBeNull()
   })
 
   it('finds a supply pack and shows it', async () => {

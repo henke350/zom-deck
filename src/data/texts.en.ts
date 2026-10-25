@@ -140,7 +140,7 @@ export const texts = {
     },
     findTitle: 'Choose a find',
     findIntro: (place: string) =>
-      `You searched ${place}. Take one find into your hand, or scrap a card instead.`,
+      `You searched ${place}. Take one find into your hand, or take nothing.`,
     packBanner: (packs: number) =>
       `You found a supply pack! You now carry ${packs}. It adds a Heavy Load to your deck.`,
     take: 'Take',
@@ -202,8 +202,8 @@ export const texts = {
     stashBanner: 'You also found a locked stash! Open it from the side panel.',
     stashTitle: 'Inside the stash',
     bodyTitle: 'Search the body',
-    bodyIntro: 'It carried something. Take one find into your hand, or scrap a card instead.',
-    stashIntro: 'Take one rare find, or scrap a card instead.',
+    bodyIntro: 'It carried something. Take one find into your hand, or take nothing.',
+    stashIntro: 'Take one rare find, or take nothing.',
     youAreHere: 'You are here',
     stepsAway: (n: number) => `${n} step${n === 1 ? '' : 's'} away`,
     freeMoveAvailable: 'Free move available: choose a highlighted neighbour.',
@@ -279,7 +279,7 @@ export const texts = {
       {
         heading: 'Searching',
         items: [
-          `Play Search in a building to see ${b.searchOptions} finds, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Take one ${b.findsToHand ? 'straight into your hand' : 'into your deck'}, scrap a card from your hand for good, or take nothing.`,
+          `Play Search in a building to see ${b.searchOptions} finds, or ${b.searchOptions + b.peacefulSearchBonus} if no zombie is there. Take one ${b.findsToHand ? 'straight into your hand' : 'into your deck'}${b.scrapInFinds ? ', scrap a card from your hand for good,' : ''} or take nothing.`,
           `No Search card? A quick search costs ${b.quickSearch.cost} AP and shows ${b.quickSearch.options} finds. Each building can be searched ${b.searchesPerBuilding} times.`,
           `The first search in a building that hides a pack gives you the pack and a Heavy Load card that clogs your deck. The Supermarket always has a pack.`,
           `Rare finds (marked Rare) seldom turn up. ${b.stashesOnMap} buildings hide a locked stash, found by searching there: open it with a Tool card for ${b.stashToolCost} AP, or force it for ${b.stashForce.cost} AP and +${b.stashForce.noise} noise, and pick 1 of ${b.stashOptions} rare finds.`,
@@ -626,7 +626,9 @@ export const texts = {
     notATool: 'Only a Tool card can open a stash.',
     nothingToSearch: 'There is nothing to search here.',
     searchedOut: 'This building has no searches left.',
-    chooseFindFirst: 'Choose a find first: take one, scrap a card, or take nothing.',
+    chooseFindFirst: 'Choose a find first: take one, or take nothing.',
+    noScrapInFinds:
+      'You cannot scrap cards while choosing finds. Use Toolbox, Painkillers or a service.',
     noFindToChoose: 'There is no find to choose right now.',
     notAFind: 'That card is not one of the finds.',
     burned: 'This building has burned. It cannot be searched again.',

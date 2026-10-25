@@ -65,6 +65,7 @@ export function validate(
     case 'takeFind':
       return state.pendingFind?.options.includes(action.card) ? ok : no(texts.reasons.notAFind)
     case 'scrapCard': {
+      if (!state.balance.scrapInFinds) return no(texts.reasons.noScrapInFinds)
       const target = state.piles.hand.find((c) => c.uid === action.uid)
       if (!target) return no(texts.reasons.trashNotInHand)
       if (!content.cards[target.card]?.trashable) return no(texts.reasons.notTrashable)

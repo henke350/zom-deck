@@ -216,8 +216,15 @@ describe('choosing a find', () => {
     )
   })
 
-  it('can scrap a card from hand instead, but never Heavy Load', () => {
-    const state = searched()
+  it('cannot scrap a card while choosing finds (tuning 5)', () => {
+    expect(reasonFor(searched(), { type: 'scrapCard', uid: 'h2' })).toBe(
+      texts.reasons.noScrapInFinds,
+    )
+  })
+
+  it('can scrap a card from hand instead when the balance allows it, but never Heavy Load', () => {
+    const plain = searched()
+    const state = { ...plain, balance: { ...plain.balance, scrapInFinds: true } }
     expect(reasonFor(state, { type: 'scrapCard', uid: 'h3' })).toBe(texts.reasons.notTrashable)
     const next = play(state, { type: 'scrapCard', uid: 'h2' })
     expect(cardsIn(next.piles.removed)).toEqual(['nerves'])

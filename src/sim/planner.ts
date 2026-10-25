@@ -261,9 +261,10 @@ function chooseFind(o: PlannerOptions, state: GameState, content: Content): Acti
     }
   }
   const scrapBelow = o.style === 'light' ? 7 : takeAtLeast
-  if (junk && bestValue < scrapBelow) return { type: 'scrapCard', uid: junk.uid }
+  const canScrap = state.balance.scrapInFinds
+  if (canScrap && junk && bestValue < scrapBelow) return { type: 'scrapCard', uid: junk.uid }
   if (best && bestValue >= takeAtLeast) return { type: 'takeFind', card: best }
-  if (junk) return { type: 'scrapCard', uid: junk.uid }
+  if (canScrap && junk) return { type: 'scrapCard', uid: junk.uid }
   return { type: 'declineFind' }
 }
 

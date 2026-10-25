@@ -49,12 +49,16 @@ describe('bots', () => {
     expect(next('rush', state)).toEqual({ type: 'playCard', uid: 'h1', mode: 0 })
   })
 
-  it('take finds that suit their style, or scrap junk instead', () => {
-    const choosing = (options: string[], hand: string[]): GameState => ({
-      ...makeState({ location: 'workshop', hand }),
-      phase: 'chooseFind',
-      pendingFind: { location: 'workshop', options, packFound: false, noise: 1 },
-    })
+  it('take finds that suit their style, or scrap junk instead when that is allowed', () => {
+    const choosing = (options: string[], hand: string[]): GameState => {
+      const base = makeState({ location: 'workshop', hand })
+      return {
+        ...base,
+        balance: { ...base.balance, scrapInFinds: true },
+        phase: 'chooseFind',
+        pendingFind: { location: 'workshop', options, packFound: false, noise: 1 },
+      }
+    }
     const finds = ['axe', 'lockpick', 'toolbox']
     expect(next('fighter', choosing(finds, ['search']))).toEqual({ type: 'takeFind', card: 'axe' })
     expect(next('quiet', choosing(finds, ['search']))).toEqual({

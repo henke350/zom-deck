@@ -100,6 +100,8 @@ export interface Balance {
   readonly rareFindWeight: number
   /** Taken finds go straight into your hand (true) or onto your discard pile (false). */
   readonly findsToHand: boolean
+  /** When choosing finds, you may scrap a card from your hand instead (off since tuning 5). */
+  readonly scrapInFinds: boolean
   /** The most finds one body search can show, however many zombies a card killed. */
   readonly bodyLootMax: number
   /** Buildings that hide a locked stash of rare finds (placed at random). */
@@ -176,6 +178,9 @@ export const balance: Balance = {
   findsToHand: true,
   bodyLootMax: 3,
   rareFindWeight: 0.25,
+  // Tuning 5 (25 Oct 2026, user's call): no scrapping a card while choosing finds. Trashing is
+  // done with Toolbox, Painkillers and the Dismantle / Patch up services.
+  scrapInFinds: false,
   stashesOnMap: 2,
   stashOptions: 2,
   stashToolCost: 1,
