@@ -127,7 +127,7 @@ export const balance: Balance = {
   noiseThreshold: 4,
   searchNoise: 1,
   packsToWin: 2,
-  packsOnMap: 4,
+  packsOnMap: 5,
   starThresholds: [2, 3, 4],
   zombies: {
     walker: { hp: 2, damage: 1, followSteps: 1, screamNoise: 0, loot: 1 },

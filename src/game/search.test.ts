@@ -31,7 +31,7 @@ describe('pack placement', () => {
       const withPack = Object.entries(sites)
         .filter(([, s]) => s.hasPack)
         .map(([id]) => id)
-      expect(withPack).toHaveLength(balance.packsOnMap)
+      expect(withPack).toHaveLength(classicBalance.packsOnMap)
       expect(withPack).toContain('supermarket')
       expect(Object.keys(sites).sort()).toEqual([...buildings].sort())
       for (const id of withPack) counts[id] = (counts[id] ?? 0) + 1
@@ -41,6 +41,16 @@ describe('pack placement', () => {
       expect(counts[id]).toBeGreaterThan(500)
       expect(counts[id]).toBeLessThan(700)
     }
+  })
+
+  it('places 5 packs in the large city, one in the Supermarket', () => {
+    for (let seed = 1; seed <= 200; seed++) {
+      const { sites } = newGame(seed)
+      const withPack = Object.entries(sites).filter(([, s]) => s.hasPack)
+      expect(withPack).toHaveLength(balance.packsOnMap)
+      expect(withPack.map(([id]) => id)).toContain('supermarket')
+    }
+    expect(balance.packsOnMap).toBe(5)
   })
 
   it('refuses impossible pack counts', () => {
