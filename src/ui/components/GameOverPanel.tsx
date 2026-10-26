@@ -68,6 +68,11 @@ export function GameOverPanel({
       <p className="end-tip">
         <b>{end.tipHeading}:</b> {onBackToBase ? texts.campaign.dayOverTip : summary.tip}
       </p>
+      {onBackToBase && outcome.result === 'won' && (
+        <p className="pack-banner">
+          {texts.campaign.bringingHome(result.food, result.water, result.materials)}
+        </p>
+      )}
 
       <div className="page-actions">
         {onBackToBase ? (

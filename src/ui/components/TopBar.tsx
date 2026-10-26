@@ -1,6 +1,6 @@
 import { texts } from '../../data/texts.en'
 import type { GameState } from '../../game'
-import { dangerLevel, noiseThreshold, packsCarried } from '../../game'
+import { dangerLevel, noiseThreshold, packsCarried, resultWith } from '../../game'
 
 interface StatProps {
   readonly label: string
@@ -42,6 +42,8 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
   // Campaign: the day, and what the packs you carry are (food or water).
   const day = state.campaignDay
   const { food, water } = packsCarried(state)
+  const salvage =
+    day !== undefined ? resultWith(state, { result: 'won', cause: 'home' }).materials : 0
   const c = texts.campaign
 
   return (
@@ -79,8 +81,8 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
       />
       {day !== undefined ? (
         <Stat
-          label={`${c.stock.food} · ${c.stock.water}`}
-          value={`${food} · ${water}`}
+          label={c.carryingLabel}
+          value={c.carrying(food, water, salvage)}
           tone={food > 0 && water > 0 ? 'good' : undefined}
         />
       ) : (

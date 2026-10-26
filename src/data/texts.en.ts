@@ -143,7 +143,9 @@ export const texts = {
     findIntro: (place: string) =>
       `You searched ${place}. Take one find into your hand, or take nothing.`,
     packBanner: (packs: number, kind?: string) =>
-      `You found a supply pack${kind ? ` of ${kind}` : ''}! You now carry ${packs}. It adds a Heavy Load to your deck.`,
+      kind
+        ? `You found ${kind.toUpperCase()}! A supply pack of ${kind}: you now carry ${packs} packs. It adds a Heavy Load to your deck.`
+        : `You found a supply pack! You now carry ${packs}. It adds a Heavy Load to your deck.`,
     take: 'Take',
     scrapHeading: 'Or scrap one card from your hand for good',
     scrap: (name: string) => `Scrap ${name}`,
@@ -408,6 +410,10 @@ export const texts = {
       'Your base. Every evening you eat 1 food and drink 1 water. Build with materials, then set out again. The city stays the same, so what you learn about it stays known.',
     stock: { food: 'Food', water: 'Water', materials: 'Materials' },
     stockLabel: 'Your store',
+    carryingLabel: 'Food · Water · Salvage',
+    carrying: (food: number, water: number, salvage: number) => `${food} · ${water} · ${salvage}`,
+    bringingHome: (food: number, water: number, salvage: number) =>
+      `You bring home ${food} food, ${water} water and ${salvage} Salvage.`,
     yesterdayHeading: 'Last night',
     cameHome: (day: number, food: number, water: number, materials: number) =>
       `Day ${day}: you came home with ${food} food, ${water} water and ${materials} materials.`,
