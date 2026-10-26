@@ -4,8 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
-import { newCampaign } from '../game'
+import { dayBalance, daySeed, daySetup, newCampaign, newGame } from '../game'
 import App from './App'
+import { GameScreen } from './GameScreen'
 import { BaseScreen } from './components/BaseScreen'
 import { clearCampaign, forgetRulesSeen, loadCampaign, markRulesSeen } from './storage'
 
@@ -120,5 +121,30 @@ describe('the base screen', () => {
     expect(screen.getByRole('heading', { name: t.survived(balance.campaign.days) })).toBeTruthy()
     await userEvent.click(screen.getByRole('button', { name: t.restart }))
     expect(on.onNewCampaign).toHaveBeenCalled()
+  })
+})
+
+describe('a campaign day on screen', () => {
+  it('says plainly whether a pack is food or water, and what you carry', async () => {
+    const campaign = newCampaign(5)
+    const day = newGame(daySeed(campaign), {
+      balance: dayBalance(campaign),
+      setup: daySetup(campaign),
+    })
+    const at = Object.keys(day.sites).find((id) => day.sites[id]?.hasPack) ?? ''
+    const kind = day.sites[at]?.packKind ?? 'food'
+    const state = {
+      ...day,
+      player: { ...day.player, location: at, ap: 3 },
+      visited: [...day.visited, at],
+      zombies: [],
+    }
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    expect(screen.getByText(t.carrying(0, 0, 0))).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: /^Quick search/ }))
+    expect(screen.getByText(texts.ui.packBanner(1, t.packKind[kind]))).toBeTruthy()
+    const food = kind === 'food' ? 1 : 0
+    expect(screen.getByText(t.carrying(food, 1 - food, 0))).toBeTruthy()
   })
 })
