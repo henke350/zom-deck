@@ -1,7 +1,7 @@
 import { useRef, type KeyboardEvent } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Content, GameState, LocationId } from '../../game'
-import { buildingKnown, zombieInfo, zombiesAt } from '../../game'
+import { buildingKnown, dogSmells, zombieInfo, zombiesAt } from '../../game'
 import { locationImages } from '../locationImages'
 import { locationText } from '../names'
 import { siteSummary } from '../sites'
@@ -106,6 +106,8 @@ export function CityMap({
     height: Math.max(...all.map((p) => p.y)) + Math.min(...all.map((p) => p.y)),
   }
   const herePos = pos(here)
+  // The Stray Dog smells a hidden pack here or next door.
+  const smells = new Set(dogSmells(state, content))
 
   const onKey = (id: LocationId) => (event: KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -142,8 +144,10 @@ export function CityMap({
           ]
             .filter(Boolean)
             .join(' ')
+          const smelled = smells.has(loc.id)
           const label = [
             name,
+            smelled ? texts.ui.dogSmells : '',
             isHere ? texts.ui.youAreHere : '',
             isDest ? texts.ui.chooseDestination : '',
           ]
@@ -208,6 +212,14 @@ export function CityMap({
                   : texts.ui.unknownShort}
               </text>
               <ZombieMarks state={state} content={content} id={loc.id} />
+              {smelled && (
+                <g className="scent" aria-hidden="true">
+                  <rect x={x - NODE_W / 2 + 4} y={top + 4} width={44} height={16} rx={8} />
+                  <text x={x - NODE_W / 2 + 26} y={top + 16} textAnchor="middle">
+                    {texts.ui.scentMark}
+                  </text>
+                </g>
+              )}
               <rect
                 className="node-box"
                 x={x - NODE_W / 2}

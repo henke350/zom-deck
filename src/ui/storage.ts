@@ -1,3 +1,5 @@
+import type { CampaignState, GameState } from '../game'
+
 const RULES_SEEN = 'one-more-building:rules-seen'
 
 // Remembered for this page visit too, in case the browser blocks storage.
@@ -52,5 +54,45 @@ export function setTipsHidden(hidden: boolean): void {
     else window.localStorage.removeItem(TIPS_HIDDEN)
   } catch {
     // Storage refused: the choice holds for this visit.
+  }
+}
+
+const CAMPAIGN = 'one-more-building:campaign'
+const CAMPAIGN_VERSION = 1
+
+/** A campaign saved in the browser: the base, and today's expedition while it is going. */
+export interface SavedCampaign {
+  readonly campaign: CampaignState
+  readonly expedition?: GameState
+}
+
+/** The saved campaign, or null when there is none (or storage is blocked or the save is old). */
+export function loadCampaign(): SavedCampaign | null {
+  try {
+    const raw = window.localStorage.getItem(CAMPAIGN)
+    if (!raw) return null
+    const saved = JSON.parse(raw) as { version?: number } & Partial<SavedCampaign>
+    if (saved.version !== CAMPAIGN_VERSION || !saved.campaign) return null
+    return saved.expedition
+      ? { campaign: saved.campaign, expedition: saved.expedition }
+      : { campaign: saved.campaign }
+  } catch {
+    return null
+  }
+}
+
+export function saveCampaign(saved: SavedCampaign): void {
+  try {
+    window.localStorage.setItem(CAMPAIGN, JSON.stringify({ version: CAMPAIGN_VERSION, ...saved }))
+  } catch {
+    // Storage refused (private window): the campaign lasts as long as this page is open.
+  }
+}
+
+export function clearCampaign(): void {
+  try {
+    window.localStorage.removeItem(CAMPAIGN)
+  } catch {
+    // Nothing to clear.
   }
 }

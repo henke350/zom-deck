@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { balance } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { bots } from './bots'
+import { campaignConsole, runCampaigns } from './campaign'
 import { fuzz } from './fuzz'
 import { applyOverride, applyOverrides } from './overrides'
 import { renderReport } from './report'
@@ -73,5 +74,17 @@ describe('fuzz run', () => {
     const result = fuzz(60)
     expect(result.problems).toEqual([])
     expect(result.actions).toBeGreaterThan(60)
+  })
+})
+
+describe('campaign simulation', () => {
+  it('plays whole campaigns with every planner bot and finds no broken rules', () => {
+    const planners = bots.filter((b) => b.bot.id !== 'random').slice(0, 2)
+    const summaries = runCampaigns(planners, 3, balance)
+    for (const s of summaries) {
+      expect(s.problems).toBe(0)
+      expect(s.avgDaysHome).toBeGreaterThanOrEqual(0)
+    }
+    expect(campaignConsole(summaries, balance.campaign.days)).toContain('overlever')
   })
 })

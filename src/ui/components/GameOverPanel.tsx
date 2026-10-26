@@ -12,6 +12,8 @@ interface GameOverPanelProps {
   readonly onNewExpedition: () => void
   readonly onRestart: () => void
   readonly onExit: () => void
+  /** Campaign: the day is over; the only way on is back to the base (no restarting a day). */
+  readonly onBackToBase?: () => void
 }
 
 /** The end screen: how it ended, why, one tip, and the numbers. */
@@ -22,6 +24,7 @@ export function GameOverPanel({
   onNewExpedition,
   onRestart,
   onExit,
+  onBackToBase,
 }: GameOverPanelProps) {
   const first = useRef<HTMLButtonElement>(null)
   useEffect(() => first.current?.focus(), [])
@@ -53,7 +56,7 @@ export function GameOverPanel({
   return (
     <Page labelledBy="game-over-title">
       <h2 id="game-over-title">{ui.outcomeTitle[outcome.cause]}</h2>
-      {outcome.stars ? (
+      {outcome.stars && !onBackToBase ? (
         <p className="stars">{ui.outcomeStars(outcome.stars, balance.starThresholds.length)}</p>
       ) : null}
 
@@ -63,19 +66,27 @@ export function GameOverPanel({
         ))}
       </section>
       <p className="end-tip">
-        <b>{end.tipHeading}:</b> {summary.tip}
+        <b>{end.tipHeading}:</b> {onBackToBase ? texts.campaign.dayOverTip : summary.tip}
       </p>
 
       <div className="page-actions">
-        <button ref={first} type="button" className="btn btn-primary" onClick={onNewExpedition}>
-          {ui.newExpedition}
-        </button>
-        <button type="button" className="btn" onClick={onRestart}>
-          {ui.sameCity}
-        </button>
-        <button type="button" className="btn btn-quiet" onClick={onExit}>
-          {ui.backToTitle}
-        </button>
+        {onBackToBase ? (
+          <button ref={first} type="button" className="btn btn-primary" onClick={onBackToBase}>
+            {texts.campaign.backToBase}
+          </button>
+        ) : (
+          <>
+            <button ref={first} type="button" className="btn btn-primary" onClick={onNewExpedition}>
+              {ui.newExpedition}
+            </button>
+            <button type="button" className="btn" onClick={onRestart}>
+              {ui.sameCity}
+            </button>
+            <button type="button" className="btn btn-quiet" onClick={onExit}>
+              {ui.backToTitle}
+            </button>
+          </>
+        )}
       </div>
 
       <section aria-labelledby="end-stats-title">

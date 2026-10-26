@@ -1,5 +1,13 @@
 import { texts } from '../../data/texts.en'
-import type { Action, CardInstance, Content, GearOption, GameState, ModeOption } from '../../game'
+import type {
+  Action,
+  CardInstance,
+  Content,
+  DogOption,
+  GearOption,
+  GameState,
+  ModeOption,
+} from '../../game'
 import { cardText } from '../names'
 import { CardFace } from './CardFace'
 
@@ -7,8 +15,8 @@ export interface PendingPlay {
   readonly uid: string
   readonly mode: number
   readonly kind: 'location' | 'trash' | 'discard' | 'zombie'
-  /** The card's mode, or a piece of gear being used (the Crossbow). */
-  readonly options: ModeOption | GearOption
+  /** The card's mode, a piece of gear being used (the Crossbow), or the dog (Sic). */
+  readonly options: ModeOption | GearOption | DogOption
 }
 
 interface HandProps {

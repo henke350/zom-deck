@@ -124,3 +124,57 @@ Steps:
 4. Run `npm run check`. It must pass.
 5. Commit on a new branch (never main) and open a pull request named "Add art for Repack".
 ```
+
+## Nyt kort: Salvage (kampagnen, oktober 2026)
+
+Kortet **Salvage** (materialer til basen) mangler et billede. Indsæt denne tekst i Codex:
+
+```
+You are working in the repository for "One More Building". Create ONE new card illustration in
+EXACTLY the same style as the existing card art, and add it to the game.
+
+Look first: art-source/cards/search.png, crowbar.png, repack.png, and docs/card-art-prompt.md.
+Same style rules: landscape 3:2, 1536 x 1024 px PNG, full-bleed, gritty painterly
+graphic-novel look, muted and desaturated, one accent colour, ONE clear object in the centre
+(about 60 %), a calm margin of at least 10 % on every side, no text, letters, logos or
+watermarks, no faces, no gore.
+
+Card: salvage. Accent: hazard amber #b87800.
+Subject: a heavy bundle of scrap tied together with rope on a concrete floor: planks, a few
+metal pipes, a coil of wire, a car door panel and a small box of nails. It looks heavy and
+useful, material to build with. A worn work glove lies on top.
+
+Steps:
+1. Save the original as art-source/cards/salvage.png (1536 x 1024).
+2. Make the game copy: 768 x 512 WebP, quality about 80, at src/assets/cards/salvage.webp.
+3. Remove 'salvage' from the awaitingArt list in src/ui/cardImages.test.ts.
+4. Run `npm run check`. It must pass.
+5. Commit on a new branch (never main) and open a pull request named "Add art for Salvage".
+```
+
+## Ny figur: Stray Dog (oktober 2026)
+
+Hunden mangler et billede. Det vises, når den er blandt fundene. Indsæt denne tekst i Codex:
+
+```
+You are working in the repository for "One More Building". Create ONE new card illustration in
+EXACTLY the same style as the existing card art, and add it to the game.
+
+Look first: art-source/cards/search.png, silentTakedown.png, repack.png, and
+docs/card-art-prompt.md. Same style rules: landscape 3:2, 1536 x 1024 px PNG, full-bleed,
+gritty painterly graphic-novel look, muted and desaturated, one accent colour, ONE clear
+subject in the centre (about 60 %), a calm margin of at least 10 % on every side, no text,
+letters, logos or watermarks, no human faces, no gore.
+
+Card: dog. Accent: safe teal #2a7462 (a worn teal collar or bandana).
+Subject: a thin, scruffy medium-sized mixed-breed dog peeking out from under an overturned
+table in an abandoned living room, ears up, wary but hopeful, looking at the viewer. Soft
+light from a broken window. It should feel like a friend you would want to protect.
+
+Steps:
+1. Save the original as art-source/cards/dog.png (1536 x 1024).
+2. Make the game copy: 768 x 512 WebP, quality about 80, at src/assets/cards/dog.webp.
+3. Remove 'dog' from the awaitingArt list in src/ui/cardImages.test.ts.
+4. Run `npm run check`. It must pass.
+5. Commit on a new branch (never main) and open a pull request named "Add art for the Stray Dog".
+```

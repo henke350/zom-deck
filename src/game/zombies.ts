@@ -1,6 +1,7 @@
 import type { Balance, DangerLevel, ZombieKind, ZombieStats } from '../data/balance'
 import { buildingKnown, cityContent } from './city'
 import { gainCard } from './deck'
+import { dogGuard } from './dog'
 import { absorbDamage, gearAfterHit } from './gear'
 import { distance, neighbors } from './map'
 import { nextFloat, nextInt } from './rng'
@@ -420,8 +421,9 @@ function attacks(state: GameState, content: Content, events: GameEvent[]): GameS
   const total = attackers.reduce((sum, z) => sum + damageOf(z), 0)
   const blocked = Math.min(next.player.block, total)
   if (blocked > 0) events.push({ type: 'damageBlocked', amount: blocked })
-  const [protectedState, lost] = absorbDamage(next, total - blocked, content, events)
-  next = protectedState
+  const [protectedState, afterGear] = absorbDamage(next, total - blocked, content, events)
+  const [guarded, lost] = dogGuard(protectedState, afterGear, events)
+  next = guarded
   if (lost > 0) events.push({ type: 'hpLost', amount: lost, source: 'zombies' })
   if (lost > 0) next = gearAfterHit(next, content, events)
   const hurt: GameState = { ...next, player: { ...next.player, hp: next.player.hp - lost } }
@@ -455,9 +457,12 @@ export function previewEndTurn(state: GameState, baseContent: Content): EndTurnP
   const events: GameEvent[] = []
   const after = zombiePhase(state, content, events)
   const count = (type: GameEvent['type']) => events.filter((e) => e.type === type).length
-  // Block and gear (Kevlar Vest) both keep damage off you.
+  // Block, gear (Kevlar Vest) and the dog all keep damage off you.
   const blocked = events.reduce(
-    (sum, e) => (e.type === 'damageBlocked' || e.type === 'gearAbsorbed' ? sum + e.amount : sum),
+    (sum, e) =>
+      e.type === 'damageBlocked' || e.type === 'gearAbsorbed' || e.type === 'dogGuarded'
+        ? sum + e.amount
+        : sum,
     0,
   )
   const damage = state.player.hp - after.player.hp

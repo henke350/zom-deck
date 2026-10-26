@@ -142,8 +142,8 @@ export const texts = {
     findTitle: 'Choose a find',
     findIntro: (place: string) =>
       `You searched ${place}. Take one find into your hand, or take nothing.`,
-    packBanner: (packs: number) =>
-      `You found a supply pack! You now carry ${packs}. It adds a Heavy Load to your deck.`,
+    packBanner: (packs: number, kind?: string) =>
+      `You found a supply pack${kind ? ` of ${kind}` : ''}! You now carry ${packs}. It adds a Heavy Load to your deck.`,
     take: 'Take',
     scrapHeading: 'Or scrap one card from your hand for good',
     scrap: (name: string) => `Scrap ${name}`,
@@ -160,6 +160,8 @@ export const texts = {
     hints: {
       goHome:
         'You have enough supplies. Walk back to the Shelter to win, or risk one more building for more stars.',
+      campaignHome:
+        'You carry food and water for tonight. Walk back to the Shelter, or push on for more and for Salvage.',
       zombies: 'Zombies here attack when you end the turn. Hit them, sneak, or walk away first.',
       search:
         'Play Search (or Quick search in the panel) to look for supplies. The first search finds a hidden pack.',
@@ -181,6 +183,12 @@ export const texts = {
               ? 'last turn'
               : `${n} turns left`,
     shoot: (cost: number) => `Shoot (${cost} AP)`,
+    dog: 'Dog',
+    dogStatus: (hp: number, max: number) => `Stray Dog · ${hp}/${max} health`,
+    sic: 'Sic (0 AP)',
+    chooseDogTarget: 'Choose a zombie for your dog.',
+    dogSmells: 'Your dog smells supplies here',
+    scentMark: 'sniff',
     chooseZombieInRange:
       'Choose the zombie to hit. Tap a nearby place on the map to see zombies there.',
     chooseTrashTarget: 'Choose a card in your hand to trash.',
@@ -355,14 +363,106 @@ export const texts = {
           `At 0 health you die. At the end of turn ${b.turnLimit} night falls and the expedition is lost.`,
         ],
       },
+      {
+        heading: 'The Stray Dog',
+        items: [
+          `Sometimes a search in a house or the church finds a scared dog. It is not a card: it walks with you (${b.dog.hp} health).`,
+          `Sic: once a turn, for 0 AP, it deals ${b.dog.biteDamage} damage to a zombie where you stand, barking (+${b.dog.biteNoise} noise).`,
+          `In each zombie phase it takes ${b.dog.guardPerPhase} damage for you. At 0 health it dies.`,
+          'It smells supply packs: buildings here and next door get a "sniff" mark on the map.',
+          `In a campaign it comes home with you, gets ${b.dog.healPerNight} health back each night and eats 1 food every ${b.dog.foodEvery} nights. No food, and it runs away.`,
+        ],
+      },
+      {
+        heading: 'Campaign',
+        items: [
+          `A campaign is ${b.campaign.days} days in one city; each day is one expedition. You may go home with whatever you have. The city stays the same, so buildings you have seen stay known, and searched buildings get only ${b.campaign.searchesRegrowPerNight} search back each night: the supplies move further out.`,
+          `Every pack is food or water. Each evening you eat ${b.campaign.foodPerNight} food and drink ${b.campaign.waterPerNight} water. No food: ${b.campaign.hungerNerves} extra Nerves the next day. No water: ${b.campaign.thirstHp} less health the next day.`,
+          'Salvage is a find only in campaigns: material for the base. It weighs like a Heavy Load until you are home. Build upgrades at the base between days.',
+          `Not home (killed or caught by the dark): today's finds are lost and the next day starts with ${b.campaign.woundsAfterLoss} Wound. After ${b.campaign.lossesAllowed + 1} lost days the campaign is over.`,
+        ],
+      },
     ],
   },
 
+  /** Version 2: the campaign and the base between days. */
+  campaign: {
+    upgrades: {
+      lookout: {
+        name: 'Lookout',
+        text: 'At the start of each expedition, see the exact zombies (and any pack) in 2 buildings.',
+      },
+      workbench: { name: 'Workbench', text: 'Start each expedition with one Nerves fewer.' },
+      infirmary: { name: 'Infirmary', text: 'Start each expedition with +2 health.' },
+      locker: { name: 'Locker', text: 'Keep 1 card you found for the next expedition.' },
+      rainCollector: { name: 'Rain Collector', text: '+1 water every second night.' },
+      garden: { name: 'Garden', text: '+1 food every second night.' },
+    },
+    start: 'Start campaign',
+    continue: (day: number) => `Continue campaign (day ${day})`,
+    restart: 'New campaign',
+    startNote: 'A campaign is several days in one city. Each day is one expedition.',
+    dayStat: 'Day',
+    dayHeading: (day: number, days: number) => `Day ${day} of ${days}`,
+    intro:
+      'Your base. Every evening you eat 1 food and drink 1 water. Build with materials, then set out again. The city stays the same, so what you learn about it stays known.',
+    stock: { food: 'Food', water: 'Water', materials: 'Materials' },
+    stockLabel: 'Your store',
+    yesterdayHeading: 'Last night',
+    cameHome: (day: number, food: number, water: number, materials: number) =>
+      `Day ${day}: you came home with ${food} food, ${water} water and ${materials} materials.`,
+    lostDay: (day: number) => `Day ${day}: you did not make it home. Everything you found is lost.`,
+    ate: 'You ate.',
+    hungry: 'There was nothing to eat.',
+    drank: 'You drank.',
+    thirsty: 'There was nothing to drink.',
+    produced: (food: number, water: number) =>
+      `Overnight the base made ${[food ? `${food} food` : '', water ? `${water} water` : ''].filter(Boolean).join(' and ')}.`,
+    todayHeading: 'Today',
+    penaltyHungry: (n: number) => `Hungry: ${n} extra Nerves in your deck.`,
+    penaltyThirsty: (n: number) => `Thirsty: you start with ${n} less health.`,
+    penaltyWounds: (n: number) => `Hurt: ${n} Wounds in your deck.`,
+    noPenalty: 'You are fed, watered and ready.',
+    lossesLeft: (n: number) =>
+      n === 0
+        ? 'One more lost day ends the campaign.'
+        : `You can survive ${n} more lost ${n === 1 ? 'day' : 'days'}.`,
+    baseHeading: 'Build',
+    build: (cost: number) => `Build (${cost})`,
+    built: 'Built',
+    lockerHeading: 'Locker: take one of yesterday’s finds along',
+    keepNone: 'Take none',
+    setOut: (day: number) => `Set out on day ${day}`,
+    backToTitle: 'Back to title',
+    backToBase: 'Back to the base',
+    dayOverTip:
+      'At the base you eat, drink and build. Packs are food or water; Salvage is material for building.',
+    survived: (days: number) => `You survived ${days} days`,
+    lostCampaign: 'The campaign is over',
+    overSummary: (days: number, food: number, water: number, upgrades: number) =>
+      `You lasted ${days} ${days === 1 ? 'day' : 'days'} and built ${upgrades} ${upgrades === 1 ? 'upgrade' : 'upgrades'}. Left in the store: ${food} food and ${water} water.`,
+    packKind: { food: 'food', water: 'water' },
+    dogAtBase: (hp: number, max: number, every: number) =>
+      `Your Stray Dog is here (${hp}/${max} health). It eats 1 food every ${every} nights.`,
+    dogNews: {
+      joined: 'A stray dog followed you home.',
+      died: 'Your dog did not come home.',
+      ate: 'Your dog ate 1 food.',
+      ranAway: 'There was no food for your dog. In the morning it was gone.',
+    },
+    reasons: {
+      over: 'The campaign is over.',
+      built: 'Already built.',
+      materials: (cost: number, have: number) => `Needs ${cost} materials. You have ${have}.`,
+    },
+  },
   confirmHome: {
     title: 'Go home now?',
     body: (packs: number, stars: number) =>
       `Walking into the Shelter ends the expedition with ${packs} supply packs: ${'★'.repeat(stars)}.`,
     next: (packs: number) => `With ${packs} packs you would get one more star.`,
+    dayBody: (day: number, food: number, water: number, materials: number) =>
+      `Walking into the Shelter ends day ${day}. You bring home ${food} food, ${water} water and ${materials} Salvage.`,
     yes: 'Go home',
     no: 'Not yet',
   },
@@ -453,7 +553,8 @@ export const texts = {
     cardsKept: (names: string) => `You keep ${names} for next turn.`,
     searched: (place: string, n: number, quick: boolean) =>
       `You ${quick ? 'quickly search' : 'search'} ${place} and find ${n} thing${n === 1 ? '' : 's'}.`,
-    packFound: (packs: number) => `You find a supply pack! You carry ${packs}.`,
+    packFound: (packs: number, kind?: string) =>
+      `You find a supply pack${kind ? ` of ${kind}` : ''}! You carry ${packs}.`,
     heavyLoadGained: 'A Heavy Load goes into your discard pile.',
     findTaken: (name: string) => `You take ${name}. It goes into your discard pile.`,
     cardScrapped: (name: string) => `You scrap ${name} for good.`,
@@ -485,6 +586,11 @@ export const texts = {
             ? `${card} is out of bolts.`
             : `${card} runs out.`,
     gearUsed: (card: string) => `You shoot with the ${card}. Not a sound.`,
+    dogFound: (hp: number) => `A scared dog creeps out and follows you. (${hp} health)`,
+    dogBit: (damage: number) => `Your dog attacks, barking: ${damage} damage.`,
+    dogGuarded: (n: number, left: number) =>
+      `Your dog throws itself in the way and takes ${n} damage (${left} health left).`,
+    dogDied: 'Your dog does not get up again.',
     bodySearched: (n: number) =>
       `You search the body: ${n === 1 ? '1 find' : `${n} finds`} to choose from.`,
     damageBlocked: (n: number) => `You block ${n} damage.`,
@@ -523,6 +629,10 @@ export const texts = {
     heavyLoad: {
       name: 'Heavy Load',
       text: "Unplayable. Can't be trashed. While it's in your hand, your free move costs 1 AP.",
+    },
+    salvage: {
+      name: 'Salvage',
+      text: "Material for your base. Unplayable. Can't be trashed. While it's in your hand, your free move costs 1 AP.",
     },
     wound: {
       name: 'Wound',
@@ -604,6 +714,10 @@ export const texts = {
       name: 'Painkillers',
       text: 'Trash a Nerves or Wound from your hand. Draw 1 card.',
     },
+    dog: {
+      name: 'Stray Dog',
+      text: 'Not a card: a dog that walks with you. Once a turn, Sic: 1 damage to a zombie here (+1 noise). It takes 1 damage for you each zombie phase, and smells packs next door. It can die.',
+    },
     repack: {
       name: 'Repack',
       text: 'Discard a card from your hand. Draw 1 card.',
@@ -667,6 +781,8 @@ export const texts = {
     noSuchGear: 'That gear is not in front of you.',
     zombieSeesYou: 'That zombie has seen you. Sneak, distract it or arrive unnoticed first.',
     gearNotUsable: 'This gear works by itself; there is nothing to use.',
+    noDog: 'You have no dog.',
+    dogBitten: 'Your dog has already attacked this turn.',
   },
 } as const
 

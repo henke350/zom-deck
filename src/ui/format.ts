@@ -23,7 +23,10 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
     case 'searched':
       return log.searched(locationText(event.location).name, event.options.length, event.quick)
     case 'packFound':
-      return log.packFound(event.packs)
+      return log.packFound(
+        event.packs,
+        event.kind ? texts.campaign.packKind[event.kind] : undefined,
+      )
     case 'cardGained':
       if (event.reason === 'pack') return log.heavyLoadGained
       if (event.reason === 'wound') return log.woundGained
@@ -44,6 +47,14 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.gearEquipped(cardText(event.card).name)
     case 'gearUsed':
       return log.gearUsed(cardText(event.card).name)
+    case 'dogFound':
+      return log.dogFound(event.hp)
+    case 'dogBit':
+      return log.dogBit(event.damage)
+    case 'dogGuarded':
+      return log.dogGuarded(event.amount, event.hpLeft)
+    case 'dogDied':
+      return log.dogDied
     case 'gearAbsorbed':
       return log.gearAbsorbed(event.amount)
     case 'gearLost':

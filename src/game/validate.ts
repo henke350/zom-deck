@@ -80,6 +80,15 @@ export function validate(
       return validateOpenStash(state, action, content)
     case 'useGear':
       return validateUseGear(state, action, content)
+    case 'dogBite': {
+      if (!state.dog) return no(texts.reasons.noDog)
+      if (state.dog.bitten) return no(texts.reasons.dogBitten)
+      const here = zombiesAt(state, state.player.location)
+      if (here.length === 0) return no(texts.reasons.noZombiesHere)
+      if (!action.target?.zombie) return no(texts.reasons.chooseZombie)
+      if (!here.some((z) => z.uid === action.target?.zombie)) return no(texts.reasons.zombieNotHere)
+      return ok
+    }
     case 'endTurn':
       return validateEndTurn(state, action)
   }

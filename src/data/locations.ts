@@ -13,6 +13,7 @@ const houseLoot = [
   { card: 'silentTakedown', weight: 1 },
   { card: 'travelLight', weight: 1 },
   { card: 'repack', weight: 2 },
+  { card: 'dog', weight: 1 },
   { card: 'bicycle', weight: 1 },
 ] as const satisfies readonly LootEntry[]
 
@@ -261,6 +262,7 @@ export const extraBuildings = {
       { card: 'alarmClock', weight: 2 },
       { card: 'travelLight', weight: 2 },
       { card: 'painkillers', weight: 1 },
+      { card: 'dog', weight: 1 },
     ],
   },
   sportsShop: {
@@ -366,4 +368,23 @@ export const largeMap: {
     ['square', 'b4'],
     ['square', 'b7'],
   ],
+}
+
+/**
+ * Campaign: how often each building offers Salvage (materials for the base) among its finds.
+ * Workshops and petrol stations are full of scrap; homes have a little.
+ */
+export const salvageWeights: Readonly<Record<string, number>> = {
+  workshop: 5,
+  gasStation: 4,
+  school: 3,
+  apartments: 3,
+  sportsShop: 2,
+  supermarket: 2,
+  police: 2,
+  hospital: 2,
+  pharmacy: 1,
+  church: 2,
+  houseA: 2,
+  houseB: 2,
 }

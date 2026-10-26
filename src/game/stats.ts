@@ -1,4 +1,5 @@
-import type { ExpeditionResult, GameEvent, GameState, Stats } from './types'
+import { defaultContent } from '../data/content'
+import type { Content, ExpeditionResult, GameEvent, GameState, Outcome, Stats } from './types'
 
 export function emptyStats(startHp: number, startCards: number): Stats {
   return {
@@ -95,11 +96,44 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
 }
 
 /** The result of a finished expedition, or undefined while it is still going. */
-export function expeditionResult(state: GameState): ExpeditionResult | undefined {
-  if (!state.outcome) return undefined
+export function expeditionResult(
+  state: GameState,
+  content: Content = defaultContent,
+): ExpeditionResult | undefined {
+  return state.outcome ? resultWith(state, state.outcome, content) : undefined
+}
+
+/** Campaign: the packs you carry, by kind. */
+export function packsCarried(state: GameState): { food: number; water: number } {
+  const taken = Object.values(state.sites).filter((s) => s.packTaken)
   return {
-    outcome: state.outcome,
+    food: taken.filter((s) => s.packKind === 'food').length,
+    water: taken.filter((s) => s.packKind === 'water').length,
+  }
+}
+
+/** The result of an expedition with this outcome (the simulator also uses it for unfinished games). */
+export function resultWith(
+  state: GameState,
+  outcome: Outcome,
+  content: Content = defaultContent,
+): ExpeditionResult {
+  const { food, water } = packsCarried(state)
+  const salvage = content.salvageCard
+  const owned = [
+    ...state.piles.draw,
+    ...state.piles.hand,
+    ...state.piles.inPlay,
+    ...state.piles.discard,
+    ...state.piles.gear,
+  ]
+  return {
+    outcome,
     packs: state.player.packs,
+    food,
+    water,
+    materials: salvage ? owned.filter((c) => c.card === salvage).length : 0,
+    ...(state.dog ? { dogHp: state.dog.hp } : {}),
     hpLeft: Math.max(0, state.player.hp),
     turnsUsed: state.turn,
     cardsFound: state.stats.cardsTaken,

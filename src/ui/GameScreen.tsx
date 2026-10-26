@@ -1,15 +1,17 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import {
   cardOptions,
   cityContent,
+  dogOptions,
   expeditionResult,
   freeMoveTargets,
   gearOptions,
   listActions,
   previewEndTurn,
   previewOutcome,
+  resultWith,
   validate,
   validateServiceHere,
   zombiesAt,
@@ -53,6 +55,10 @@ interface GameScreenProps {
   readonly onNewExpedition: () => void
   readonly onRestart: () => void
   readonly onExit: () => void
+  /** Campaign: called with every new state, so the day can be saved and resumed. */
+  readonly onStateChange?: (state: GameState) => void
+  /** Campaign: the day is over; go back to the base with the final state. */
+  readonly onDayOver?: (state: GameState) => void
 }
 
 export function GameScreen({
@@ -64,8 +70,11 @@ export function GameScreen({
   onNewExpedition,
   onRestart,
   onExit,
+  onStateChange,
+  onDayOver,
 }: GameScreenProps) {
   const { state, log, dispatch } = useGame(seed, setup, initialState, balance)
+  useEffect(() => onStateChange?.(state), [state, onStateChange])
   // The buildings of this city, where they stand and how the roads connect them.
   const content = useMemo(() => cityContent(state, defaultContent), [state])
   const [rulesOpen, setRulesOpen] = useState(showRulesOnStart)
@@ -228,7 +237,9 @@ export function GameScreen({
 
   const serviceHere = content.locations[state.player.location]?.service
   const pendingName = pending
-    ? cardText(cardIdFor(pending.uid)).name
+    ? pending.uid === 'dog'
+      ? cardText('dog').name
+      : cardText(cardIdFor(pending.uid)).name
     : serviceOpen && serviceHere
       ? texts.services[serviceHere.id].name
       : ''
@@ -241,6 +252,19 @@ export function GameScreen({
   }
 
   // Use a piece of gear (the Crossbow): one target goes at once, more open a choice.
+  // Sic: one zombie here is bitten at once; with more, pick one on the panel.
+  const onSic = () => {
+    const option = dogOptions(state, content)
+    const [only] = option?.actions ?? []
+    if (!option || !only) return
+    if (option.actions.length === 1) {
+      act(only)
+      return
+    }
+    setSelected(null)
+    setPending({ uid: 'dog', mode: 0, kind: 'zombie', options: option })
+  }
+
   const onUseGear = (uid: string) => {
     const option = gearOptions(state, uid, content)
     const [only] = option?.actions ?? []
@@ -272,6 +296,7 @@ export function GameScreen({
         onNewExpedition={onNewExpedition}
         onRestart={onRestart}
         onExit={onExit}
+        {...(onDayOver ? { onBackToBase: () => onDayOver(state) } : {})}
       />
     )
   }
@@ -332,7 +357,13 @@ export function GameScreen({
       </main>
 
       <section className="hand-area" aria-label={texts.ui.hand}>
-        <GearRow state={state} content={content} onUse={onUseGear} busy={pending !== null} />
+        <GearRow
+          state={state}
+          content={content}
+          onUse={onUseGear}
+          onSic={onSic}
+          busy={pending !== null}
+        />
         {choosingFind ? (
           <FindChoice
             state={state}
@@ -375,6 +406,14 @@ export function GameScreen({
                   nextStarAt={state.balance.starThresholds.find((n) => n > state.player.packs)}
                   onConfirm={() => act(homeMove, true)}
                   onCancel={() => setHomeMove(null)}
+                  {...(state.campaignDay !== undefined
+                    ? {
+                        campaign: {
+                          day: state.campaignDay,
+                          ...resultWith(state, homeOutcome, defaultContent),
+                        },
+                      }
+                    : {})}
                 />
               ) : dangerNotice !== null ? (
                 <DangerNotice

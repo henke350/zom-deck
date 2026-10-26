@@ -11,7 +11,15 @@ const facts = [
   { value: balance.apPerTurn, label: texts.facts.ap },
 ]
 
-export function TitleScreen({ onStart }: { onStart: () => void }) {
+interface TitleScreenProps {
+  readonly onStart: () => void
+  /** Start a new campaign (replaces a saved one). */
+  readonly onNewCampaign: () => void
+  /** A saved campaign to continue, with its day. */
+  readonly savedCampaign?: { readonly day: number; readonly onContinue: () => void }
+}
+
+export function TitleScreen({ onStart, onNewCampaign, savedCampaign }: TitleScreenProps) {
   const [rulesOpen, setRulesOpen] = useState(false)
   if (rulesOpen) {
     return (
@@ -51,6 +59,17 @@ export function TitleScreen({ onStart }: { onStart: () => void }) {
           </button>
         </div>
         <p className="reason">{texts.prototypeNote}</p>
+        <div className="action-row">
+          {savedCampaign && (
+            <button type="button" className="btn btn-primary" onClick={savedCampaign.onContinue}>
+              {texts.campaign.continue(savedCampaign.day)}
+            </button>
+          )}
+          <button type="button" className="btn" onClick={onNewCampaign}>
+            {savedCampaign ? texts.campaign.restart : texts.campaign.start}
+          </button>
+        </div>
+        <p className="reason">{texts.campaign.startNote}</p>
       </div>
 
       <p className="status">{texts.statusLine}</p>

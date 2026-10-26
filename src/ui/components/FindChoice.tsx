@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { texts } from '../../data/texts.en'
-import type { Action, Content, GameState, PendingFind } from '../../game'
+import type { Action, Content, GameState, LocationId, PendingFind } from '../../game'
 import { noisePreview, validate } from '../../game'
 import { cardText, locationText } from '../names'
 import { CardFace } from './CardFace'
@@ -44,7 +44,7 @@ export function FindChoice({ state, content, find, onChoose, notice }: FindChoic
           </span>
           {find.packFound && (
             <span className="pack-banner" role="status">
-              {ui.packBanner(state.player.packs)}
+              {ui.packBanner(state.player.packs, packKindName(state, find.location))}
             </span>
           )}
           {find.stashFound && (
@@ -106,4 +106,10 @@ export function FindChoice({ state, content, find, onChoose, notice }: FindChoic
       )}
     </div>
   )
+}
+
+/** Campaign: what the pack just found is (food or water). */
+function packKindName(state: GameState, location: LocationId): string | undefined {
+  const kind = state.sites[location]?.packKind
+  return kind ? texts.campaign.packKind[kind] : undefined
 }

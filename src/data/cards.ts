@@ -54,6 +54,16 @@ export const cards = {
     freeMoveCostWhileInHand: 1,
   },
   wound: { id: 'wound', kind: 'junk', cost: 0, tags: [], trashable: true, modes: [] },
+  // Campaign only: material for the base. It weighs on you like a Heavy Load until you are home.
+  salvage: {
+    id: 'salvage',
+    kind: 'junk',
+    cost: 0,
+    tags: [],
+    trashable: false,
+    modes: [],
+    freeMoveCostWhileInHand: 1,
+  },
 
   // Finds: Quiet
   softSoles: {
@@ -296,6 +306,16 @@ export const cards = {
         ],
       },
     ],
+  },
+  // A companion, not a card: taking this find gives you the Stray Dog (src/game/dog.ts).
+  dog: {
+    id: 'dog',
+    kind: 'action',
+    cost: 0,
+    tags: [],
+    trashable: true,
+    modes: [],
+    companion: true,
   },
   repack: {
     id: 'repack',

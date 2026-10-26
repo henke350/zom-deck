@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import { balance as standard } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { bots } from './bots'
+import { campaignConsole, runCampaigns } from './campaign'
 import { fuzz } from './fuzz'
 import { applyOverrides } from './overrides'
 import { renderPrintAndPlay } from './print'
@@ -17,6 +18,7 @@ import { runBots, runVariants, traceGame } from './simulate'
  *   npm run sim -- --set maxHp=12       try a balance change (report goes to .sim/)
  *   npm run sim -- --variant-games 0    skip the "what if" section (faster)
  *   npm run sim -- trace greedy 7       one game, action by action
+ *   npm run sim -- campaign             the bots play whole campaigns (200 each)
  *   npm run fuzz                        10 000 random games, every rule checked after every action
  *   npm run print                       print-and-play sheets → print/print-and-play.html
  *   npm run print -- --no-card-backs    the same without card backs (for opaque sleeves)
@@ -35,6 +37,15 @@ function main(argv: readonly string[]): number {
     )
     for (const p of result.problems) console.log(`  ${p}`)
     return result.problems.length === 0 ? 0 : 1
+  }
+  if (command === 'campaign') {
+    // npm run sim -- campaign: every planner bot plays whole campaigns.
+    const balance = applyOverrides(standard, options(rest, '--set'))
+    const count = Number(option(rest, '--games') ?? 200)
+    const planners = bots.filter((b) => b.bot.id !== 'random')
+    const summaries = runCampaigns(planners, count, balance)
+    console.log(campaignConsole(summaries, balance.campaign.days))
+    return summaries.some((s) => s.problems > 0) ? 1 : 0
   }
   if (command === 'trace') {
     // npm run sim -- trace <bot id> <seed>: every action and what happened, for one game.

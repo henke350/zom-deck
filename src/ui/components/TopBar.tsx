@@ -1,6 +1,6 @@
 import { texts } from '../../data/texts.en'
 import type { GameState } from '../../game'
-import { dangerLevel, noiseThreshold } from '../../game'
+import { dangerLevel, noiseThreshold, packsCarried } from '../../game'
 
 interface StatProps {
   readonly label: string
@@ -39,9 +39,14 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
         )
       : undefined
   const extraFinds = dangerLevel(state).extraFinds
+  // Campaign: the day, and what the packs you carry are (food or water).
+  const day = state.campaignDay
+  const { food, water } = packsCarried(state)
+  const c = texts.campaign
 
   return (
     <header className="topbar" aria-label="Status">
+      {day !== undefined && <Stat label={c.dayStat} value={`${day}/${balance.campaign.days}`} />}
       <Stat
         label={ui.health}
         value={`${player.hp}/${balance.maxHp}`}
@@ -72,12 +77,20 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
         value={`${turn}/${balance.turnLimit}`}
         tone={dusk ? 'warn' : undefined}
       />
-      <Stat
-        label={ui.packs}
-        value={`${player.packs}/${balance.packsToWin}`}
-        tone={player.packs >= balance.packsToWin ? 'good' : undefined}
-        hint={ui.starsHint(balance.starThresholds)}
-      />
+      {day !== undefined ? (
+        <Stat
+          label={`${c.stock.food} · ${c.stock.water}`}
+          value={`${food} · ${water}`}
+          tone={food > 0 && water > 0 ? 'good' : undefined}
+        />
+      ) : (
+        <Stat
+          label={ui.packs}
+          value={`${player.packs}/${balance.packsToWin}`}
+          tone={player.packs >= balance.packsToWin ? 'good' : undefined}
+          hint={ui.starsHint(balance.starThresholds)}
+        />
+      )}
       <div className="piles" aria-label="Deck">
         <span>
           {ui.drawPile} <b>{piles.draw.length}</b>
@@ -89,9 +102,11 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
           {ui.removedPile} <b>{piles.removed.length}</b>
         </span>
       </div>
-      <span className="seed">
-        {ui.seed} {state.seed}
-      </span>
+      {day === undefined && (
+        <span className="seed">
+          {ui.seed} {state.seed}
+        </span>
+      )}
       <button type="button" className="btn btn-quiet btn-small" onClick={onShowRules}>
         {texts.rules.short}
       </button>

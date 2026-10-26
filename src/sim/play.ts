@@ -1,5 +1,5 @@
 import { defaultContent } from '../data/content'
-import { applyAction, expeditionResult, newGame, ownedCount, validate } from '../game'
+import { applyAction, expeditionResult, newGame, ownedCount, resultWith, validate } from '../game'
 import type { Balance } from '../data/balance'
 import type {
   CardId,
@@ -38,6 +38,8 @@ export interface GameRecord {
   readonly plays: Readonly<Record<CardId, number>>
   /** Problems found: illegal bot moves, broken invariants, or a game that never ends. */
   readonly problems: readonly string[]
+  /** The last state, always with an outcome (a game cut short counts as caught by the dark). */
+  readonly finalState: GameState
 }
 
 const maxActions = 2000
@@ -99,14 +101,9 @@ export function playGame(bot: Bot, seed: number, options: PlayOptions = {}): Gam
     }
   }
 
-  const result = expeditionResult(state) ?? {
-    outcome: { result: 'lost', cause: 'darkness' },
-    packs: state.player.packs,
-    hpLeft: state.player.hp,
-    turnsUsed: state.turn,
-    cardsFound: state.stats.cardsTaken,
-    stats: state.stats,
-  }
+  const result =
+    expeditionResult(state, content) ??
+    resultWith(state, { result: 'lost', cause: 'darkness' }, content)
   return {
     seed,
     result,
@@ -118,5 +115,6 @@ export function playGame(bot: Bot, seed: number, options: PlayOptions = {}): Gam
     idleTurns,
     plays,
     problems,
+    finalState: state.outcome ? state : { ...state, outcome: result.outcome },
   }
 }

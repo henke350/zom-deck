@@ -100,6 +100,8 @@ export interface CardDef {
   readonly freeMoveCostWhileInHand?: number
   /** A rare find: seldom in searches, always in locked stashes. */
   readonly rare?: boolean
+  /** The Stray Dog: taking this find gives you a companion instead of a card. */
+  readonly companion?: boolean
   /** Gear: what the card does while it lies in front of you, and how long it lasts. */
   readonly gear?: GearDef
 }
@@ -145,7 +147,12 @@ export interface LocationService {
 export interface LootEntry {
   readonly card: CardId
   readonly weight: number
+  /** Only in a campaign (Salvage: materials for the base). */
+  readonly campaignOnly?: boolean
 }
+
+/** In a campaign, every supply pack is food or water. */
+export type PackKind = 'food' | 'water'
 
 /** What a building looks like during an expedition. */
 export interface SiteState {
@@ -160,6 +167,8 @@ export interface SiteState {
   readonly burned: boolean
   /** A locked stash with rare finds: hidden until the first search, then found, then opened. */
   readonly stash: StashState
+  /** Campaign: what the pack here is (seen when it is found). */
+  readonly packKind?: PackKind
 }
 
 /** none: no stash here. lost: it burned with the building. */
@@ -206,6 +215,8 @@ export interface Content {
   readonly packCard: CardId
   /** The junk card added by a heavy zombie attack when the Wound variant is on. */
   readonly woundCard: CardId
+  /** Campaign: the find that is a material for the base (Salvage). */
+  readonly salvageCard?: CardId
   /** The kinds of zombie that noise and dusk bring. Default: only Walkers. */
   readonly arrivals?: {
     readonly noise: ZombieMix
@@ -302,9 +313,24 @@ export interface GameState {
   readonly visited: readonly LocationId[]
   /** The buildings of this city and where they stand. Absent: the classic map. */
   readonly city?: City
+  /** Campaign: the day this expedition is (1 first). Absent: a single expedition. */
+  readonly campaignDay?: number
+  /** Campaign: buildings you got to know on earlier days. */
+  readonly known?: readonly LocationId[]
+  /** Campaign: packs placed this day, when the plundered city had room for fewer. */
+  readonly packsPlaced?: number
+  /** The Stray Dog, while it is with you. */
+  readonly dog?: DogState
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
+}
+
+/** The Stray Dog at your side. */
+export interface DogState {
+  readonly hp: number
+  /** It has attacked this turn (Sic works once per turn). */
+  readonly bitten: boolean
 }
 
 export interface Stats {
@@ -348,6 +374,13 @@ export interface Stats {
 export interface ExpeditionResult {
   readonly outcome: Outcome
   readonly packs: number
+  /** Campaign: the packs that were food, and those that were water. */
+  readonly food: number
+  readonly water: number
+  /** Campaign: Salvage cards carried home (materials for the base). */
+  readonly materials: number
+  /** The Stray Dog's health at the end, if it is still with you. */
+  readonly dogHp?: number
   readonly hpLeft: number
   readonly turnsUsed: number
   readonly cardsFound: readonly CardId[]
@@ -358,6 +391,20 @@ export interface ExpeditionResult {
 export interface ExpeditionSetup {
   readonly startDeck?: readonly CardId[]
   readonly startHp?: number
+  /** Campaign: the day (turns on pack kinds and Salvage finds). */
+  readonly campaignDay?: number
+  /** Campaign: the same city every day. */
+  readonly city?: City
+  /** Campaign: buildings known from earlier days. */
+  readonly known?: readonly LocationId[]
+  /** Campaign: buildings whose exact zombies and pack you see from the start (Lookout). */
+  readonly scouted?: readonly LocationId[]
+  /** Campaign: searches already used in each building on earlier days. */
+  readonly searchesUsed?: Readonly<Record<LocationId, number>>
+  /** Campaign: buildings that burned on earlier days. */
+  readonly burned?: readonly LocationId[]
+  /** Campaign: the Stray Dog comes along with this much health. */
+  readonly dog?: { readonly hp: number }
 }
 
 export interface PlayCardAction {
@@ -379,6 +426,13 @@ export interface PlayCardAction {
 export interface UseGearAction {
   readonly type: 'useGear'
   readonly uid: string
+  readonly target?: PlayCardAction['target']
+}
+
+/** Sic: the Stray Dog attacks a zombie where you stand. */
+export interface DogBiteAction {
+  readonly type: 'dogBite'
+  /** `zombie`: uid of a zombie where you stand. */
   readonly target?: PlayCardAction['target']
 }
 
@@ -436,10 +490,15 @@ export type Action =
   | UseServiceAction
   | OpenStashAction
   | UseGearAction
+  | DogBiteAction
   | EndTurnAction
 
 export type GameEvent =
   | { readonly type: 'turnStarted'; readonly turn: number }
+  | { readonly type: 'dogFound'; readonly hp: number }
+  | { readonly type: 'dogBit'; readonly zombie: string; readonly damage: number }
+  | { readonly type: 'dogGuarded'; readonly amount: number; readonly hpLeft: number }
+  | { readonly type: 'dogDied' }
   | { readonly type: 'deckShuffled' }
   | { readonly type: 'cardsDrawn'; readonly uids: readonly string[] }
   | {
@@ -464,7 +523,12 @@ export type GameEvent =
       readonly options: readonly CardId[]
       readonly quick: boolean
     }
-  | { readonly type: 'packFound'; readonly location: LocationId; readonly packs: number }
+  | {
+      readonly type: 'packFound'
+      readonly location: LocationId
+      readonly packs: number
+      readonly kind?: PackKind
+    }
   | {
       readonly type: 'cardGained'
       readonly uid: string

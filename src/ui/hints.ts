@@ -1,8 +1,8 @@
 import type { Content, GameState } from '../game'
-import { cardOptions, freeMoveTargets, previewEndTurn, validate } from '../game'
+import { cardOptions, freeMoveTargets, packsCarried, previewEndTurn, validate } from '../game'
 
 /** A tip for new players: what a sensible next step is right now. */
-export type HintId = 'goHome' | 'zombies' | 'search' | 'walk' | 'endTurn'
+export type HintId = 'goHome' | 'campaignHome' | 'zombies' | 'search' | 'walk' | 'endTurn'
 
 /**
  * Picks the tip that fits the moment. It only reads the state and asks the engine what is
@@ -11,7 +11,15 @@ export type HintId = 'goHome' | 'zombies' | 'search' | 'walk' | 'endTurn'
 export function currentHint(state: GameState, content: Content): HintId | null {
   if (state.phase !== 'action') return null
   const here = content.locations[state.player.location]
-  if (state.player.packs >= state.balance.packsToWin && here?.kind !== 'shelter') return 'goHome'
+  if (here?.kind !== 'shelter') {
+    // Campaign: you can always go home; the tip comes once tonight's meal is in the bag.
+    if (state.campaignDay !== undefined) {
+      const { food, water } = packsCarried(state)
+      if (food > 0 && water > 0) return 'campaignHome'
+    } else if (state.player.packs >= state.balance.packsToWin) {
+      return 'goHome'
+    }
+  }
   if (previewEndTurn(state, content).attackers > 0) return 'zombies'
   if (canSearch(state, content)) return 'search'
   if (freeMoveTargets(state, content).length > 0) return 'walk'

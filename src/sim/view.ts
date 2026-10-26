@@ -1,4 +1,4 @@
-import { buildingKnown, zombieInfo } from '../game'
+import { buildingKnown, dogSmells, neighbors, zombieInfo } from '../game'
 import type { Content, GameState, LocationId } from '../game'
 
 /**
@@ -22,6 +22,13 @@ export function packChance(state: GameState, content: Content, id: LocationId): 
   if (wasSearched(state, id)) return 0 // the first search always finds the pack
   if (site.scouted) return site.hasPack ? 1 : 0
   const known = buildingKnown(state, content, id)
+  // The Stray Dog's nose: next to you, a sniff mark means a pack and no mark means none.
+  if (state.dog && known) {
+    const here = state.player.location
+    if (id === here || neighbors(content, here).includes(id)) {
+      return dogSmells(state, content).includes(id) ? 1 : 0
+    }
+  }
   if (known && def.alwaysHasPack) return 1
 
   // Packs the player can't place yet are spread over every building that might hold one.
