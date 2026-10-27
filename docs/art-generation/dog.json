@@ -1,0 +1,12 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "id": "dog",
+      "accent": "safe teal #2a7462",
+      "original": "art-source/cards/dog.png",
+      "gameCopy": "src/assets/cards/dog.webp",
+      "prompt": "Use case: stylized-concept. One card illustration for the browser zombie survival deckbuilder \"One More Building\".\nMatch the attached Search, Silent Takedown and Repack card art EXACTLY: gritty painterly hand-inked graphic novel, slightly rough charcoal outlines, restrained flat tonal planes, weathered paper/screen-print texture. Muted desaturated concrete greys, dusty off-white and dark charcoal. ONE accent colour only: safe teal #2a7462, on a worn collar or bandana.\nFORMAT: Landscape 3:2, exactly 1536x1024 px PNG. Full-bleed opaque background, no border or frame.\nSUBJECT: A thin, scruffy medium-sized mixed-breed dog peeking out from under an overturned table in an abandoned living room. Ears up, wary but hopeful, looking directly at the viewer. Natural adult mixed-breed proportions, wiry grey/off-white fur, a worn muted teal bandana. It should feel like a vulnerable friend you would want to protect, without cartoon styling or exaggerated baby-like eyes.\nCOMPOSITION: The DOG is the ONE clear central subject, about 60% of the image, with a calm margin of at least 10% on EVERY side. Keep both ear tips and the dog's visible paws comfortably inside the central area. Dog's eyes and muzzle are readable around the middle of the image so the wide-strip card crop retains its expression. Strong silhouette and contrast against the table shadow, readable at 200px wide. The table is visibly overturned: tabletop tilted on its side, legs angled above/behind the dog, forming a small shelter. Simple living-room hints only, no detailed scenery or extra subjects.\nLIGHT: Soft dusty off-white light from a broken window, neutral concrete and grey floor. Quiet, tense but hopeful mood. Fur and background neutral greys only, bandana/collar teal sole accent.\nSTRICT: No text, letters, numbers, logos, watermarks, signatures, UI, writing on collar tags, posters or packaging. No humans or human faces, no blood, gore, injury or violence. No photorealism, 3D, cute cartoon or anime. Do not copy any existing franchise, brand or character.\nREFERENCE ROLES: All attached images are STYLE references only. Search is primary for ink/texture, Silent Takedown for shadow, Repack for muted teal; do not repeat their subjects."
+    }
+  ]
+}
