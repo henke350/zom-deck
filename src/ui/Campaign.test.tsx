@@ -39,6 +39,9 @@ describe('campaign', () => {
     const ask = screen.getByRole('group', { name: texts.confirmHome.title })
     expect(within(ask).getByText(texts.confirmHome.dayBody(1, 0, 0, 0))).toBeTruthy()
     await user.click(within(ask).getByRole('button', { name: texts.confirmHome.yes }))
+    // The end of a campaign day: no replay hint, and a result line with the day instead of stars.
+    expect(screen.queryByText(/Same city again/)).toBeNull()
+    expect(screen.getByText(/^OMB campaign day 1 seed/)).toBeTruthy()
     await user.click(screen.getByRole('button', { name: t.backToBase }))
 
     expect(

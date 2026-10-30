@@ -80,4 +80,11 @@ describe('end summary', () => {
       'OMB seed 4711 | home ** | turn 6 | hp 0/9 | packs 3 | stashes 1 | danger 1 | finds Axe',
     )
   })
+
+  it('sums up a campaign day with its day, food, water and Salvage, without stars', () => {
+    const r = { ...result(home(2), 3, { cardsTaken: ['axe'] }), food: 1, water: 2, materials: 4 }
+    expect(resultCode(r, 4711, 9, 3)).toBe(
+      'OMB campaign day 3 seed 4711 | home | turn 6 | hp 0/9 | food 1 water 2 | salvage 4 | danger 1 | finds Axe',
+    )
+  })
 })

@@ -14,6 +14,8 @@ interface GameOverPanelProps {
   readonly onExit: () => void
   /** Campaign: the day is over; the only way on is back to the base (no restarting a day). */
   readonly onBackToBase?: () => void
+  /** Campaign: which day this was. */
+  readonly campaignDay?: number
 }
 
 /** The end screen: how it ended, why, one tip, and the numbers. */
@@ -25,6 +27,7 @@ export function GameOverPanel({
   onRestart,
   onExit,
   onBackToBase,
+  campaignDay,
 }: GameOverPanelProps) {
   const first = useRef<HTMLButtonElement>(null)
   useEffect(() => first.current?.focus(), [])
@@ -32,7 +35,7 @@ export function GameOverPanel({
   const end = texts.end
   const { outcome } = result
   const summary = endSummary(result, balance)
-  const code = resultCode(result, seed, balance.maxHp)
+  const code = resultCode(result, seed, balance.maxHp, campaignDay)
   const codeRef = useRef<HTMLElement>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const copy = async () => {
@@ -107,7 +110,7 @@ export function GameOverPanel({
           ))}
         </dl>
       </section>
-      <p className="muted end-seed">{end.seed(seed)}</p>
+      {campaignDay === undefined && <p className="muted end-seed">{end.seed(seed)}</p>}
       <section className="result-code" aria-label={end.resultHeading}>
         <h3 className="eyebrow">{end.resultHeading}</h3>
         <p className="muted">{end.resultHint}</p>
