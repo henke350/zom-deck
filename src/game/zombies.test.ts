@@ -4,7 +4,7 @@ import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import { applyAction } from './engine'
 import { newGame } from './setup'
-import { classicBalance, cardsIn, makeState, type StateSpec } from './testkit'
+import { classicBalance, cardsIn, makeState, toughBalance, type StateSpec } from './testkit'
 import type { Action, GameEvent, GameState } from './types'
 import { validate } from './validate'
 import { addNoise, noisePreview, previewEndTurn, zombieInfo, zombiesAt } from './zombies'
@@ -624,10 +624,27 @@ describe('zombies that grow with you', () => {
     expect(events).toContainEqual({ type: 'dangerRose', level: 2, reason: 'deck' })
   })
 
-  it('from danger 3, every zombie has more health, old and new', () => {
-    const bonus = balance.danger.levels[2]!.zombieHpBonus
+  it('never makes zombies tougher by default (tuning 7): more of them come instead', () => {
+    expect(balance.danger.levels.every((l) => l.zombieHpBonus === 0)).toBe(true)
+    const top = balance.danger.levels.length
+    expect(balance.danger.levels[top - 1]?.arrivals).toBe(2)
+    const threshold = balance.danger.levels[top - 1]!.noiseThreshold
+    const arrived = addNoise(
+      makeState({ location: 'street', danger: top }),
+      threshold,
+      defaultContent,
+      'noise',
+      [],
+    )
+    expect(arrived.zombies).toHaveLength(2)
+    for (const z of arrived.zombies) expect(z.hp).toBe(balance.zombies[z.kind].hp)
+  })
+
+  it('can give every zombie more health from danger 3, old and new (a knob)', () => {
+    const bonus = toughBalance.danger.levels[2]!.zombieHpBonus
     expect(bonus).toBeGreaterThan(0)
     const state = makeState({
+      balance: toughBalance,
       location: 'pharmacy',
       packsAt: ['pharmacy'],
       packs: 1,
@@ -639,7 +656,7 @@ describe('zombies that grow with you', () => {
     expect(next.zombies[0]?.hp).toBe(balance.zombies.walker.hp + bonus)
     expect(events).toContainEqual({ type: 'zombiesToughened', amount: bonus })
     const arrived = addNoise(
-      makeState({ location: 'street', danger: 3 }),
+      makeState({ balance: toughBalance, location: 'street', danger: 3 }),
       3,
       defaultContent,
       'noise',

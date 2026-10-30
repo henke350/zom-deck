@@ -214,9 +214,11 @@ export const balance: Balance = {
     levels: [
       { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.25, zombieHpBonus: 0 },
       { noiseThreshold: 4, arrivals: 1, extraFinds: 0, rareFindWeight: 0.5, zombieHpBonus: 0 },
-      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 0.5, zombieHpBonus: 1 },
-      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 1, zombieHpBonus: 1 },
+      { noiseThreshold: 3, arrivals: 1, extraFinds: 1, rareFindWeight: 0.5, zombieHpBonus: 0 },
+      { noiseThreshold: 3, arrivals: 2, extraFinds: 1, rareFindWeight: 1, zombieHpBonus: 0 },
     ],
+    // Tuning 7 (30 Oct 2026, user's call): zombies never get more health; at the top level more
+    // of them come instead (2 per full noise meter). About as hard as before.
     perPack: 1,
     // Tuning 6 (25 Oct 2026, user's call): the first pack you find does not raise danger.
     calmPacks: 1,
