@@ -70,6 +70,15 @@ export const classicBalance: Balance = {
   packsOnMap: 4,
 }
 
+/** The classic map with tougher zombies from danger 3 (the knob tuning 7 turned off). */
+export const toughBalance: Balance = {
+  ...classicBalance,
+  danger: {
+    ...classicBalance.danger,
+    levels: classicBalance.danger.levels.map((l, i) => (i >= 2 ? { ...l, zombieHpBonus: 1 } : l)),
+  },
+}
+
 export function makeState(spec: StateSpec = {}): GameState {
   const balance = spec.balance ?? classicBalance
   const location = spec.location ?? 'shelter'

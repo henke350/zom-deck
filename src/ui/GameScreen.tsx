@@ -297,6 +297,7 @@ export function GameScreen({
         onRestart={onRestart}
         onExit={onExit}
         {...(onDayOver ? { onBackToBase: () => onDayOver(state) } : {})}
+        {...(state.campaignDay !== undefined ? { campaignDay: state.campaignDay } : {})}
       />
     )
   }

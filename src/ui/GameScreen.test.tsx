@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { balance } from '../data/balance'
 import { texts } from '../data/texts.en'
 import { newGame, zombiesAt, type GameState } from '../game'
-import { classicBalance, makeState } from '../game/testkit'
+import { classicBalance, makeState, toughBalance } from '../game/testkit'
 import { GameScreen } from './GameScreen'
 import { setTipsHidden } from './storage'
 
@@ -303,6 +303,7 @@ describe('GameScreen: the danger ramp', () => {
 
   it('shows a notice when danger rises, says what raises it next, and marks tougher zombies', async () => {
     const state = makeState({
+      balance: toughBalance,
       location: 'pharmacy',
       packsAt: ['pharmacy'],
       packs: 1,
