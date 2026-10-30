@@ -10,6 +10,10 @@
   --amber-ink: #744b00;
   --red: #a5312a;
   --teal: #2a7462;
+  /* Primary buttons and the focus ring need 4.5:1 and 3:1 against their surroundings. */
+  --primary: #9a6400;
+  --on-primary: #ffffff;
+  --focus: #744b00;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, Menlo, Consolas, monospace;
   color-scheme: light;
@@ -28,6 +32,9 @@
     --amber-ink: #f2be62;
     --red: #e36b60;
     --teal: #55b89e;
+    --primary: #e3a33a;
+    --on-primary: #121514;
+    --focus: #e3a33a;
     color-scheme: dark;
   }
 }
@@ -62,7 +69,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -139,4 +146,21 @@ h1 {
   margin: 0;
   font-size: 0.9rem;
   color: var(--muted);
+}
+
+/* A landscape tablet (960 × 600): the title page fits without scrolling. */
+@media (orientation: landscape) and (max-height: 650px) {
+  .title-screen {
+    padding: 1.5rem 1.25rem;
+    gap: 0.9rem;
+  }
+  h1 {
+    font-size: 3rem;
+  }
+  .facts li {
+    padding: 0.5rem 0.75rem;
+  }
+  .facts strong {
+    font-size: 1.4rem;
+  }
 }

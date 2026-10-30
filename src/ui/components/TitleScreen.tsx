@@ -49,26 +49,29 @@ export function TitleScreen({ onStart, onNewCampaign, savedCampaign }: TitleScre
         </ul>
       </section>
 
+      {/* One row of choices, one main action: continuing a saved campaign, else a quick expedition. */}
       <div className="actions">
-        <div className="action-row">
-          <button type="button" className="btn btn-primary" onClick={onStart}>
-            {texts.startExpedition}
-          </button>
-          <button type="button" className="btn" onClick={() => setRulesOpen(true)}>
-            {texts.rules.open}
-          </button>
-        </div>
-        <p className="reason">{texts.prototypeNote}</p>
         <div className="action-row">
           {savedCampaign && (
             <button type="button" className="btn btn-primary" onClick={savedCampaign.onContinue}>
               {texts.campaign.continue(savedCampaign.day)}
             </button>
           )}
+          <button
+            type="button"
+            className={savedCampaign ? 'btn' : 'btn btn-primary'}
+            onClick={onStart}
+          >
+            {texts.startExpedition}
+          </button>
           <button type="button" className="btn" onClick={onNewCampaign}>
             {savedCampaign ? texts.campaign.restart : texts.campaign.start}
           </button>
+          <button type="button" className="btn btn-quiet" onClick={() => setRulesOpen(true)}>
+            {texts.rules.open}
+          </button>
         </div>
+        <p className="reason">{texts.prototypeNote}</p>
         <p className="reason">{texts.campaign.startNote}</p>
       </div>
 
