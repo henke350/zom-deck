@@ -112,6 +112,11 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
           {ui.removedPile} <b>{piles.removed.length}</b>
         </span>
       </div>
+      {state.dayEvent && state.dayEvent !== 'quiet' && (
+        <span className="day-event" title={texts.dayEvents[state.dayEvent].text}>
+          {texts.dayEvents[state.dayEvent].name}
+        </span>
+      )}
       {day === undefined && (
         <span className="seed">
           {ui.seed} {state.seed}

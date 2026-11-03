@@ -17,7 +17,12 @@ const startDeck = ['run', 'search', 'toolbox', 'nerves', 'bandage']
 function renderGame() {
   const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
   const view = render(
-    <GameScreen seed={7} setup={{ startDeck }} balance={classicBalance} {...handlers} />,
+    <GameScreen
+      seed={7}
+      setup={{ startDeck, dayEvent: 'none' }}
+      balance={classicBalance}
+      {...handlers}
+    />,
   )
   const card = (id: string) => {
     const el = view.container.querySelector<HTMLElement>(`[data-card="${id}"]`)
@@ -491,5 +496,19 @@ describe('GameScreen: the Stray Dog', () => {
     expect(
       screen.getByRole('button', { name: new RegExp(`^House A. ${texts.ui.dogSmells}`) }),
     ).toBeTruthy()
+  })
+})
+
+describe('GameScreen: the event of the day', () => {
+  it('shows the event above the hand at the start and in the top bar', async () => {
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    const state = newGame(3, { balance: classicBalance, setup: { dayEvent: 'rain' } })
+    render(<GameScreen seed={3} initialState={state} {...handlers} />)
+    expect(screen.getByText(texts.dayEvents.rain.text)).toBeTruthy()
+    expect(screen.getAllByText(texts.dayEvents.rain.name, { exact: false }).length).toBeGreaterThan(
+      0,
+    )
+    await userEvent.click(screen.getByRole('button', { name: texts.dayEvents.close }))
+    expect(screen.queryByText(texts.dayEvents.rain.text)).toBeNull()
   })
 })

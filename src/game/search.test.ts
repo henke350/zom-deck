@@ -27,7 +27,7 @@ describe('pack placement', () => {
   it('always places 4 packs, one in the Supermarket, never in Shelter or Street (1,000 seeds)', () => {
     const counts: Record<string, number> = {}
     for (let seed = 1; seed <= 1000; seed++) {
-      const { sites } = newGame(seed, { balance: classicBalance })
+      const { sites } = newGame(seed, { balance: classicBalance, setup: { dayEvent: 'none' } })
       const withPack = Object.entries(sites)
         .filter(([, s]) => s.hasPack)
         .map(([id]) => id)
@@ -45,7 +45,7 @@ describe('pack placement', () => {
 
   it('places 5 packs in the large city, one in the Supermarket', () => {
     for (let seed = 1; seed <= 200; seed++) {
-      const { sites } = newGame(seed)
+      const { sites } = newGame(seed, { setup: { dayEvent: 'none' } })
       const withPack = Object.entries(sites).filter(([, s]) => s.hasPack)
       expect(withPack).toHaveLength(balance.packsOnMap)
       expect(withPack.map(([id]) => id)).toContain('supermarket')

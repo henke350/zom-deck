@@ -27,6 +27,7 @@ import type {
 import type { Balance } from '../data/balance'
 import { CityMap } from './components/CityMap'
 import { DangerNotice } from './components/DangerNotice'
+import { EventNotice } from './components/EventNotice'
 import { HomePrompt } from './components/HomePrompt'
 import { GearRow } from './components/GearRow'
 import { EventLog } from './components/EventLog'
@@ -86,6 +87,8 @@ export function GameScreen({
     setDangerNotice(state.danger > dangerShown ? state.danger : null)
   }
   const closeDangerNotice = useCallback(() => setDangerNotice(null), [])
+  // The event of the day shows above the hand at the start, until you close it or act.
+  const [eventShown, setEventShown] = useState(state.turn === 1 && state.dayEvent !== undefined)
   const [tipsOn, setTipsOn] = useState(() => !tipsHidden())
   const showTips = (on: boolean) => {
     setTipsHidden(!on)
@@ -138,6 +141,7 @@ export function GameScreen({
     setPending(null)
     setServiceOpen(false)
     setHomeMove(null)
+    setEventShown(false)
     // The danger notice stays while you pick the find of the search that raised danger.
     if (state.phase !== 'chooseFind') setDangerNotice(null)
     if (!confirmed && previewOutcome(state, action, content)?.result === 'won') {
@@ -416,6 +420,8 @@ export function GameScreen({
                       }
                     : {})}
                 />
+              ) : eventShown && state.dayEvent ? (
+                <EventNotice event={state.dayEvent} onClose={() => setEventShown(false)} />
               ) : dangerNotice !== null ? (
                 <DangerNotice
                   level={dangerNotice}

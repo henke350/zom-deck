@@ -28,7 +28,7 @@ describe('starting zombies', () => {
   it('are rolled inside each building’s range and nowhere else (500 seeds)', () => {
     const seen: Record<string, Set<number>> = {}
     for (let seed = 1; seed <= 500; seed++) {
-      const state = newGame(seed, { balance: classicBalance })
+      const state = newGame(seed, { balance: classicBalance, setup: { dayEvent: 'none' } })
       for (const loc of Object.values(defaultContent.locations)) {
         const count = zombiesAt(state, loc.id).length
         if (!loc.startZombies) {

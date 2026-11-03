@@ -281,6 +281,31 @@ export const texts = {
     },
   },
 
+  /** Events of the day (balance.events). */
+  dayEvents: {
+    label: 'Today',
+    quiet: { name: 'A quiet morning', text: 'Nothing unusual today.' },
+    rain: {
+      name: 'Pouring rain',
+      text: 'The rain drowns out sound: every noise threshold is 1 higher.',
+    },
+    fullMoon: { name: 'Full moon', text: 'The dead get restless early: dusk comes 1 turn sooner.' },
+    foundMap: {
+      name: 'A survivor’s map',
+      text: 'Two buildings are marked on it: you know what is inside.',
+    },
+    restless: { name: 'Restless dead', text: 'Every building holds 1 more zombie than usual.' },
+    supplyDrop: {
+      name: 'Supply drop',
+      text: 'A helicopter dropped supplies: 1 more pack in the city.',
+    },
+    cache: {
+      name: 'Weapons cache',
+      text: 'You found a Pistol at the shelter: it is in your deck.',
+    },
+    fog: { name: 'Thick fog', text: 'Zombies lose you more easily: they follow 1 step less.' },
+    close: 'Got it',
+  },
   /** Special places (`feature` on a location). */
   places: {
     infirmary: {
@@ -423,6 +448,19 @@ export const texts = {
         heading: 'Losing',
         items: [
           `At 0 health you die. At the end of turn ${b.turnLimit} night falls and the expedition is lost.`,
+        ],
+      },
+      {
+        heading: 'Events of the day',
+        items: [
+          'Every expedition starts with an event that changes the day: pouring rain (noise carries less), a full moon (earlier dusk), a survivor’s map, restless dead, a supply drop, a weapons cache or thick fog. It shows above your hand at the start and in the top bar.',
+        ],
+      },
+      {
+        heading: 'Special places',
+        items: [
+          'Some buildings do something by themselves: the Hospital heals you when you end your turn there, the Police station has bullets, the petrol station is full of things to search, the Apartments are booby-trapped, and the Church lets noise die down. The side panel says what each one does.',
+          `Guns (Pistol, Shotgun, Head Shot) use bullets. You start with ${b.ammo.start}; each Ammunition you find gives ${b.ammo.perFind}, up to ${b.ammo.max}.`,
         ],
       },
       {

@@ -1,4 +1,5 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
+import { eventScoutCount, eventStartCards, pickDayEvent, withDayEvent } from './dayEvents'
 import { adoptDog } from './dog'
 import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
@@ -24,9 +25,15 @@ export function starterDeck(b: Balance): CardId[] {
 
 /** Creates a new expedition: shuffles the deck and draws the first hand (turn 1). */
 export function newGame(seed: number, options: NewGameOptions = {}): GameState {
-  const balance = options.balance ?? defaultBalance
+  const baseBalance = options.balance ?? defaultBalance
   const content = options.content ?? defaultContent
-  const deckIds = options.setup?.startDeck ?? starterDeck(balance)
+  // The event of the day changes the balance of this whole expedition.
+  const dayEvent = pickDayEvent(baseBalance, seed, options.setup?.dayEvent)
+  const balance = withDayEvent(baseBalance, dayEvent)
+  const deckIds = [
+    ...(options.setup?.startDeck ?? starterDeck(balance)),
+    ...eventStartCards(dayEvent),
+  ]
 
   for (const id of deckIds) {
     if (!content.cards[id]) throw new Error(`Unknown card in start deck: ${id}`)
@@ -50,9 +57,18 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     ...(setup?.burned ? { burned: setup.burned } : {}),
     packKinds: campaign,
   })
-  // Lookout: some buildings are scouted before you set out.
+  // Lookout (and a found map): some buildings are scouted before you set out.
   const sites = { ...placed }
-  for (const id of setup?.scouted ?? []) {
+  const mapped = eventScoutCount(dayEvent)
+  const extraScouted =
+    mapped > 0
+      ? shuffle(
+          Object.keys(sites).filter((id) => !(setup?.scouted ?? []).includes(id)),
+          normalizeSeed(seed ^ 0x51ed270b),
+        )[0].slice(0, mapped)
+      : []
+  const scoutedIds = [...(setup?.scouted ?? []), ...extraScouted]
+  for (const id of scoutedIds) {
     const site = sites[id]
     if (site) sites[id] = { ...site, scouted: true }
   }
@@ -86,6 +102,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     danger: 1,
     gearLeft: {},
     visited: [content.startLocation],
+    ...(dayEvent ? { dayEvent: dayEvent.id } : {}),
     ...(city ? { city } : {}),
     ...(campaign
       ? {
@@ -97,7 +114,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     stats: emptyStats(startHp, instances.length),
   }
   const events: GameEvent[] = []
-  const scouted = (setup?.scouted ?? []).filter((id) => sites[id])
+  const scouted = scoutedIds.filter((id) => sites[id])
   const revealed = scouted.reduce((s, id) => revealZombies(s, here, id), initial)
   // Campaign: the dog from earlier days comes along.
   const withDog = setup?.dog ? adoptDog(revealed, setup.dog.hp, events) : revealed

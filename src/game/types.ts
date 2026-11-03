@@ -1,4 +1,4 @@
-import type { Balance, ZombieKind } from '../data/balance'
+import type { Balance, DayEventId, ZombieKind } from '../data/balance'
 
 export type { ZombieKind }
 
@@ -348,6 +348,8 @@ export interface GameState {
   readonly packsPlaced?: number
   /** The Stray Dog, while it is with you. */
   readonly dog?: DogState
+  /** The event of this expedition (its changes are already in `balance`). */
+  readonly dayEvent?: DayEventId
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
@@ -434,6 +436,8 @@ export interface ExpeditionSetup {
   readonly burned?: readonly LocationId[]
   /** Campaign: the Stray Dog comes along with this much health. */
   readonly dog?: { readonly hp: number }
+  /** The event of the day; leave out for a random one, 'none' for none. */
+  readonly dayEvent?: DayEventId | 'none'
 }
 
 export interface PlayCardAction {

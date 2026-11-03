@@ -47,6 +47,34 @@ export interface DogBalance {
   readonly foodEvery: number
 }
 
+/** Events of the day (inspired by Maximum Apocalypse's Day/Night cards). Texts in texts.en.ts. */
+export type DayEventId =
+  'quiet' | 'rain' | 'fullMoon' | 'foundMap' | 'restless' | 'supplyDrop' | 'cache' | 'fog'
+
+/** What an event changes for the whole expedition. */
+export type DayEventEffect =
+  /** Every noise threshold (all danger levels) is this much higher. */
+  | { readonly kind: 'noiseThreshold'; readonly amount: number }
+  /** Dusk comes this many turns earlier. */
+  | { readonly kind: 'duskEarlier'; readonly turns: number }
+  /** This many buildings you cannot see yet are scouted at the start. */
+  | { readonly kind: 'scout'; readonly count: number }
+  /** More start zombies in every building. */
+  | { readonly kind: 'extraStartZombies'; readonly amount: number }
+  /** More supply packs in the city. */
+  | { readonly kind: 'extraPacks'; readonly amount: number }
+  /** These cards go into your start deck. */
+  | { readonly kind: 'startCards'; readonly cards: readonly string[] }
+  /** Zombies follow this many steps more (negative: fewer, at least 0). */
+  | { readonly kind: 'followSteps'; readonly amount: number }
+
+export interface DayEvent {
+  readonly id: DayEventId
+  /** How often it comes up, relative to the others. */
+  readonly weight: number
+  readonly effects: readonly DayEventEffect[]
+}
+
 /** What you can build at the base between campaign days (texts in texts.en.ts). */
 export type UpgradeId =
   'lookout' | 'workbench' | 'infirmary' | 'locker' | 'rainCollector' | 'garden'
@@ -206,6 +234,8 @@ export interface Balance {
     readonly nerves: number
   }
   readonly dog: DogBalance
+  /** One event at the start of every expedition (and campaign day). */
+  readonly events: { readonly enabled: boolean; readonly options: readonly DayEvent[] }
   readonly campaign: CampaignBalance
 }
 
@@ -287,6 +317,20 @@ export const balance: Balance = {
   stashForce: { cost: 2, noise: 2 },
   wounds: { enabled: false, damageInOnePhase: 2 },
   starterDeck: { search: 4, crowbar: 2, run: 1, sneak: 1, nerves: 2 },
+  // Events of the day (3 Nov 2026, inspired by Maximum Apocalypse): every expedition differs.
+  events: {
+    enabled: true,
+    options: [
+      { id: 'quiet', weight: 3, effects: [] },
+      { id: 'rain', weight: 1, effects: [{ kind: 'noiseThreshold', amount: 1 }] },
+      { id: 'fullMoon', weight: 1, effects: [{ kind: 'duskEarlier', turns: 1 }] },
+      { id: 'foundMap', weight: 1, effects: [{ kind: 'scout', count: 2 }] },
+      { id: 'restless', weight: 1, effects: [{ kind: 'extraStartZombies', amount: 1 }] },
+      { id: 'supplyDrop', weight: 1, effects: [{ kind: 'extraPacks', amount: 1 }] },
+      { id: 'cache', weight: 1, effects: [{ kind: 'startCards', cards: ['pistol'] }] },
+      { id: 'fog', weight: 1, effects: [{ kind: 'followSteps', amount: -1 }] },
+    ],
+  },
   // The Stray Dog (25 Oct 2026, the user's idea): it fights, takes hits for you and can die.
   dog: {
     hp: 3,
