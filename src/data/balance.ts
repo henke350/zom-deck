@@ -236,7 +236,25 @@ export interface Balance {
   readonly dog: DogBalance
   /** One event at the start of every expedition (and campaign day). */
   readonly events: { readonly enabled: boolean; readonly options: readonly DayEvent[] }
+  /** Who you play: each survivor changes the start deck a little and has one ability. */
+  readonly survivors: readonly Survivor[]
   readonly campaign: CampaignBalance
+}
+
+export type SurvivorId = 'scavenger' | 'firefighter' | 'hunter' | 'medic' | 'mechanic'
+
+export interface Survivor {
+  readonly id: SurvivorId
+  /** Start deck changes: each swap turns one `from` card into a `to` card. */
+  readonly swaps: readonly { readonly from: string; readonly to: string }[]
+  /** Extra maximum health. */
+  readonly maxHp?: number
+  /** Every heal from a card heals this much more. */
+  readonly healBonus?: number
+  /** Buildings you see (zombies and pack) from the start. */
+  readonly scout?: number
+  /** Gear you put on lasts this much longer (absorbs, turns or uses). */
+  readonly gearBonus?: number
 }
 
 export const balance: Balance = {
@@ -342,6 +360,21 @@ export const balance: Balance = {
   },
   // Version 2, K1–K2 (25 Oct 2026): first numbers from docs/plan.md section 12, to be tuned
   // with campaign simulations and playtests.
+  // Survivors (3 Nov 2026, inspired by Maximum Apocalypse): the Scavenger is the classic start.
+  survivors: [
+    { id: 'scavenger', swaps: [] },
+    { id: 'firefighter', swaps: [{ from: 'crowbar', to: 'axe' }], maxHp: 2 },
+    { id: 'hunter', swaps: [{ from: 'crowbar', to: 'bow' }], scout: 1 },
+    {
+      id: 'medic',
+      swaps: [
+        { from: 'nerves', to: 'bandage' },
+        { from: 'nerves', to: 'painkillers' },
+      ],
+      healBonus: 1,
+    },
+    { id: 'mechanic', swaps: [{ from: 'nerves', to: 'flashlight' }], gearBonus: 1 },
+  ],
   campaign: {
     days: 7,
     foodPerNight: 1,

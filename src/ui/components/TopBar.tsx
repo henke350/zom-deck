@@ -112,6 +112,9 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
           {ui.removedPile} <b>{piles.removed.length}</b>
         </span>
       </div>
+      {state.survivor && state.survivor !== 'scavenger' && (
+        <span className="day-event survivor-chip">{texts.survivors[state.survivor].name}</span>
+      )}
       {state.dayEvent && state.dayEvent !== 'quiet' && (
         <span className="day-event" title={texts.dayEvents[state.dayEvent].text}>
           {texts.dayEvents[state.dayEvent].name}

@@ -24,6 +24,7 @@ describe('campaign', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: t.start }))
+    await user.click(screen.getByRole('button', { name: /^Choose Scavenger/ }))
     expect(
       screen.getByRole('heading', { name: t.dayHeading(1, balance.campaign.days) }),
     ).toBeTruthy()
@@ -64,6 +65,7 @@ describe('campaign', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: t.start }))
+    await user.click(screen.getByRole('button', { name: /^Choose Scavenger/ }))
     await user.click(screen.getByRole('button', { name: t.setOut(1) }))
     await user.click(screen.getByRole('button', { name: /^Street/ }))
     cleanup()

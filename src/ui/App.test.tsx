@@ -21,10 +21,24 @@ describe('App', () => {
     expect(turns.textContent).toContain(String(balance.turnLimit))
   })
 
+  it('asks who goes out, shows what each survivor changes, and plays as them', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: texts.startExpedition }))
+    expect(screen.getByRole('heading', { name: texts.survivors.heading })).toBeTruthy()
+    expect(screen.getByText(texts.survivors.swap('Axe', 'Crowbar'))).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: texts.survivors.back }))
+    await user.click(screen.getByRole('button', { name: texts.startExpedition }))
+    await user.click(screen.getByRole('button', { name: /^Choose Medic/ }))
+    await user.click(screen.getByRole('button', { name: texts.rules.close }))
+    expect(screen.getByText(texts.survivors.medic.name)).toBeTruthy()
+  })
+
   it('starts an expedition and puts the seed in the address', async () => {
     window.history.replaceState(null, '', '/?seed=4711')
     render(<App />)
     await userEvent.click(screen.getByRole('button', { name: texts.startExpedition }))
+    await userEvent.click(screen.getByRole('button', { name: /^Choose Scavenger/ }))
     // The first expedition opens on the rules page; the game comes back when you close it.
     await userEvent.click(screen.getByRole('button', { name: texts.rules.close }))
     expect(screen.getByRole('list', { name: texts.ui.hand })).toBeTruthy()
@@ -36,6 +50,7 @@ describe('App', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: texts.startExpedition }))
+    await user.click(screen.getByRole('button', { name: /^Choose Scavenger/ }))
     const rules = screen.getByRole('region', { name: texts.rules.title })
     await user.click(within(rules).getByRole('button', { name: texts.rules.close }))
     expect(screen.queryByRole('region', { name: texts.rules.title })).toBeNull()
@@ -45,6 +60,7 @@ describe('App', () => {
     cleanup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: texts.startExpedition }))
+    await user.click(screen.getByRole('button', { name: /^Choose Scavenger/ }))
     expect(screen.queryByRole('region', { name: texts.rules.title })).toBeNull()
   })
 

@@ -1,4 +1,4 @@
-import type { Balance, DayEventId, ZombieKind } from '../data/balance'
+import type { Balance, DayEventId, SurvivorId, ZombieKind } from '../data/balance'
 
 export type { ZombieKind }
 
@@ -350,6 +350,8 @@ export interface GameState {
   readonly dog?: DogState
   /** The event of this expedition (its changes are already in `balance`). */
   readonly dayEvent?: DayEventId
+  /** Who is out there (absent: the classic start). */
+  readonly survivor?: SurvivorId
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
@@ -438,6 +440,8 @@ export interface ExpeditionSetup {
   readonly dog?: { readonly hp: number }
   /** The event of the day; leave out for a random one, 'none' for none. */
   readonly dayEvent?: DayEventId | 'none'
+  /** Who goes out; leave out for the classic start. */
+  readonly survivor?: SurvivorId
 }
 
 export interface PlayCardAction {

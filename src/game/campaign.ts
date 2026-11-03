@@ -1,4 +1,9 @@
-import { balance as defaultBalance, type Balance, type UpgradeId } from '../data/balance'
+import {
+  balance as defaultBalance,
+  type Balance,
+  type SurvivorId,
+  type UpgradeId,
+} from '../data/balance'
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import { buildingKnown, cityContent, contentForCity, mapContent, rollCity } from './city'
@@ -78,6 +83,8 @@ export interface CampaignState {
   readonly locker?: CardId
   /** The Stray Dog, if it lives at the base. */
   readonly dog?: { readonly hp: number }
+  /** Who goes out every day (chosen when the campaign starts). */
+  readonly survivor?: SurvivorId
   readonly history: readonly DayReport[]
   /** survived: all days done. lost: one lost day too many. */
   readonly over?: 'survived' | 'lost'
@@ -88,6 +95,7 @@ export function newCampaign(
   seed: number,
   balance: Balance = defaultBalance,
   content: Content = defaultContent,
+  survivor?: SurvivorId,
 ): CampaignState {
   const normalized = normalizeSeed(seed)
   const city = balance.randomCity
@@ -108,6 +116,7 @@ export function newCampaign(
     known: [],
     searchesUsed: {},
     burned: [],
+    ...(survivor ? { survivor } : {}),
     history: [],
   }
 }
@@ -160,6 +169,7 @@ export function daySetup(
     searchesUsed: campaign.searchesUsed,
     burned: campaign.burned,
     ...(campaign.dog ? { dog: campaign.dog } : {}),
+    ...(campaign.survivor ? { survivor: campaign.survivor } : {}),
     scouted: campaign.upgrades.includes('lookout')
       ? lookoutTargets(campaign, balance, content)
       : [],

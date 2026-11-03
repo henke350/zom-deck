@@ -109,7 +109,11 @@ export function fuzz(games: number, content: Content = defaultContent): FuzzResu
     if (!kind) continue
     const seed = i + 1
     const report = (what: string) => problems.push(`${kind.name}, seed ${seed}: ${what}`)
-    const start = newGame(seed, { balance: kind.balance, content, setup: kind.setup })
+    // Every survivor plays every kind of game.
+    const survivors = kind.balance.survivors
+    const survivor = survivors[Math.floor(i / setups.length) % survivors.length]?.id
+    const setup = { ...kind.setup, ...(survivor ? { survivor } : {}) }
+    const start = newGame(seed, { balance: kind.balance, content, setup })
     let state: GameState = start
     const random = makeRandom(seed)
     const taken: Action[] = []

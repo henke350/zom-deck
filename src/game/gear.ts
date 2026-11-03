@@ -1,4 +1,5 @@
 import type { CardInstance, Content, GameEvent, GameState, GearDef, GearLasts } from './types'
+import { gearBonus } from './survivors'
 import { damageZombies } from './zombies'
 
 /**
@@ -8,16 +9,16 @@ import { damageZombies } from './zombies'
  */
 
 /** The counter a piece of gear starts with. */
-export function freshGear(def: GearDef): number {
+export function freshGear(def: GearDef, bonus = 0): number {
   switch (def.lasts.kind) {
     case 'absorbs':
-      return def.lasts.total
+      return def.lasts.total + bonus
     case 'turns':
-      return def.lasts.turns
+      return def.lasts.turns + bonus
     case 'untilHit':
       return 1
     case 'uses':
-      return def.lasts.uses
+      return def.lasts.uses + bonus
   }
 }
 
@@ -46,7 +47,10 @@ export function equip(
       inPlay: state.piles.inPlay.filter((c) => c.uid !== uid),
       gear: [...state.piles.gear, card],
     },
-    gearLeft: { ...state.gearLeft, [uid]: freshGear(def) },
+    gearLeft: {
+      ...state.gearLeft,
+      [uid]: freshGear(def, gearBonus(state.balance, state.survivor)),
+    },
   }
 }
 

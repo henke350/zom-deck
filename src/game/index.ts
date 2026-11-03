@@ -40,3 +40,4 @@ export {
   validateBuild,
 } from './campaign'
 export type { CampaignState, DayReport } from './campaign'
+export { survivorDeck, survivorOf } from './survivors'

@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useState } from 'react'
-import { balance } from '../data/balance'
+import { balance, type SurvivorId } from '../data/balance'
 import { build, chooseLocker, dayBalance, daySeed, daySetup, finishDay, newCampaign } from '../game'
 import type { CampaignState, GameState } from '../game'
 import { GameScreen } from './GameScreen'
 import { BaseScreen } from './components/BaseScreen'
+import { SurvivorScreen } from './components/SurvivorScreen'
 import { TitleScreen } from './components/TitleScreen'
 import { randomSeed, readSeedFromSearch } from './seed'
 import { clearCampaign, loadCampaign, rulesSeen, saveCampaign } from './storage'
 
 type Screen =
   | { readonly kind: 'title' }
+  /** Choosing who goes out, before a quick expedition or a new campaign. */
+  | { readonly kind: 'survivor'; readonly next: 'expedition' | 'campaign' }
   | {
       readonly kind: 'game'
       readonly seed: number
       readonly run: number
+      readonly survivor: SurvivorId
       /** First expedition on this device: show the rules over the map. */
       readonly showRules: boolean
     }
@@ -62,18 +66,8 @@ export default function App() {
   if (screen.kind === 'title') {
     return (
       <TitleScreen
-        onStart={() =>
-          setScreen({
-            kind: 'game',
-            seed: readSeedFromSearch(window.location.search) ?? randomSeed(),
-            run: 1,
-            showRules: !rulesSeen(),
-          })
-        }
-        onNewCampaign={() => {
-          clearCampaign()
-          toBase(newCampaign(randomSeed(), balance))
-        }}
+        onStart={() => setScreen({ kind: 'survivor', next: 'expedition' })}
+        onNewCampaign={() => setScreen({ kind: 'survivor', next: 'campaign' })}
         {...(saved
           ? {
               savedCampaign: {
@@ -94,6 +88,30 @@ export default function App() {
     )
   }
 
+  if (screen.kind === 'survivor') {
+    const { next } = screen
+    return (
+      <SurvivorScreen
+        balance={balance}
+        onBack={() => setScreen({ kind: 'title' })}
+        onChoose={(survivor) => {
+          if (next === 'campaign') {
+            clearCampaign()
+            toBase(newCampaign(randomSeed(), balance, undefined, survivor))
+          } else {
+            setScreen({
+              kind: 'game',
+              seed: readSeedFromSearch(window.location.search) ?? randomSeed(),
+              run: 1,
+              survivor,
+              showRules: !rulesSeen(),
+            })
+          }
+        }}
+      />
+    )
+  }
+
   if (screen.kind === 'base') {
     const { campaign } = screen
     return (
@@ -103,10 +121,7 @@ export default function App() {
         onBuild={(id) => toBase(build(campaign, id, balance))}
         onLocker={(card) => toBase(chooseLocker(campaign, card))}
         onSetOut={() => setScreen({ kind: 'day', campaign, showRules: !rulesSeen() })}
-        onNewCampaign={() => {
-          clearCampaign()
-          toBase(newCampaign(randomSeed(), balance))
-        }}
+        onNewCampaign={() => setScreen({ kind: 'survivor', next: 'campaign' })}
         onExit={() => setScreen({ kind: 'title' })}
       />
     )
@@ -135,9 +150,16 @@ export default function App() {
     <GameScreen
       key={`${screen.seed}-${screen.run}`}
       seed={screen.seed}
+      setup={{ survivor: screen.survivor }}
       showRulesOnStart={screen.showRules}
       onNewExpedition={() =>
-        setScreen({ kind: 'game', seed: randomSeed(), run: screen.run + 1, showRules: false })
+        setScreen({
+          kind: 'game',
+          seed: randomSeed(),
+          run: screen.run + 1,
+          survivor: screen.survivor,
+          showRules: false,
+        })
       }
       onRestart={() => setScreen({ ...screen, run: screen.run + 1, showRules: false })}
       onExit={() => setScreen({ kind: 'title' })}

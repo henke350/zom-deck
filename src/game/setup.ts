@@ -1,6 +1,7 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
 import { eventScoutCount, eventStartCards, pickDayEvent, withDayEvent } from './dayEvents'
 import { adoptDog } from './dog'
+import { survivorDeck, survivorOf, withSurvivor } from './survivors'
 import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
 import { normalizeSeed, shuffle } from './rng'
@@ -29,9 +30,11 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   const content = options.content ?? defaultContent
   // The event of the day changes the balance of this whole expedition.
   const dayEvent = pickDayEvent(baseBalance, seed, options.setup?.dayEvent)
-  const balance = withDayEvent(baseBalance, dayEvent)
+  // So does the survivor you play (start deck, health and one ability).
+  const survivor = survivorOf(baseBalance, options.setup?.survivor)
+  const balance = withSurvivor(withDayEvent(baseBalance, dayEvent), survivor)
   const deckIds = [
-    ...(options.setup?.startDeck ?? starterDeck(balance)),
+    ...survivorDeck(options.setup?.startDeck ?? starterDeck(balance), survivor),
     ...eventStartCards(dayEvent),
   ]
 
@@ -59,7 +62,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   })
   // Lookout (and a found map): some buildings are scouted before you set out.
   const sites = { ...placed }
-  const mapped = eventScoutCount(dayEvent)
+  const mapped = eventScoutCount(dayEvent) + (survivor?.scout ?? 0)
   const extraScouted =
     mapped > 0
       ? shuffle(
@@ -74,7 +77,12 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   }
   const [zombies, nextZombieUid, rng] = setupZombies(here, balance, afterPacks)
 
-  const startHp = options.setup?.startHp ?? balance.maxHp
+  // A given start health (campaign) is before the survivor's extra health.
+  const givenHp = options.setup?.startHp
+  const startHp =
+    givenHp === undefined
+      ? balance.maxHp
+      : Math.min(balance.maxHp, givenHp + (survivor?.maxHp ?? 0))
   const initial: GameState = {
     seed: normalized,
     rng,
@@ -103,6 +111,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     gearLeft: {},
     visited: [content.startLocation],
     ...(dayEvent ? { dayEvent: dayEvent.id } : {}),
+    ...(survivor ? { survivor: survivor.id } : {}),
     ...(city ? { city } : {}),
     ...(campaign
       ? {

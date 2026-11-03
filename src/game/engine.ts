@@ -7,6 +7,7 @@ import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } fr
 import { equip, fireGear, tickGear } from './gear'
 import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
+import { healBonus } from './survivors'
 import { validate } from './validate'
 import {
   addNoise,
@@ -210,7 +211,8 @@ function resolveEffect(
       return drawCards(state, effect.amount, events)
     case 'heal': {
       // Healing also cures Spitter poison.
-      const hp = Math.min(state.balance.maxHp, player.hp + effect.amount)
+      const amount = effect.amount + healBonus(state.balance, state.survivor)
+      const hp = Math.min(state.balance.maxHp, player.hp + amount)
       events.push({ type: 'healed', amount: hp - player.hp })
       return { ...state, player: { ...player, hp, poison: 0 } }
     }

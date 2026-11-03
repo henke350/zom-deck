@@ -306,6 +306,25 @@ export const texts = {
     fog: { name: 'Thick fog', text: 'Zombies lose you more easily: they follow 1 step less.' },
     close: 'Got it',
   },
+  /** Survivors: who goes out (`balance.survivors`). */
+  survivors: {
+    heading: 'Who goes out?',
+    intro:
+      'Each survivor starts with a slightly different deck and has one ability. In a campaign, the same survivor goes out every day.',
+    choose: 'Choose',
+    back: 'Back',
+    scavenger: { name: 'Scavenger', text: 'Knows the streets. The classic start.' },
+    firefighter: { name: 'Firefighter', text: 'Strong, and hard to stop.' },
+    hunter: { name: 'Hunter', text: 'Quiet, and watches before going in.' },
+    medic: { name: 'Medic', text: 'Steady hands, and a full kit.' },
+    mechanic: { name: 'Mechanic', text: 'Keeps every tool working.' },
+    noChange: 'No changes',
+    swap: (to: string, from: string) => `${to} instead of ${from}`,
+    maxHp: (n: number) => `+${n} max health`,
+    heal: (n: number) => `Every heal gives +${n} health`,
+    scout: (n: number) => `Sees ${n} building${n === 1 ? '' : 's'} from the start`,
+    gear: (n: number) => `Gear lasts ${n} longer`,
+  },
   /** Special places (`feature` on a location). */
   places: {
     infirmary: {
@@ -448,6 +467,12 @@ export const texts = {
         heading: 'Losing',
         items: [
           `At 0 health you die. At the end of turn ${b.turnLimit} night falls and the expedition is lost.`,
+        ],
+      },
+      {
+        heading: 'Survivors',
+        items: [
+          'Before you set out you choose who goes: the Scavenger (the classic start), the Firefighter (more health, an Axe), the Hunter (a Bow, and sees one building from the start), the Medic (healing instead of Nerves, and heals better) or the Mechanic (a Flashlight, and gear lasts longer). The choice page lists exactly what each one changes.',
         ],
       },
       {
