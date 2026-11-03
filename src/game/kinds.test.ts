@@ -198,3 +198,44 @@ describe('ammunition', () => {
     expect(next.piles.hand.some((c) => c.card === 'ammunition')).toBe(false)
   })
 })
+
+describe('special places', () => {
+  const p = classicBalance.places
+  const content = {
+    ...defaultContent,
+    locations: {
+      ...defaultContent.locations,
+      houseA: { ...defaultContent.locations.houseA!, feature: 'trap' as const },
+      pharmacy: { ...defaultContent.locations.pharmacy!, feature: 'infirmary' as const },
+      police: { ...defaultContent.locations.police!, feature: 'armory' as const },
+      houseB: { ...defaultContent.locations.houseB!, feature: 'sanctuary' as const },
+    },
+  }
+
+  it('a trap hurts you the first time you go in, and only then', () => {
+    const state = makeState({ location: 'street' })
+    const first = applyAction(state, { type: 'freeMove', to: 'houseA' }, content).state
+    expect(first.player.hp).toBe(state.player.hp - p.trapDamage)
+    expect(first.stats.damageFromPlaces).toBe(p.trapDamage)
+  })
+
+  it('the armory gives bullets on the first visit', () => {
+    const state = makeState({ location: 'supermarket', ammo: 0 })
+    const next = applyAction(state, { type: 'freeMove', to: 'police' }, content).state
+    expect(next.player.ammo).toBe(p.armoryAmmo)
+  })
+
+  it('the infirmary heals and cures poison when you end your turn there', () => {
+    const state = makeState({ location: 'pharmacy', hp: 5, poison: 1 })
+    const next = applyAction(state, { type: 'endTurn' }, content).state
+    // The poison ticks first (5 − 1), then the infirmary heals and cures it.
+    expect(next.player.hp).toBe(5 - 1 + p.infirmaryHeal)
+    expect(next.player.poison).toBe(0)
+  })
+
+  it('the sanctuary lets noise die down', () => {
+    const state = makeState({ location: 'houseB', noise: 2 })
+    const next = applyAction(state, { type: 'endTurn' }, content).state
+    expect(next.noise).toBe(2 - p.sanctuaryQuiet)
+  })
+})

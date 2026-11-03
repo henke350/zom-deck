@@ -139,6 +139,8 @@ export interface LocationDef {
   }
   /** Something you can do here for AP (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly service?: LocationService
+  /** What this place does by itself (numbers in `balance.places`). */
+  readonly feature?: PlaceFeature
   /** An empty building slot on a bigger map: a random city always puts a building here. */
   readonly slot?: boolean
   /**
@@ -149,6 +151,13 @@ export interface LocationDef {
 }
 
 export type ServiceId = 'dismantle' | 'patchUp'
+
+/**
+ * A special place. infirmary: end your turn here to heal. armory: bullets on your first visit.
+ * fuel: extra finds on your first visit. trap: you get hurt on your first visit. sanctuary:
+ * noise dies down when you end your turn here.
+ */
+export type PlaceFeature = 'infirmary' | 'armory' | 'fuel' | 'trap' | 'sanctuary'
 
 /** A location service trashes one card from your hand. `junk`: only Nerves and Wound. */
 export interface LocationService {
@@ -617,6 +626,12 @@ export type GameEvent =
     }
   | { readonly type: 'poisoned'; readonly amount: number; readonly total: number }
   | { readonly type: 'ammoUsed'; readonly amount: number; readonly left: number }
+  | {
+      readonly type: 'placeEffect'
+      readonly location: LocationId
+      readonly feature: PlaceFeature
+      readonly amount: number
+    }
   | { readonly type: 'ammoFound'; readonly amount: number; readonly total: number }
   | { readonly type: 'zombieWoke'; readonly uid: string }
   | { readonly type: 'zombieBurst'; readonly uid: string; readonly damage: number }

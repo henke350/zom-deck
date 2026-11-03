@@ -46,6 +46,7 @@ export const locations = {
   },
   police: {
     id: 'police',
+    feature: 'armory',
     kind: 'building',
     downtown: true,
     mapPos: { x: 520, y: 70 },
@@ -158,6 +159,7 @@ export type KnownLocationId = keyof typeof locations
 export const extraBuildings = {
   gasStation: {
     id: 'gasStation',
+    feature: 'fuel',
     kind: 'building',
     startZombies: {
       min: 0,
@@ -204,6 +206,7 @@ export const extraBuildings = {
   },
   hospital: {
     id: 'hospital',
+    feature: 'infirmary',
     kind: 'building',
     downtown: true,
     startZombies: {
@@ -229,6 +232,7 @@ export const extraBuildings = {
   },
   apartments: {
     id: 'apartments',
+    feature: 'trap',
     kind: 'building',
     downtown: true,
     startZombies: {
@@ -255,6 +259,7 @@ export const extraBuildings = {
   },
   church: {
     id: 'church',
+    feature: 'sanctuary',
     kind: 'building',
     startZombies: {
       min: 0,

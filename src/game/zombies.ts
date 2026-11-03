@@ -1,4 +1,5 @@
 import type { Balance, DangerLevel, ZombieKind, ZombieStats } from '../data/balance'
+import { endTurnAt } from './places'
 import { buildingKnown, cityContent } from './city'
 import { gainCard } from './deck'
 import { dogGuard } from './dog'
@@ -517,7 +518,9 @@ export interface EndTurnPreview {
 export function previewEndTurn(state: GameState, baseContent: Content): EndTurnPreview {
   const content = cityContent(state, baseContent)
   const events: GameEvent[] = []
-  const after = zombiePhase(state, content, events)
+  const attacked = zombiePhase(state, content, events)
+  // A place may heal you afterwards (the infirmary): the preview counts what you really lose.
+  const after = attacked.player.hp > 0 ? endTurnAt(attacked, content, events) : attacked
   const count = (type: GameEvent['type']) => events.filter((e) => e.type === type).length
   // Block, gear (Kevlar Vest) and the dog all keep damage off you.
   const blocked = events.reduce(

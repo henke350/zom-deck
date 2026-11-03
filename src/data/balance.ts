@@ -173,6 +173,19 @@ export interface Balance {
   readonly scrapInFinds: boolean
   /** The most finds one body search can show, however many zombies a card killed. */
   readonly bodyLootMax: number
+  /** What special places do (see `PlaceFeature` on a location). */
+  readonly places: {
+    /** Hospital: end your turn here and get this much health back (cures poison too). */
+    readonly infirmaryHeal: number
+    /** Police: bullets you find the first time you go in. */
+    readonly armoryAmmo: number
+    /** Petrol station: extra finds this turn the first time you go in. */
+    readonly fuelSearchBonus: number
+    /** Apartments: a trap the first time you go in. */
+    readonly trapDamage: number
+    /** Church: noise that dies down when you end your turn here. */
+    readonly sanctuaryQuiet: number
+  }
   /** Bullets for guns (Pistol, Shotgun, Head Shot): at the start, per Ammunition find, at most. */
   readonly ammo: { readonly start: number; readonly perFind: number; readonly max: number }
   /** Buildings that hide a locked stash of rare finds (placed at random). */
@@ -260,6 +273,8 @@ export const balance: Balance = {
   // for killing zombies (search the body).
   findsToHand: true,
   bodyLootMax: 3,
+  // Special places (inspired by Maximum Apocalypse's map tiles).
+  places: { infirmaryHeal: 1, armoryAmmo: 3, fuelSearchBonus: 1, trapDamage: 1, sanctuaryQuiet: 1 },
   // Guns need bullets (inspired by Maximum Apocalypse): a scarce resource, not a free card.
   ammo: { start: 3, perFind: 3, max: 9 },
   rareFindWeight: 0.25,

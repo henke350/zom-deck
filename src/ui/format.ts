@@ -99,6 +99,8 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.ammoFound(event.amount, event.total)
     case 'ammoUsed':
       return log.ammoUsed(event.left)
+    case 'placeEffect':
+      return texts.places[event.feature].log(event.amount)
     case 'zombieBurst':
       return log.zombieBurst(event.damage)
     case 'cardTrashed':

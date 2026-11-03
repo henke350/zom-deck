@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { endTurnAt, firstVisit } from './places'
 import { dogBite, restDog } from './dog'
 import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
@@ -344,12 +345,14 @@ function arrive(
   unnoticed = false,
 ): GameState {
   events.push({ type: 'moved', from: state.player.location, to, by, apCost })
+  const firstTime = !state.visited.includes(to)
   let moved: GameState = {
     ...state,
     player: { ...state.player, location: to },
-    visited: state.visited.includes(to) ? state.visited : [...state.visited, to],
+    visited: firstTime ? [...state.visited, to] : state.visited,
   }
   moved = revealZombies(moved, content, to)
+  if (firstTime) moved = firstVisit(moved, content, to, events)
   const atShelter = content.locations[to]?.kind === 'shelter'
   if (atShelter && moved.player.packs >= state.balance.packsToWin) {
     const stars = starsFor(moved, moved.player.packs)
@@ -395,6 +398,7 @@ function endTurn(
   // Zombies first: they follow, then attack. Then dusk noise may bring more.
   let next = zombiePhase(state, content, events)
   if (next.player.hp <= 0) return gameOver(next, { result: 'lost', cause: 'killed' }, events)
+  next = endTurnAt(next, content, events)
   if (state.turn >= state.balance.duskFromTurn) {
     next = addNoise(next, state.balance.duskNoise, content, 'dusk', events)
   }

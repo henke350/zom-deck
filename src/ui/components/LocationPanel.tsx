@@ -191,6 +191,12 @@ export function LocationPanel({
           {!forceCheck.ok && <p className="reason">{forceCheck.reason}</p>}
         </div>
       )}
+      {def?.feature && (
+        <div className="service">
+          <h3 className="eyebrow">{texts.places[def.feature].name}</h3>
+          <p>{texts.places[def.feature].text(state.balance.places)}</p>
+        </div>
+      )}
       {def?.service && (
         <div className="service">
           <h3 className="eyebrow">{texts.services[def.service.id].name}</h3>

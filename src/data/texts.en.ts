@@ -281,6 +281,36 @@ export const texts = {
     },
   },
 
+  /** Special places (`feature` on a location). */
+  places: {
+    infirmary: {
+      name: 'Infirmary',
+      text: (p: Balance['places']) =>
+        `End your turn here: +${p.infirmaryHeal} health, and poison is cured.`,
+      log: (n: number) => `You rest in the infirmary: +${n} health.`,
+    },
+    armory: {
+      name: 'Armory',
+      text: (p: Balance['places']) => `First time in: ${p.armoryAmmo} bullets in a locker.`,
+      log: (n: number) => `A locker full of bullets: +${n}.`,
+    },
+    fuel: {
+      name: 'Fuel and tools',
+      text: (p: Balance['places']) =>
+        `First time in: your next search here finds +${p.fuelSearchBonus}.`,
+      log: (n: number) => `Plenty to look through here: +${n} find on your next search.`,
+    },
+    trap: {
+      name: 'Booby-trapped',
+      text: (p: Balance['places']) => `First time in: a trap hurts you for ${p.trapDamage}.`,
+      log: (n: number) => `A tripwire! You lose ${n} health.`,
+    },
+    sanctuary: {
+      name: 'Sanctuary',
+      text: (p: Balance['places']) => `End your turn here: noise drops by ${p.sanctuaryQuiet}.`,
+      log: (n: number) => `The thick walls muffle everything: noise −${n}.`,
+    },
+  },
   services: {
     dismantle: { name: 'Dismantle', text: 'Trash a card from your hand.' },
     patchUp: { name: 'Patch up', text: 'Trash a Nerves or Wound from your hand.' },
