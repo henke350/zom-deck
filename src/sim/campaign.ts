@@ -1,4 +1,4 @@
-import type { Balance, UpgradeId } from '../data/balance'
+import type { Balance, SurvivorId, UpgradeId } from '../data/balance'
 import { defaultContent } from '../data/content'
 import {
   build,
@@ -41,8 +41,13 @@ export interface CampaignRecord {
  * One whole campaign played by a bot. The bot plays each day as an ordinary expedition aiming
  * for 2 packs (one meal), then builds the first upgrade it can afford in `buildOrder`.
  */
-export function playCampaign(info: BotInfo, seed: number, balance: Balance): CampaignRecord {
-  let campaign: CampaignState = newCampaign(seed, balance, defaultContent)
+export function playCampaign(
+  info: BotInfo,
+  seed: number,
+  balance: Balance,
+  survivor?: SurvivorId,
+): CampaignRecord {
+  let campaign: CampaignState = newCampaign(seed, balance, defaultContent, survivor)
   let materials = 0
   const problems: string[] = []
   for (let guard = 0; !campaign.over && guard < balance.campaign.days + 1; guard++) {
@@ -92,9 +97,12 @@ export function runCampaigns(
   infos: readonly BotInfo[],
   games: number,
   balance: Balance,
+  survivor?: SurvivorId,
 ): CampaignSummary[] {
   return infos.map((info) => {
-    const records = Array.from({ length: games }, (_, i) => playCampaign(info, i + 1, balance))
+    const records = Array.from({ length: games }, (_, i) =>
+      playCampaign(info, i + 1, balance, survivor),
+    )
     const avg = (f: (r: CampaignRecord) => number) =>
       records.reduce((sum, r) => sum + f(r), 0) / Math.max(1, records.length)
     return {

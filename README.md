@@ -30,7 +30,7 @@ npm run dev      # starter spillet på http://localhost:5173
 6. Stå i en bygning og spil **Search**, eller brug **Quick search** i sidepanelet (2 AP, ingen kort). Fundene vises der, hvor hånden ligger: vælg ét, eller tag ingenting (du kan ikke skrotte kort her – brug Toolbox, Painkillers eller en tjeneste). Spillet har ingen pop-up-vinduer.
 7. Supermarket har altid en forsyningspakke; fire andre ligger tilfældigt. Hver pakke lægger et Heavy Load i dit dæk.
 8. Gå ind i Shelter med mindst 2 pakker for at vinde (3 pakker = ★★, 4 = ★★★). Spillet spørger først **Go home now?** i linjen over hånden, så du kan vælge at tage én bygning mere.
-9. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol). Der er fire typer, vist med et bogstav i prikken: **W**alker (følger 1 skridt), **R**unner (hurtig, følger 2 skridt, 1 liv), **B**rute (4 liv, slår for 2, følger aldrig) og **S**creamer (bider ikke, men skriger og laver støj).
+9. **Zombier:** Bygninger viser et spænd ("1–2?"), indtil du går ind. Zombier, der har set dig (prik med ring), følger efter dig og angriber, når turen slutter. Kom to skridt væk, snig dig (Sneak) eller slå dem ned (Crowbar, Axe, Pistol). Typerne vises med et bogstav i prikken: **W**alker (følger 1 skridt), **R**unner (hurtig, følger 2 skridt, 1 liv), **B**rute (4 liv, slår for 2, følger aldrig), **S**creamer (bider ikke, men skriger og laver støj), S**p**itter (spytter gift fra 1 felt væk), **H**ound (følger 3 skridt), Bl**o**ater (sprænger, når den dør), Sleeper (**Z**, sover til der larmes) og Bat (**V**, flyver og kan kun rammes af skud og ild).
 10. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
 11. **Fare (Danger):** Starter på 1 og stiger for hver pakke, hvert sjældent fund og hvert 4. fund i dækket (op til 4). Fra fare 3 har alle zombier +1 liv, og zombierne i en bygning bestemmes først, når du går ind. Nye zombier bliver hurtigere og hårdere, men fundene bliver også bedre: fra fare 3 giver hver søgning +1 fund, og sjældne fund dukker oftere op.
 12. **Fund og drab:** Et fund, du tager, kommer direkte på hånden. Dræber du en zombie, kan du gennemsøge liget og tage et fund mere (en Brute bærer mere).
@@ -38,9 +38,11 @@ npm run dev      # starter spillet på http://localhost:5173
 14. **Stille våben:** Knife, Bow og Crossbow larmer ikke. Bow og Crossbow kan ramme en zombie ét skridt væk, hvis du kan se den (gade eller en bygning, du har været i). **Head Shot** dræber en zombie, hvis du har spillet et våben først; **Silent Takedown** dræber en zombie, der ikke har set dig.
 15. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
 16. Grå knapper viser altid, hvorfor de ikke kan bruges.
-17. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
-18. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
-19. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
+17. **Overlever og dagens begivenhed:** før du går ud, vælger du, hvem der går (Scavenger, Firefighter, Hunter, Medic eller Mechanic – hver har lidt andre startkort og én evne). Hver ekspedition starter med en begivenhed, fx regn, fuldmåne eller nødforsyning.
+18. **Ammunition og særlige steder:** Pistol, Shotgun og Head Shot bruger kugler (start med 3). Nogle bygninger gør noget selv: Hospital heler, politistationen har kugler, Church dæmper støj, lejlighederne har en fælde.
+19. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
+20. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
+21. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 
@@ -52,6 +54,7 @@ Vælg **Start campaign** på titelskærmen. En kampagne er 7 dage i samme by:
 2. **Dagen:** en almindelig ekspedition. Pakker er mad eller vand. **Salvage** er materialer til basen og vejer som et Heavy Load. Du må gå hjem, når du vil.
 3. **Aften:** du spiser 1 mad og drikker 1 vand. Mangler du mad, får du en ekstra Nerves næste dag; mangler du vand, starter du med 2 liv mindre.
 4. Byen er den samme hver dag: det, du har set, forbliver kendt, men plyndrede bygninger kommer kun langsomt igen, så du skal længere ud.
+5. **Missioner:** hver dag har en frivillig mission i en bygning markeret med ★ (redning, ryd bygningen eller på dag 6 en boss). Klarer du den og kommer hjem, får basen en belønning.
 
 **Hunden (Stray Dog):** nogle gange finder du en hund i et hus eller kirken. Den går ved siden af dig, bider en zombie én gang pr. tur (**Sic**), tager skade for dig og viser med et "sniff"-mærke, hvor der ligger pakker lige ved siden af. Den kan dø. I kampagnen følger den med hjem og skal have mad hver anden aften.
 

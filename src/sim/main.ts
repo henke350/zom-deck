@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { balance as standard } from '../data/balance'
+import { balance as standard, type SurvivorId } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { bots } from './bots'
 import { campaignConsole, runCampaigns } from './campaign'
@@ -19,10 +19,20 @@ import { runBots, runVariants, traceGame } from './simulate'
  *   npm run sim -- --variant-games 0    skip the "what if" section (faster)
  *   npm run sim -- trace greedy 7       one game, action by action
  *   npm run sim -- campaign             the bots play whole campaigns (200 each)
+ *   npm run sim -- --survivor medic     play as one survivor (also with campaign)
  *   npm run fuzz                        10 000 random games, every rule checked after every action
  *   npm run print                       print-and-play sheets → print/print-and-play.html
  *   npm run print -- --no-card-backs    the same without card backs (for opaque sleeves)
  */
+/** --survivor <id>: play as this survivor (checked against the balance file). */
+function survivorOption(args: readonly string[]): SurvivorId | undefined {
+  const id = option(args, '--survivor')
+  if (id === undefined) return undefined
+  const found = standard.survivors.find((s) => s.id === id)
+  if (!found) throw new Error(`Unknown survivor "${id}"`)
+  return found.id
+}
+
 function main(argv: readonly string[]): number {
   const [command = 'report', ...rest] = argv
   const games = Number(option(rest, '--games') ?? (command === 'fuzz' ? 10000 : 1000))
@@ -43,7 +53,7 @@ function main(argv: readonly string[]): number {
     const balance = applyOverrides(standard, options(rest, '--set'))
     const count = Number(option(rest, '--games') ?? 200)
     const planners = bots.filter((b) => b.bot.id !== 'random')
-    const summaries = runCampaigns(planners, count, balance)
+    const summaries = runCampaigns(planners, count, balance, survivorOption(rest))
     console.log(campaignConsole(summaries, balance.campaign.days))
     return summaries.some((s) => s.problems > 0) ? 1 : 0
   }
@@ -72,7 +82,7 @@ function main(argv: readonly string[]): number {
 
   const overrides = options(rest, '--set')
   const balance = applyOverrides(standard, overrides)
-  const summaries = runBots(balance, games)
+  const summaries = runBots(balance, games, undefined, survivorOption(rest))
   // The "what if" section compares tuning knobs; it is part of the standard report only.
   const variantGames = Number(option(rest, '--variant-games') ?? (overrides.length ? 0 : 300))
   const variants = variantGames > 0 ? runVariants(balance, variantGames) : []

@@ -178,3 +178,30 @@ Steps:
 4. Run `npm run check`. It must pass.
 5. Commit on a new branch (never main) and open a pull request named "Add art for the Stray Dog".
 ```
+
+## Nyt fund: Ammunition (november 2026)
+
+Ammunition (kugler til Pistol, Shotgun og Head Shot) mangler et billede. Det vises, når den er blandt fundene. Indsæt denne tekst i Codex:
+
+```
+You are working in the repository for "One More Building". Create ONE new card illustration in
+EXACTLY the same style as the existing card art, and add it to the game.
+
+Look first: art-source/cards/pistol.png, shotgun.png, headShot.png, and
+docs/card-art-prompt.md. Same style rules: landscape 3:2, 1536 x 1024 px PNG, full-bleed,
+gritty painterly graphic-novel look, muted and desaturated, one accent colour, ONE clear
+subject in the centre (about 60 %), a calm margin of at least 10 % on every side, no text,
+letters, logos or watermarks, no human faces, no gore.
+
+Card: ammunition. Accent: danger red #a5312a (a faded red stripe on the box).
+Subject: a small, battered cardboard box of pistol bullets lying open, a handful of brass
+cartridges spilled beside it, catching cold light. Simple background: a faint hint of a dusty
+shelf. It should feel precious and scarce.
+
+Steps:
+1. Save the original as art-source/cards/ammunition.png (1536 x 1024).
+2. Make the game copy: 768 x 512 WebP, quality about 80, at src/assets/cards/ammunition.webp.
+3. Remove 'ammunition' from the awaitingArt list in src/ui/cardImages.test.ts.
+4. Run `npm run check`. It must pass.
+5. Commit on a new branch (never main) and open a pull request named "Add art for Ammunition".
+```

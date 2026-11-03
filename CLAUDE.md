@@ -88,6 +88,13 @@ src/sim/   bots and balance reports (from M6), run in Node
   in (food, water, Salvage, evening meal, night production). With `state.campaignDay` set, packs
   get a `packKind` and `campaignOnly` loot (Salvage) turns up. `npm run sim -- campaign` plays
   whole campaigns. The UI saves the campaign and the running day in localStorage (`storage.ts`).
+- Inspired by Maximum Apocalypse (Nov 2026): `src/game/dayEvents.ts` (one event per expedition,
+  its own RNG, `balance.events`; tests pass `dayEvent: 'none'` for a fixed start),
+  `src/game/survivors.ts` (`ExpeditionSetup.survivor`, deck swaps and one ability,
+  `balance.survivors`), `src/game/places.ts` (`LocationDef.feature`, `balance.places`), ammo
+  (`player.ammo`, `CardMode.ammo`, `balance.ammo`) and campaign missions in
+  `src/game/missions.ts` (`dayMission` in campaign.ts picks kind and building; `checkMission`
+  runs after every action; the reward is paid in `finishDay`). The sim takes `--survivor <id>`.
 - The Stray Dog lives in `src/game/dog.ts`: a find with `companion` on its `CardDef` sets `state.dog`
   instead of adding a card. `dogBite` (Sic, the `dogBite` action), `dogGuard` (in the zombie phase
   after gear), `dogSmells` (sniff marks; the bots may use them). Numbers in `balance.dog`; in a
