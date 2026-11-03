@@ -57,11 +57,15 @@ function ZombieMarks({
     <g>
       <rect className="zpill" x={startX - 10} y={y - 9} width={pillW} height={18} rx={9} />
       {shown.map((z, i) => (
-        <g key={z.uid} className={`zdot-${z.kind}`}>
+        <g key={z.uid} className={`zdot-${z.kind}${z.asleep ? ' zasleep' : ''}`}>
           <title>
-            {z.hp > state.balance.zombies[z.kind].hp
-              ? `${texts.zombieKinds[z.kind].name} (${texts.ui.tougherZombie})`
-              : texts.zombieKinds[z.kind].name}
+            {[
+              texts.zombieKinds[z.kind].name,
+              z.hp > state.balance.zombies[z.kind].hp ? `(${texts.ui.tougherZombie})` : '',
+              z.asleep ? `(${texts.ui.asleep})` : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
           </title>
           <circle
             className={z.alerted ? 'zdot zdot-alert' : 'zdot'}

@@ -55,6 +55,9 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
         tone={lowHp ? 'danger' : undefined}
       />
       <Stat label={ui.ap} value={`${player.ap}/${balance.apPerTurn}`} />
+      {player.poison > 0 && (
+        <Stat label={ui.poisonStat} value={String(player.poison)} tone="danger" />
+      )}
       <Stat
         label={ui.noiseLabel}
         value={`${state.noise}/${threshold}`}

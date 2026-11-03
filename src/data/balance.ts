@@ -5,7 +5,8 @@
 
 export type ZombieFollow = 'chase' | 'gentle' | 'off'
 
-export type ZombieKind = 'walker' | 'runner' | 'brute' | 'screamer'
+export type ZombieKind =
+  'walker' | 'runner' | 'brute' | 'screamer' | 'spitter' | 'hound' | 'bloater' | 'sleeper' | 'bat'
 
 export interface ZombieStats {
   readonly hp: number
@@ -19,6 +20,16 @@ export interface ZombieStats {
    * is a chance of one more: 0.5 means one find half the time.
    */
   readonly loot: number
+  /** Spitter: each attack also poisons you this much (1 damage a turn, fading by 1 a turn). */
+  readonly poison?: number
+  /** Spitter: it also attacks from this many steps away once it has seen you, without moving. */
+  readonly spit?: number
+  /** Bloater: when it dies where you stand, it bursts and deals you this much damage. */
+  readonly burst?: number
+  /** Sleeper: starts asleep; wakes when it is hit or a full noise meter brings zombies to you. */
+  readonly sleeps?: boolean
+  /** Bat: flies; only shooting and fire can hit it (effects with `hitsFlying`, gear that shoots). */
+  readonly flies?: boolean
 }
 
 /** The Stray Dog: a companion you can find. It bites, guards you, and smells supplies. */
@@ -206,6 +217,12 @@ export const balance: Balance = {
     runner: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0, loot: 1 },
     brute: { hp: 4, damage: 2, followSteps: 0, screamNoise: 0, loot: 2 },
     screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2, loot: 0.5 },
+    // New kinds instead of tougher zombies (inspired by Maximum Apocalypse, 3 Nov 2026).
+    spitter: { hp: 1, damage: 1, followSteps: 0, screamNoise: 0, loot: 0.5, poison: 1, spit: 1 },
+    hound: { hp: 1, damage: 1, followSteps: 3, screamNoise: 0, loot: 0 },
+    bloater: { hp: 3, damage: 1, followSteps: 1, screamNoise: 0, loot: 1, burst: 2 },
+    sleeper: { hp: 3, damage: 2, followSteps: 1, screamNoise: 0, loot: 1, sleeps: true },
+    bat: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0, loot: 0, flies: true },
   },
   danger: {
     enabled: true,

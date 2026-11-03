@@ -129,6 +129,7 @@ export function LocationPanel({
                 ui.zombieHealth(z.hp, zombieMaxHp(state, z.kind)),
                 z.alerted ? ui.zombieSeenYou : '',
                 z.neutralized ? ui.zombieDistracted : '',
+                z.asleep ? ui.asleep : '',
               ]
                 .filter(Boolean)
                 .join(' · ')

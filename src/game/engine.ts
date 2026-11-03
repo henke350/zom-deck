@@ -9,12 +9,13 @@ import { updateStats } from './stats'
 import { validate } from './validate'
 import {
   addNoise,
+  canHitZombie,
   damageZombies,
   neutralizeZombies,
   noticeHere,
+  revealZombies,
   zombiePhase,
   zombiesAt,
-  revealZombies,
 } from './zombies'
 import type {
   Action,
@@ -45,7 +46,12 @@ export function applyAction(
   if (!validation.ok) throw new Error(`Illegal action ${action.type}: ${validation.reason}`)
 
   const events: GameEvent[] = []
-  const next = step(state, action, content, events)
+  let next = step(state, action, content, events)
+  // Anything can kill you mid-turn (a Bloater bursting): the expedition ends at once.
+  if (next.phase !== 'gameOver' && next.player.hp <= 0) {
+    const { pendingFind: _gone, ...ended } = next
+    next = gameOver(ended, { result: 'lost', cause: 'killed' }, events)
+  }
   return { state: { ...next, stats: updateStats(next.stats, events) }, events }
 }
 
@@ -198,9 +204,10 @@ function resolveEffect(
     case 'draw':
       return drawCards(state, effect.amount, events)
     case 'heal': {
+      // Healing also cures Spitter poison.
       const hp = Math.min(state.balance.maxHp, player.hp + effect.amount)
       events.push({ type: 'healed', amount: hp - player.hp })
-      return { ...state, player: { ...player, hp } }
+      return { ...state, player: { ...player, hp, poison: 0 } }
     }
     case 'loseHp':
       events.push({ type: 'hpLost', amount: effect.amount, source: 'card' })
@@ -252,10 +259,13 @@ function resolveEffect(
       return arrive(state, to, card, 0, content, events, effect.unnoticed === true)
     }
     case 'damage': {
+      // Blows that hit everything here miss the Bats, unless they are shots or fire.
       const targets =
         effect.target === 'one'
           ? [action.target?.zombie ?? '']
-          : zombiesAt(state, here).map((z) => z.uid)
+          : zombiesAt(state, here)
+              .filter((z) => canHitZombie(state.balance, z, effect.hitsFlying === true))
+              .map((z) => z.uid)
       return damageZombies(state, targets, effect.amount, events)
     }
     case 'kill': {
@@ -413,5 +423,6 @@ function endTurn(
 
 function gameOver(state: GameState, outcome: Outcome, events: GameEvent[]): GameState {
   events.push({ type: 'gameOver', outcome })
-  return { ...state, phase: 'gameOver', outcome }
+  const { pendingFind: _gone, ...ended } = state
+  return { ...ended, phase: 'gameOver', outcome }
 }

@@ -73,6 +73,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
       packs: 0,
       searchBonus: 0,
       block: 0,
+      poison: 0,
     },
     piles: { draw, hand: [], inPlay: [], discard: [], removed: [], gear: [] },
     sites,

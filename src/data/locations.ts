@@ -55,6 +55,7 @@ export const locations = {
       kinds: [
         { kind: 'walker', weight: 2 },
         { kind: 'brute', weight: 2 },
+        { kind: 'hound', weight: 1 },
       ],
     },
     lootPool: [
@@ -92,6 +93,7 @@ export const locations = {
       kinds: [
         { kind: 'walker', weight: 3 },
         { kind: 'runner', weight: 1 },
+        { kind: 'bloater', weight: 1 },
       ],
     },
     alwaysHasPack: true,
@@ -117,6 +119,7 @@ export const locations = {
       kinds: [
         { kind: 'walker', weight: 2 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'spitter', weight: 1 },
       ],
     },
     service: { id: 'patchUp', filter: 'junk' },
@@ -162,6 +165,7 @@ export const extraBuildings = {
         { kind: 'walker', weight: 2 },
         { kind: 'runner', weight: 1 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'bloater', weight: 1 },
       ],
     },
     lootPool: [
@@ -183,6 +187,7 @@ export const extraBuildings = {
       kinds: [
         { kind: 'runner', weight: 2 },
         { kind: 'walker', weight: 1 },
+        { kind: 'spitter', weight: 1 },
       ],
     },
     lootPool: [
@@ -206,6 +211,8 @@ export const extraBuildings = {
         { kind: 'walker', weight: 2 },
         { kind: 'brute', weight: 1 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'sleeper', weight: 1 },
+        { kind: 'spitter', weight: 1 },
       ],
     },
     service: { id: 'patchUp', filter: 'junk' },
@@ -229,6 +236,7 @@ export const extraBuildings = {
         { kind: 'walker', weight: 3 },
         { kind: 'screamer', weight: 2 },
         { kind: 'runner', weight: 1 },
+        { kind: 'sleeper', weight: 2 },
       ],
     },
     lootPool: [
@@ -252,6 +260,7 @@ export const extraBuildings = {
       kinds: [
         { kind: 'walker', weight: 2 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'sleeper', weight: 1 },
       ],
     },
     service: { id: 'patchUp', filter: 'junk' },
@@ -275,6 +284,7 @@ export const extraBuildings = {
       kinds: [
         { kind: 'runner', weight: 2 },
         { kind: 'walker', weight: 1 },
+        { kind: 'hound', weight: 1 },
       ],
     },
     lootPool: [

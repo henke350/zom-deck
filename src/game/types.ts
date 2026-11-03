@@ -23,6 +23,8 @@ export type Effect =
       readonly target: 'one' | 'allHere'
       /** Bow: a single target may also stand this many steps away (where you can see zombies). */
       readonly range?: number
+      /** A shot or fire: it can hit flying zombies (Bats). */
+      readonly hitsFlying?: boolean
     }
   | { readonly kind: 'neutralize'; readonly target: 'one' | 'allHere' }
   | { readonly kind: 'block'; readonly amount: number }
@@ -38,7 +40,13 @@ export type Effect =
   /** Gear: the card stays in front of you (see `CardDef.gear`) instead of being discarded. */
   | { readonly kind: 'equip' }
   /** Kills one zombie here outright, whatever its health. `unaware`: only one that has not seen you. */
-  | { readonly kind: 'kill'; readonly target: 'one'; readonly unaware?: boolean }
+  | {
+      readonly kind: 'kill'
+      readonly target: 'one'
+      readonly unaware?: boolean
+      /** A shot: it can hit flying zombies (Bats). */
+      readonly hitsFlying?: boolean
+    }
 
 /** What a piece of gear does while it lies in front of you. */
 export type GearEffect =
@@ -188,6 +196,8 @@ export interface Zombie {
    * you first enter or scout the building, at the danger level of that moment.
    */
   readonly rollOnReveal?: boolean
+  /** A Sleeper that has not woken up yet: it does not notice you or attack. */
+  readonly asleep?: boolean
 }
 
 /** A search waiting for the player to choose. */
@@ -277,6 +287,8 @@ export interface PlayerState {
   readonly searchBonus: number
   /** Damage prevented this turn. */
   readonly block: number
+  /** Spitter poison: this much damage at the end of the turn, then it fades by 1. */
+  readonly poison: number
 }
 
 export interface Outcome {
@@ -349,6 +361,8 @@ export interface Stats {
   readonly damageFromZombies: number
   /** Health lost to your own cards (Adrenaline). */
   readonly damageFromCards: number
+  /** Health lost to places (traps). */
+  readonly damageFromPlaces: number
   /** Damage kept off you by Block and gear (Kevlar Vest). */
   readonly damageBlocked: number
   readonly attacksByFollowers: number
@@ -590,7 +604,14 @@ export type GameEvent =
   | { readonly type: 'buildingBurned'; readonly location: LocationId }
   | { readonly type: 'apGained'; readonly amount: number }
   | { readonly type: 'healed'; readonly amount: number }
-  | { readonly type: 'hpLost'; readonly amount: number; readonly source: 'zombies' | 'card' }
+  | {
+      readonly type: 'hpLost'
+      readonly amount: number
+      readonly source: 'zombies' | 'card' | 'poison' | 'burst' | 'place'
+    }
+  | { readonly type: 'poisoned'; readonly amount: number; readonly total: number }
+  | { readonly type: 'zombieWoke'; readonly uid: string }
+  | { readonly type: 'zombieBurst'; readonly uid: string; readonly damage: number }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'cardDiscarded'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'serviceUsed'; readonly service: ServiceId; readonly location: LocationId }

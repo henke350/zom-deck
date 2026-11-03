@@ -99,6 +99,8 @@ export const texts = {
       close: 'Got it',
     },
     tougherZombie: 'tougher than usual',
+    asleep: 'asleep',
+    poisonStat: 'Poison',
     dangerBonus: (finds: number) => `Danger · +${finds} find`,
     noiseBadge: (n: number, arrivals: number) =>
       arrivals > 0 ? `+${n} noise · zombie!` : `+${n} noise`,
@@ -250,6 +252,31 @@ export const texts = {
       short: 'S',
       text: 'Does not bite, but while it has seen you it shrieks: +2 noise every turn.',
     },
+    spitter: {
+      name: 'Spitter',
+      short: 'P',
+      text: 'Never moves, but once it has seen you it spits from up to 1 step away: 1 damage and 1 poison.',
+    },
+    hound: {
+      name: 'Hound',
+      short: 'H',
+      text: 'A dead dog: fragile, but follows you up to three steps.',
+    },
+    bloater: {
+      name: 'Bloater',
+      short: 'O',
+      text: 'Bursts when it dies where you stand: 2 damage to you. Kill it from a distance.',
+    },
+    sleeper: {
+      name: 'Sleeper',
+      short: 'Z',
+      text: 'Asleep: it does not notice you. A hit, or a full noise meter where you stand, wakes it: then it hits for 2.',
+    },
+    bat: {
+      name: 'Bat',
+      short: 'V',
+      text: 'Flies and follows you two steps. Only shots and fire can hit it: guns, bows, the Crossbow, Molotov.',
+    },
   },
 
   services: {
@@ -303,6 +330,7 @@ export const texts = {
         items: [
           `When you end your turn, zombies that have seen you follow you. Then every zombie where you stand attacks. Block soaks up damage.`,
           `Walker: ${b.zombies.walker.hp} health, hits for ${b.zombies.walker.damage}, follows ${b.zombies.walker.followSteps} step. Runner: ${b.zombies.runner.hp} health, follows up to ${b.zombies.runner.followSteps} steps. Brute: ${b.zombies.brute.hp} health, hits for ${b.zombies.brute.damage}, never follows. Screamer: does not bite, but adds ${b.zombies.screamer.screamNoise} noise every turn while it has seen you.`,
+          `Spitter: never moves; once it has seen you it spits from up to ${b.zombies.spitter.spit ?? 1} step away (+${b.zombies.spitter.poison ?? 1} poison: 1 damage a turn, fading by 1; any healing cures it). Hound: follows up to ${b.zombies.hound.followSteps} steps. Bloater: bursts for ${b.zombies.bloater.burst ?? 2} damage when it dies where you stand. Sleeper: asleep until a hit or a full noise meter where you stand wakes it, then hits for ${b.zombies.sleeper.damage}. Bat: only shots and fire can hit it.`,
           `Kill a zombie and you can search its body: pick from ${b.zombies.walker.loot} find (a Brute: ${b.zombies.brute.loot}), up to ${b.bodyLootMax} when one card kills several. No noise.`,
           'Zombies two steps away lose track of you, and they never enter the Shelter.',
           'Bow and Crossbow are silent and can hit a zombie one step away, if you can see it (a street, or a building you have been in or scouted). Knife is silent too.',
@@ -547,6 +575,10 @@ export const texts = {
     apGained: (n: number) => `You gain ${n} AP.`,
     healed: (n: number) => `You heal ${n}.`,
     hpLost: (n: number) => `You lose ${n} health.`,
+    poisonHurts: (n: number) => `The poison burns: you lose ${n} health.`,
+    poisoned: (n: number, total: number) => `Spit hits you: +${n} poison (${total} in all).`,
+    zombieWoke: 'A Sleeper wakes up.',
+    zombieBurst: (n: number) => `It bursts all over you: ${n} damage.`,
     cardTrashed: (name: string) => `You trash ${name}.`,
     cardDiscarded: (name: string) => `You discard ${name}.`,
     serviceUsed: (service: string, place: string) => `You use ${service} at the ${place}.`,
@@ -788,6 +820,7 @@ export const texts = {
     zombieSeesYou: 'That zombie has seen you. Sneak, distract it or arrive unnoticed first.',
     gearNotUsable: 'This gear works by itself; there is nothing to use.',
     noDog: 'You have no dog.',
+    onlyShotsHitFlying: 'Bats fly: only a shot or fire can hit them.',
     dogBitten: 'Your dog has already attacked this turn.',
   },
 } as const

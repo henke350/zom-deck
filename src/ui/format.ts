@@ -90,7 +90,13 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
     case 'healed':
       return log.healed(event.amount)
     case 'hpLost':
-      return log.hpLost(event.amount)
+      return event.source === 'poison' ? log.poisonHurts(event.amount) : log.hpLost(event.amount)
+    case 'poisoned':
+      return log.poisoned(event.amount, event.total)
+    case 'zombieWoke':
+      return log.zombieWoke
+    case 'zombieBurst':
+      return log.zombieBurst(event.damage)
     case 'cardTrashed':
       return log.cardTrashed(cardText(event.card).name)
     case 'cardDiscarded':

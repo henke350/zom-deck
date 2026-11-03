@@ -19,7 +19,7 @@ import {
   needsUnawareTarget,
 } from './rules'
 import { checkSearchHere } from './search'
-import { zombiesAt, zombiesInRange } from './zombies'
+import { canHitZombie, zombiesAt, zombiesInRange } from './zombies'
 import type {
   Action,
   CardInstance,
@@ -86,7 +86,9 @@ export function validate(
       const here = zombiesAt(state, state.player.location)
       if (here.length === 0) return no(texts.reasons.noZombiesHere)
       if (!action.target?.zombie) return no(texts.reasons.chooseZombie)
-      if (!here.some((z) => z.uid === action.target?.zombie)) return no(texts.reasons.zombieNotHere)
+      const bitten = here.find((z) => z.uid === action.target?.zombie)
+      if (!bitten) return no(texts.reasons.zombieNotHere)
+      if (!canHitZombie(state.balance, bitten, false)) return no(texts.reasons.onlyShotsHitFlying)
       return ok
     }
     case 'endTurn':
@@ -228,6 +230,18 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
 
   const here = zombiesAt(state, state.player.location)
   const range = targetRangeOf(effects)
+  // Bats fly: a single target must be within reach of a shot or fire.
+  const hitsFlying = effects.some(
+    (e) => (e.kind === 'damage' || e.kind === 'kill') && e.hitsFlying === true,
+  )
+  const targeted = state.zombies.find((z) => z.uid === action.target?.zombie)
+  if (
+    needsZombieTarget(effects) &&
+    targeted &&
+    !canHitZombie(state.balance, targeted, hitsFlying)
+  ) {
+    return no(texts.reasons.onlyShotsHitFlying)
+  }
   if (needsZombieTarget(effects) && range > 0) {
     const check = checkZombieTarget(state, content, range, action.target?.zombie)
     if (!check.ok) return check

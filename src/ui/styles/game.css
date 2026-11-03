@@ -747,6 +747,20 @@
 .zdot-screamer .zdot {
   fill: var(--amber);
 }
+.zdot-spitter .zdot {
+  fill: var(--teal);
+}
+.zdot-bloater .zdot,
+.zdot-sleeper .zdot {
+  fill: var(--ink-2);
+}
+.zdot-bat .zdot {
+  fill: var(--red);
+}
+/* A Sleeper that has not woken: faded */
+.zasleep {
+  opacity: 0.55;
+}
 
 /* Light pill behind the zombie marks, so they read on top of an illustration */
 .zpill {
