@@ -1,4 +1,4 @@
-import type { Balance } from '../data/balance'
+import type { Balance, SurvivorId } from '../data/balance'
 import { defaultContent } from '../data/content'
 import { applyAction, cityContent, newGame } from '../game'
 import type { Bot } from './bot'
@@ -13,11 +13,18 @@ export function runBots(
   balance: Balance,
   games: number,
   which: readonly BotInfo[] = bots,
+  survivor?: SurvivorId,
 ): BotSummary[] {
   return which.map((info) => {
     const records = []
     for (let seed = 1; seed <= games; seed++) {
-      records.push(playGame(info.bot, seed, { balance, checkInvariants: true }))
+      records.push(
+        playGame(info.bot, seed, {
+          balance,
+          checkInvariants: true,
+          ...(survivor ? { setup: { survivor } } : {}),
+        }),
+      )
     }
     return summarize(info, records, balance)
   })

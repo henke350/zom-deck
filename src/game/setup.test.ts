@@ -32,6 +32,8 @@ describe('newGame', () => {
       packs: 0,
       searchBonus: 0,
       block: 0,
+      poison: 0,
+      ammo: balance.ammo.start,
     })
   })
 

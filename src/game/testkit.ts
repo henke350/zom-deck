@@ -46,6 +46,7 @@ export interface StateSpec {
     readonly hp?: number
     readonly alerted?: boolean
     readonly neutralized?: boolean
+    readonly asleep?: boolean
   }[]
   /** Danger level. Default: 1. */
   readonly danger?: number
@@ -54,6 +55,10 @@ export interface StateSpec {
   readonly visited?: readonly LocationId[]
   /** The Stray Dog's health; leave out for no dog. */
   readonly dog?: number
+  /** Spitter poison on the player. */
+  readonly poison?: number
+  /** Bullets for guns. */
+  readonly ammo?: number
 }
 
 function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] {
@@ -89,6 +94,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     hp: z.hp ?? balance.zombies[z.kind ?? 'walker'].hp,
     alerted: z.alerted ?? z.at === location,
     neutralized: z.neutralized ?? false,
+    ...(z.asleep ? { asleep: true } : {}),
   }))
   const sites: Record<LocationId, SiteState> = {}
   for (const loc of Object.values(defaultContent.locations)) {
@@ -125,6 +131,8 @@ export function makeState(spec: StateSpec = {}): GameState {
       packs: spec.packs ?? 0,
       searchBonus: 0,
       block: 0,
+      poison: spec.poison ?? 0,
+      ammo: spec.ammo ?? balance.ammo.start,
     },
     piles,
     sites,

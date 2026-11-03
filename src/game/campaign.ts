@@ -1,7 +1,15 @@
-import { balance as defaultBalance, type Balance, type UpgradeId } from '../data/balance'
+import {
+  balance as defaultBalance,
+  type Balance,
+  type MissionKind,
+  type SurvivorId,
+  type UpgradeId,
+} from '../data/balance'
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import { buildingKnown, cityContent, contentForCity, mapContent, rollCity } from './city'
+import { distance } from './map'
+import { missionKindFor } from './missions'
 import { normalizeSeed, shuffle } from './rng'
 import { starterDeck } from './setup'
 import { expeditionResult } from './stats'
@@ -52,6 +60,8 @@ export interface DayReport {
   readonly producedWater: number
   /** What happened with the Stray Dog today and tonight, if anything. */
   readonly dog?: 'joined' | 'died' | 'ate' | 'ranAway'
+  /** The mission done today (its reward is in food, water and materials). */
+  readonly mission?: MissionKind
 }
 
 export interface CampaignState {
@@ -78,6 +88,8 @@ export interface CampaignState {
   readonly locker?: CardId
   /** The Stray Dog, if it lives at the base. */
   readonly dog?: { readonly hp: number }
+  /** Who goes out every day (chosen when the campaign starts). */
+  readonly survivor?: SurvivorId
   readonly history: readonly DayReport[]
   /** survived: all days done. lost: one lost day too many. */
   readonly over?: 'survived' | 'lost'
@@ -88,6 +100,7 @@ export function newCampaign(
   seed: number,
   balance: Balance = defaultBalance,
   content: Content = defaultContent,
+  survivor?: SurvivorId,
 ): CampaignState {
   const normalized = normalizeSeed(seed)
   const city = balance.randomCity
@@ -108,6 +121,7 @@ export function newCampaign(
     known: [],
     searchesUsed: {},
     burned: [],
+    ...(survivor ? { survivor } : {}),
     history: [],
   }
 }
@@ -151,6 +165,7 @@ export function daySetup(
   if (campaign.locker) deck.push(campaign.locker)
 
   const startHp = Math.max(1, today.maxHp - (campaign.thirsty ? c.thirstHp : 0))
+  const mission = dayMission(campaign, balance, content)
   return {
     campaignDay: campaign.day,
     startDeck: deck,
@@ -160,10 +175,37 @@ export function daySetup(
     searchesUsed: campaign.searchesUsed,
     burned: campaign.burned,
     ...(campaign.dog ? { dog: campaign.dog } : {}),
+    ...(campaign.survivor ? { survivor: campaign.survivor } : {}),
+    ...(mission ? { mission } : {}),
     scouted: campaign.upgrades.includes('lookout')
       ? lookoutTargets(campaign, balance, content)
       : [],
   }
+}
+
+/**
+ * Today's optional mission and its building. It comes from the campaign seed and the day, so
+ * the base page and the expedition agree. A rescue prefers a building you do not know yet; all
+ * missions prefer buildings at least two steps from the shelter.
+ */
+export function dayMission(
+  campaign: CampaignState,
+  balance: Balance = defaultBalance,
+  content: Content = defaultContent,
+): { readonly kind: MissionKind; readonly target: LocationId } | undefined {
+  if (campaign.over) return undefined
+  const kind = missionKindFor(balance.campaign.missions, campaign.day)
+  if (!kind) return undefined
+  const map = mapContent(content, balance.cityMap)
+  const here = campaign.city ? contentForCity(campaign.city, map) : map
+  const open = Object.values(here.locations)
+    .filter((l) => l.kind === 'building' && !campaign.burned.includes(l.id))
+    .map((l) => l.id)
+  const [order] = shuffle(open, normalizeSeed(daySeed(campaign) ^ 0x2545f491))
+  const far = (id: LocationId) => distance(here, here.startLocation, id) >= 2
+  const fresh = (id: LocationId) => kind !== 'rescue' || !campaign.known.includes(id)
+  const target = order.find((id) => far(id) && fresh(id)) ?? order.find(far) ?? order[0]
+  return target ? { kind, target } : undefined
 }
 
 /**
@@ -204,7 +246,17 @@ export function finishDay(
   const c = balance.campaign
   const content = cityContent(expedition, baseContent)
   const home = result.outcome.result === 'won'
-  const brought = home ? result : { food: 0, water: 0, materials: 0 }
+  // A mission done brings its reward, but only if you get home with it.
+  const mission = expedition.mission
+  const missionDone = home && mission?.done === true
+  const reward = missionDone ? c.missionReward[mission.kind] : { food: 0, water: 0, materials: 0 }
+  const brought = home
+    ? {
+        food: result.food + reward.food,
+        water: result.water + reward.water,
+        materials: result.materials + reward.materials,
+      }
+    : { food: 0, water: 0, materials: 0 }
 
   // The city remembers: buildings you got to know, searches used, buildings burned.
   const buildings = Object.keys(expedition.sites)
@@ -267,6 +319,7 @@ export function finishDay(
     producedFood,
     producedWater,
     ...(dogNews ? { dog: dogNews } : {}),
+    ...(missionDone ? { mission: mission.kind } : {}),
   }
   const losses = campaign.losses + (home ? 0 : 1)
   const over: CampaignState['over'] =

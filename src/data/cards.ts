@@ -129,8 +129,9 @@ export const cards = {
     trashable: true,
     modes: [
       {
-        effects: [{ kind: 'damage', amount: 1, target: 'one' }],
-        followUp: { tag: 'weapon', effects: [{ kind: 'kill', target: 'one' }] },
+        ammo: 1,
+        effects: [{ kind: 'damage', amount: 1, target: 'one', hitsFlying: true }],
+        followUp: { tag: 'weapon', effects: [{ kind: 'kill', target: 'one', hitsFlying: true }] },
       },
     ],
   },
@@ -161,7 +162,9 @@ export const cards = {
     cost: 1,
     tags: ['weapon', 'quiet'],
     trashable: true,
-    modes: [{ effects: [{ kind: 'damage', amount: 2, target: 'one', range: 1 }] }],
+    modes: [
+      { effects: [{ kind: 'damage', amount: 2, target: 'one', range: 1, hitsFlying: true }] },
+    ],
   },
   axe: {
     id: 'axe',
@@ -182,7 +185,13 @@ export const cards = {
     cost: 1,
     tags: ['weapon'],
     trashable: true,
-    modes: [{ noise: 2, effects: [{ kind: 'damage', amount: 3, target: 'one' }] }],
+    modes: [
+      {
+        noise: 2,
+        ammo: 1,
+        effects: [{ kind: 'damage', amount: 3, target: 'one', hitsFlying: true }],
+      },
+    ],
   },
   molotov: {
     id: 'molotov',
@@ -194,7 +203,10 @@ export const cards = {
       {
         useUp: true,
         noise: 2,
-        effects: [{ kind: 'damage', amount: 2, target: 'allHere' }, { kind: 'burnBuilding' }],
+        effects: [
+          { kind: 'damage', amount: 2, target: 'allHere', hitsFlying: true },
+          { kind: 'burnBuilding' },
+        ],
       },
     ],
   },
@@ -307,6 +319,16 @@ export const cards = {
       },
     ],
   },
+  // Not a card: taking this find gives you bullets for guns (balance.ammo).
+  ammunition: {
+    id: 'ammunition',
+    kind: 'action',
+    cost: 0,
+    tags: [],
+    trashable: true,
+    modes: [],
+    ammoFind: true,
+  },
   // A companion, not a card: taking this find gives you the Stray Dog (src/game/dog.ts).
   dog: {
     id: 'dog',
@@ -338,7 +360,13 @@ export const cards = {
     tags: ['weapon'],
     trashable: true,
     rare: true,
-    modes: [{ noise: 2, effects: [{ kind: 'damage', amount: 2, target: 'allHere' }] }],
+    modes: [
+      {
+        noise: 2,
+        ammo: 1,
+        effects: [{ kind: 'damage', amount: 2, target: 'allHere', hitsFlying: true }],
+      },
+    ],
   },
   chainsaw: {
     id: 'chainsaw',

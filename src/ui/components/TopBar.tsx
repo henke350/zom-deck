@@ -1,6 +1,7 @@
 import { texts } from '../../data/texts.en'
 import type { GameState } from '../../game'
 import { dangerLevel, noiseThreshold, packsCarried, resultWith } from '../../game'
+import { locationText } from '../names'
 
 interface StatProps {
   readonly label: string
@@ -56,6 +57,14 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
       />
       <Stat label={ui.ap} value={`${player.ap}/${balance.apPerTurn}`} />
       <Stat
+        label={ui.ammoStat}
+        value={String(player.ammo)}
+        tone={player.ammo === 0 ? 'warn' : undefined}
+      />
+      {player.poison > 0 && (
+        <Stat label={ui.poisonStat} value={String(player.poison)} tone="danger" />
+      )}
+      <Stat
         label={ui.noiseLabel}
         value={`${state.noise}/${threshold}`}
         tone={state.noise >= threshold - 1 ? 'warn' : undefined}
@@ -104,6 +113,27 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
           {ui.removedPile} <b>{piles.removed.length}</b>
         </span>
       </div>
+      {state.mission && (
+        <span
+          className={state.mission.done ? 'day-event mission-chip done' : 'day-event mission-chip'}
+          title={
+            state.mission.done
+              ? texts.missions.done
+              : texts.missions[state.mission.kind].text(locationText(state.mission.target).name)
+          }
+        >
+          {state.mission.done ? '✓ ' : '★ '}
+          {texts.missions[state.mission.kind].name}
+        </span>
+      )}
+      {state.survivor && state.survivor !== 'scavenger' && (
+        <span className="day-event survivor-chip">{texts.survivors[state.survivor].name}</span>
+      )}
+      {state.dayEvent && state.dayEvent !== 'quiet' && (
+        <span className="day-event" title={texts.dayEvents[state.dayEvent].text}>
+          {texts.dayEvents[state.dayEvent].name}
+        </span>
+      )}
       {day === undefined && (
         <span className="seed">
           {ui.seed} {state.seed}

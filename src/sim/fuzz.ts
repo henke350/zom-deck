@@ -71,11 +71,17 @@ function campaignSetups(content: Content, deck: readonly CardId[]): FuzzSetup[] 
     burned: buildings.slice(-1),
   }
   const laterSetup = daySetup(later, standard, content)
+  const bossDay: CampaignState = { ...first, day: standard.campaign.missions.indexOf('boss') + 1 }
   return [
     {
       name: 'kampagne dag 1',
       balance: dayBalance(first, standard),
       setup: daySetup(first, standard, content),
+    },
+    {
+      name: 'kampagne, bossdag',
+      balance: dayBalance(bossDay, standard),
+      setup: daySetup(bossDay, standard, content),
     },
     {
       name: 'kampagne, plyndret by',
@@ -109,7 +115,11 @@ export function fuzz(games: number, content: Content = defaultContent): FuzzResu
     if (!kind) continue
     const seed = i + 1
     const report = (what: string) => problems.push(`${kind.name}, seed ${seed}: ${what}`)
-    const start = newGame(seed, { balance: kind.balance, content, setup: kind.setup })
+    // Every survivor plays every kind of game.
+    const survivors = kind.balance.survivors
+    const survivor = survivors[Math.floor(i / setups.length) % survivors.length]?.id
+    const setup = { ...kind.setup, ...(survivor ? { survivor } : {}) }
+    const start = newGame(seed, { balance: kind.balance, content, setup })
     let state: GameState = start
     const random = makeRandom(seed)
     const taken: Action[] = []

@@ -1,4 +1,4 @@
-import type { Balance, ZombieKind } from '../data/balance'
+import type { Balance, DayEventId, MissionKind, SurvivorId, ZombieKind } from '../data/balance'
 
 export type { ZombieKind }
 
@@ -23,6 +23,8 @@ export type Effect =
       readonly target: 'one' | 'allHere'
       /** Bow: a single target may also stand this many steps away (where you can see zombies). */
       readonly range?: number
+      /** A shot or fire: it can hit flying zombies (Bats). */
+      readonly hitsFlying?: boolean
     }
   | { readonly kind: 'neutralize'; readonly target: 'one' | 'allHere' }
   | { readonly kind: 'block'; readonly amount: number }
@@ -38,7 +40,13 @@ export type Effect =
   /** Gear: the card stays in front of you (see `CardDef.gear`) instead of being discarded. */
   | { readonly kind: 'equip' }
   /** Kills one zombie here outright, whatever its health. `unaware`: only one that has not seen you. */
-  | { readonly kind: 'kill'; readonly target: 'one'; readonly unaware?: boolean }
+  | {
+      readonly kind: 'kill'
+      readonly target: 'one'
+      readonly unaware?: boolean
+      /** A shot: it can hit flying zombies (Bats). */
+      readonly hitsFlying?: boolean
+    }
 
 /** What a piece of gear does while it lies in front of you. */
 export type GearEffect =
@@ -80,6 +88,8 @@ export interface CardMode {
   readonly noise?: number
   /** "Use up": the card is removed from the game when played in this mode. */
   readonly useUp?: boolean
+  /** Guns: bullets this mode uses (see `balance.ammo`). */
+  readonly ammo?: number
   /** "Follow-up": these effects replace `effects` if a card with `tag` was played earlier this turn. */
   readonly followUp?: { readonly tag: Tag; readonly effects: readonly Effect[] }
 }
@@ -102,6 +112,8 @@ export interface CardDef {
   readonly rare?: boolean
   /** The Stray Dog: taking this find gives you a companion instead of a card. */
   readonly companion?: boolean
+  /** Ammunition: taking this find gives you bullets instead of a card. */
+  readonly ammoFind?: boolean
   /** Gear: what the card does while it lies in front of you, and how long it lasts. */
   readonly gear?: GearDef
 }
@@ -127,6 +139,8 @@ export interface LocationDef {
   }
   /** Something you can do here for AP (Workshop: Dismantle, Pharmacy: Patch up). */
   readonly service?: LocationService
+  /** What this place does by itself (numbers in `balance.places`). */
+  readonly feature?: PlaceFeature
   /** An empty building slot on a bigger map: a random city always puts a building here. */
   readonly slot?: boolean
   /**
@@ -137,6 +151,13 @@ export interface LocationDef {
 }
 
 export type ServiceId = 'dismantle' | 'patchUp'
+
+/**
+ * A special place. infirmary: end your turn here to heal. armory: bullets on your first visit.
+ * fuel: extra finds on your first visit. trap: you get hurt on your first visit. sanctuary:
+ * noise dies down when you end your turn here.
+ */
+export type PlaceFeature = 'infirmary' | 'armory' | 'fuel' | 'trap' | 'sanctuary'
 
 /** A location service trashes one card from your hand. `junk`: only Nerves and Wound. */
 export interface LocationService {
@@ -188,6 +209,8 @@ export interface Zombie {
    * you first enter or scout the building, at the danger level of that moment.
    */
   readonly rollOnReveal?: boolean
+  /** A Sleeper that has not woken up yet: it does not notice you or attack. */
+  readonly asleep?: boolean
 }
 
 /** A search waiting for the player to choose. */
@@ -277,6 +300,10 @@ export interface PlayerState {
   readonly searchBonus: number
   /** Damage prevented this turn. */
   readonly block: number
+  /** Spitter poison: this much damage at the end of the turn, then it fades by 1. */
+  readonly poison: number
+  /** Bullets for guns. */
+  readonly ammo: number
 }
 
 export interface Outcome {
@@ -321,6 +348,12 @@ export interface GameState {
   readonly packsPlaced?: number
   /** The Stray Dog, while it is with you. */
   readonly dog?: DogState
+  /** The event of this expedition (its changes are already in `balance`). */
+  readonly dayEvent?: DayEventId
+  /** Who is out there (absent: the classic start). */
+  readonly survivor?: SurvivorId
+  /** Campaign: today's optional mission. */
+  readonly mission?: Mission
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
@@ -349,6 +382,8 @@ export interface Stats {
   readonly damageFromZombies: number
   /** Health lost to your own cards (Adrenaline). */
   readonly damageFromCards: number
+  /** Health lost to places (traps). */
+  readonly damageFromPlaces: number
   /** Damage kept off you by Block and gear (Kevlar Vest). */
   readonly damageBlocked: number
   readonly attacksByFollowers: number
@@ -381,6 +416,8 @@ export interface ExpeditionResult {
   readonly materials: number
   /** The Stray Dog's health at the end, if it is still with you. */
   readonly dogHp?: number
+  /** Campaign: today's mission was done. */
+  readonly missionDone?: boolean
   readonly hpLeft: number
   readonly turnsUsed: number
   readonly cardsFound: readonly CardId[]
@@ -405,6 +442,19 @@ export interface ExpeditionSetup {
   readonly burned?: readonly LocationId[]
   /** Campaign: the Stray Dog comes along with this much health. */
   readonly dog?: { readonly hp: number }
+  /** The event of the day; leave out for a random one, 'none' for none. */
+  readonly dayEvent?: DayEventId | 'none'
+  /** Who goes out; leave out for the classic start. */
+  readonly survivor?: SurvivorId
+  /** Campaign: today's optional mission in a marked building. */
+  readonly mission?: { readonly kind: MissionKind; readonly target: LocationId }
+}
+
+/** A campaign mission: go to the marked building and do what it asks. */
+export interface Mission {
+  readonly kind: MissionKind
+  readonly target: LocationId
+  readonly done: boolean
 }
 
 export interface PlayCardAction {
@@ -590,7 +640,23 @@ export type GameEvent =
   | { readonly type: 'buildingBurned'; readonly location: LocationId }
   | { readonly type: 'apGained'; readonly amount: number }
   | { readonly type: 'healed'; readonly amount: number }
-  | { readonly type: 'hpLost'; readonly amount: number; readonly source: 'zombies' | 'card' }
+  | {
+      readonly type: 'hpLost'
+      readonly amount: number
+      readonly source: 'zombies' | 'card' | 'poison' | 'burst' | 'place'
+    }
+  | { readonly type: 'poisoned'; readonly amount: number; readonly total: number }
+  | { readonly type: 'ammoUsed'; readonly amount: number; readonly left: number }
+  | {
+      readonly type: 'placeEffect'
+      readonly location: LocationId
+      readonly feature: PlaceFeature
+      readonly amount: number
+    }
+  | { readonly type: 'ammoFound'; readonly amount: number; readonly total: number }
+  | { readonly type: 'zombieWoke'; readonly uid: string }
+  | { readonly type: 'missionDone'; readonly kind: MissionKind; readonly target: LocationId }
+  | { readonly type: 'zombieBurst'; readonly uid: string; readonly damage: number }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'cardDiscarded'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'serviceUsed'; readonly service: ServiceId; readonly location: LocationId }

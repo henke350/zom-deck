@@ -46,6 +46,7 @@ export const locations = {
   },
   police: {
     id: 'police',
+    feature: 'armory',
     kind: 'building',
     downtown: true,
     mapPos: { x: 520, y: 70 },
@@ -55,6 +56,7 @@ export const locations = {
       kinds: [
         { kind: 'walker', weight: 2 },
         { kind: 'brute', weight: 2 },
+        { kind: 'hound', weight: 1 },
       ],
     },
     lootPool: [
@@ -65,6 +67,7 @@ export const locations = {
       { card: 'districtMap', weight: 2 },
       { card: 'flashlight', weight: 1 },
       { card: 'shotgun', weight: 1 },
+      { card: 'ammunition', weight: 3 },
     ],
   },
   houseA: {
@@ -92,6 +95,7 @@ export const locations = {
       kinds: [
         { kind: 'walker', weight: 3 },
         { kind: 'runner', weight: 1 },
+        { kind: 'bloater', weight: 1 },
       ],
     },
     alwaysHasPack: true,
@@ -117,6 +121,7 @@ export const locations = {
       kinds: [
         { kind: 'walker', weight: 2 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'spitter', weight: 1 },
       ],
     },
     service: { id: 'patchUp', filter: 'junk' },
@@ -154,6 +159,7 @@ export type KnownLocationId = keyof typeof locations
 export const extraBuildings = {
   gasStation: {
     id: 'gasStation',
+    feature: 'fuel',
     kind: 'building',
     startZombies: {
       min: 0,
@@ -162,6 +168,7 @@ export const extraBuildings = {
         { kind: 'walker', weight: 2 },
         { kind: 'runner', weight: 1 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'bloater', weight: 1 },
       ],
     },
     lootPool: [
@@ -172,6 +179,7 @@ export const extraBuildings = {
       { card: 'flashlight', weight: 2 },
       { card: 'toolbox', weight: 1 },
       { card: 'bicycle', weight: 1 },
+      { card: 'ammunition', weight: 1 },
     ],
   },
   school: {
@@ -183,6 +191,7 @@ export const extraBuildings = {
       kinds: [
         { kind: 'runner', weight: 2 },
         { kind: 'walker', weight: 1 },
+        { kind: 'spitter', weight: 1 },
       ],
     },
     lootPool: [
@@ -197,6 +206,7 @@ export const extraBuildings = {
   },
   hospital: {
     id: 'hospital',
+    feature: 'infirmary',
     kind: 'building',
     downtown: true,
     startZombies: {
@@ -206,6 +216,8 @@ export const extraBuildings = {
         { kind: 'walker', weight: 2 },
         { kind: 'brute', weight: 1 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'sleeper', weight: 1 },
+        { kind: 'spitter', weight: 1 },
       ],
     },
     service: { id: 'patchUp', filter: 'junk' },
@@ -220,6 +232,7 @@ export const extraBuildings = {
   },
   apartments: {
     id: 'apartments',
+    feature: 'trap',
     kind: 'building',
     downtown: true,
     startZombies: {
@@ -229,6 +242,7 @@ export const extraBuildings = {
         { kind: 'walker', weight: 3 },
         { kind: 'screamer', weight: 2 },
         { kind: 'runner', weight: 1 },
+        { kind: 'sleeper', weight: 2 },
       ],
     },
     lootPool: [
@@ -245,6 +259,7 @@ export const extraBuildings = {
   },
   church: {
     id: 'church',
+    feature: 'sanctuary',
     kind: 'building',
     startZombies: {
       min: 0,
@@ -252,6 +267,7 @@ export const extraBuildings = {
       kinds: [
         { kind: 'walker', weight: 2 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'sleeper', weight: 1 },
       ],
     },
     service: { id: 'patchUp', filter: 'junk' },
@@ -275,6 +291,7 @@ export const extraBuildings = {
       kinds: [
         { kind: 'runner', weight: 2 },
         { kind: 'walker', weight: 1 },
+        { kind: 'hound', weight: 1 },
       ],
     },
     lootPool: [
@@ -287,6 +304,7 @@ export const extraBuildings = {
       { card: 'softSoles', weight: 1 },
       { card: 'travelLight', weight: 1 },
       { card: 'bicycle', weight: 1 },
+      { card: 'ammunition', weight: 1 },
     ],
   },
 } as const satisfies Record<string, Omit<LocationDef, 'mapPos'>>

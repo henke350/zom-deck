@@ -5,7 +5,17 @@
 
 export type ZombieFollow = 'chase' | 'gentle' | 'off'
 
-export type ZombieKind = 'walker' | 'runner' | 'brute' | 'screamer'
+export type ZombieKind =
+  | 'walker'
+  | 'runner'
+  | 'brute'
+  | 'screamer'
+  | 'spitter'
+  | 'hound'
+  | 'bloater'
+  | 'sleeper'
+  | 'bat'
+  | 'boss'
 
 export interface ZombieStats {
   readonly hp: number
@@ -19,6 +29,16 @@ export interface ZombieStats {
    * is a chance of one more: 0.5 means one find half the time.
    */
   readonly loot: number
+  /** Spitter: each attack also poisons you this much (1 damage a turn, fading by 1 a turn). */
+  readonly poison?: number
+  /** Spitter: it also attacks from this many steps away once it has seen you, without moving. */
+  readonly spit?: number
+  /** Bloater: when it dies where you stand, it bursts and deals you this much damage. */
+  readonly burst?: number
+  /** Sleeper: starts asleep; wakes when it is hit or a full noise meter brings zombies to you. */
+  readonly sleeps?: boolean
+  /** Bat: flies; only shooting and fire can hit it (effects with `hitsFlying`, gear that shoots). */
+  readonly flies?: boolean
 }
 
 /** The Stray Dog: a companion you can find. It bites, guards you, and smells supplies. */
@@ -34,6 +54,34 @@ export interface DogBalance {
   readonly healPerNight: number
   /** Campaign: it eats 1 food every this many nights, or it runs away. */
   readonly foodEvery: number
+}
+
+/** Events of the day (inspired by Maximum Apocalypse's Day/Night cards). Texts in texts.en.ts. */
+export type DayEventId =
+  'quiet' | 'rain' | 'fullMoon' | 'foundMap' | 'restless' | 'supplyDrop' | 'cache' | 'fog'
+
+/** What an event changes for the whole expedition. */
+export type DayEventEffect =
+  /** Every noise threshold (all danger levels) is this much higher. */
+  | { readonly kind: 'noiseThreshold'; readonly amount: number }
+  /** Dusk comes this many turns earlier. */
+  | { readonly kind: 'duskEarlier'; readonly turns: number }
+  /** This many buildings you cannot see yet are scouted at the start. */
+  | { readonly kind: 'scout'; readonly count: number }
+  /** More start zombies in every building. */
+  | { readonly kind: 'extraStartZombies'; readonly amount: number }
+  /** More supply packs in the city. */
+  | { readonly kind: 'extraPacks'; readonly amount: number }
+  /** These cards go into your start deck. */
+  | { readonly kind: 'startCards'; readonly cards: readonly string[] }
+  /** Zombies follow this many steps more (negative: fewer, at least 0). */
+  | { readonly kind: 'followSteps'; readonly amount: number }
+
+export interface DayEvent {
+  readonly id: DayEventId
+  /** How often it comes up, relative to the others. */
+  readonly weight: number
+  readonly effects: readonly DayEventEffect[]
 }
 
 /** What you can build at the base between campaign days (texts in texts.en.ts). */
@@ -75,6 +123,22 @@ export interface CampaignBalance {
   readonly productionEvery: number
   /** Searches a plundered building gets back each night (others move in, things wash up). */
   readonly searchesRegrowPerNight: number
+  /** Today's mission, day 1 first (the last value repeats). Missions are optional. */
+  readonly missions: readonly MissionKind[]
+  /** What a mission done brings when you get home. */
+  readonly missionReward: Readonly<Record<MissionKind, MissionReward>>
+}
+
+/**
+ * Campaign missions (inspired by Maximum Apocalypse's scenarios): rescue (reach the marked
+ * building), clear (stand in it with no zombies there) and boss (kill the boss waiting in it).
+ */
+export type MissionKind = 'rescue' | 'clear' | 'boss'
+
+export interface MissionReward {
+  readonly food: number
+  readonly water: number
+  readonly materials: number
 }
 
 /** One step of the danger meter. */
@@ -162,6 +226,21 @@ export interface Balance {
   readonly scrapInFinds: boolean
   /** The most finds one body search can show, however many zombies a card killed. */
   readonly bodyLootMax: number
+  /** What special places do (see `PlaceFeature` on a location). */
+  readonly places: {
+    /** Hospital: end your turn here and get this much health back (cures poison too). */
+    readonly infirmaryHeal: number
+    /** Police: bullets you find the first time you go in. */
+    readonly armoryAmmo: number
+    /** Petrol station: extra finds this turn the first time you go in. */
+    readonly fuelSearchBonus: number
+    /** Apartments: a trap the first time you go in. */
+    readonly trapDamage: number
+    /** Church: noise that dies down when you end your turn here. */
+    readonly sanctuaryQuiet: number
+  }
+  /** Bullets for guns (Pistol, Shotgun, Head Shot): at the start, per Ammunition find, at most. */
+  readonly ammo: { readonly start: number; readonly perFind: number; readonly max: number }
   /** Buildings that hide a locked stash of rare finds (placed at random). */
   readonly stashesOnMap: number
   /** Rare finds to choose from in an opened stash. */
@@ -180,7 +259,27 @@ export interface Balance {
     readonly nerves: number
   }
   readonly dog: DogBalance
+  /** One event at the start of every expedition (and campaign day). */
+  readonly events: { readonly enabled: boolean; readonly options: readonly DayEvent[] }
+  /** Who you play: each survivor changes the start deck a little and has one ability. */
+  readonly survivors: readonly Survivor[]
   readonly campaign: CampaignBalance
+}
+
+export type SurvivorId = 'scavenger' | 'firefighter' | 'hunter' | 'medic' | 'mechanic'
+
+export interface Survivor {
+  readonly id: SurvivorId
+  /** Start deck changes: each swap turns one `from` card into a `to` card. */
+  readonly swaps: readonly { readonly from: string; readonly to: string }[]
+  /** Extra maximum health. */
+  readonly maxHp?: number
+  /** Every heal from a card heals this much more. */
+  readonly healBonus?: number
+  /** Buildings you see (zombies and pack) from the start. */
+  readonly scout?: number
+  /** Gear you put on lasts this much longer (absorbs, turns or uses). */
+  readonly gearBonus?: number
 }
 
 export const balance: Balance = {
@@ -206,6 +305,14 @@ export const balance: Balance = {
     runner: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0, loot: 1 },
     brute: { hp: 4, damage: 2, followSteps: 0, screamNoise: 0, loot: 2 },
     screamer: { hp: 1, damage: 0, followSteps: 1, screamNoise: 2, loot: 0.5 },
+    // New kinds instead of tougher zombies (inspired by Maximum Apocalypse, 3 Nov 2026).
+    spitter: { hp: 1, damage: 1, followSteps: 0, screamNoise: 0, loot: 0.5, poison: 1, spit: 1 },
+    hound: { hp: 1, damage: 1, followSteps: 3, screamNoise: 0, loot: 0 },
+    bloater: { hp: 3, damage: 1, followSteps: 1, screamNoise: 0, loot: 1, burst: 2 },
+    sleeper: { hp: 3, damage: 2, followSteps: 1, screamNoise: 0, loot: 1, sleeps: true },
+    bat: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0, loot: 0, flies: true },
+    // Campaign only: the boss of a mission. It never leaves its building.
+    boss: { hp: 7, damage: 2, followSteps: 0, screamNoise: 0, loot: 3 },
   },
   danger: {
     enabled: true,
@@ -241,6 +348,10 @@ export const balance: Balance = {
   // for killing zombies (search the body).
   findsToHand: true,
   bodyLootMax: 3,
+  // Special places (inspired by Maximum Apocalypse's map tiles).
+  places: { infirmaryHeal: 1, armoryAmmo: 3, fuelSearchBonus: 1, trapDamage: 1, sanctuaryQuiet: 1 },
+  // Guns need bullets (inspired by Maximum Apocalypse): a scarce resource, not a free card.
+  ammo: { start: 3, perFind: 3, max: 9 },
   rareFindWeight: 0.25,
   // Tuning 5 (25 Oct 2026, user's call): no scrapping a card while choosing finds. Trashing is
   // done with Toolbox, Painkillers and the Dismantle / Patch up services.
@@ -251,6 +362,20 @@ export const balance: Balance = {
   stashForce: { cost: 2, noise: 2 },
   wounds: { enabled: false, damageInOnePhase: 2 },
   starterDeck: { search: 4, crowbar: 2, run: 1, sneak: 1, nerves: 2 },
+  // Events of the day (3 Nov 2026, inspired by Maximum Apocalypse): every expedition differs.
+  events: {
+    enabled: true,
+    options: [
+      { id: 'quiet', weight: 3, effects: [] },
+      { id: 'rain', weight: 1, effects: [{ kind: 'noiseThreshold', amount: 1 }] },
+      { id: 'fullMoon', weight: 1, effects: [{ kind: 'duskEarlier', turns: 1 }] },
+      { id: 'foundMap', weight: 1, effects: [{ kind: 'scout', count: 2 }] },
+      { id: 'restless', weight: 1, effects: [{ kind: 'extraStartZombies', amount: 1 }] },
+      { id: 'supplyDrop', weight: 1, effects: [{ kind: 'extraPacks', amount: 1 }] },
+      { id: 'cache', weight: 1, effects: [{ kind: 'startCards', cards: ['pistol'] }] },
+      { id: 'fog', weight: 1, effects: [{ kind: 'followSteps', amount: -1 }] },
+    ],
+  },
   // The Stray Dog (25 Oct 2026, the user's idea): it fights, takes hits for you and can die.
   dog: {
     hp: 3,
@@ -262,6 +387,21 @@ export const balance: Balance = {
   },
   // Version 2, K1–K2 (25 Oct 2026): first numbers from docs/plan.md section 12, to be tuned
   // with campaign simulations and playtests.
+  // Survivors (3 Nov 2026, inspired by Maximum Apocalypse): the Scavenger is the classic start.
+  survivors: [
+    { id: 'scavenger', swaps: [] },
+    { id: 'firefighter', swaps: [{ from: 'crowbar', to: 'axe' }], maxHp: 2 },
+    { id: 'hunter', swaps: [{ from: 'crowbar', to: 'bow' }], scout: 1 },
+    {
+      id: 'medic',
+      swaps: [
+        { from: 'nerves', to: 'bandage' },
+        { from: 'nerves', to: 'painkillers' },
+      ],
+      healBonus: 1,
+    },
+    { id: 'mechanic', swaps: [{ from: 'nerves', to: 'flashlight' }], gearBonus: 1 },
+  ],
   campaign: {
     days: 7,
     foodPerNight: 1,
@@ -289,6 +429,13 @@ export const balance: Balance = {
     // First campaign simulation (25 Oct 2026): with no regrowth and one lost day allowed, no bot
     // survived 7 days; with these values 10–63 % do (players can also go home early).
     searchesRegrowPerNight: 1,
+    // Missions (3 Nov 2026): a reason to go somewhere new every day, and a boss near the end.
+    missions: ['rescue', 'clear', 'rescue', 'clear', 'rescue', 'boss', 'clear'],
+    missionReward: {
+      rescue: { food: 1, water: 0, materials: 1 },
+      clear: { food: 0, water: 1, materials: 1 },
+      boss: { food: 1, water: 1, materials: 3 },
+    },
   },
 }
 

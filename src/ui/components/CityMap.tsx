@@ -57,11 +57,15 @@ function ZombieMarks({
     <g>
       <rect className="zpill" x={startX - 10} y={y - 9} width={pillW} height={18} rx={9} />
       {shown.map((z, i) => (
-        <g key={z.uid} className={`zdot-${z.kind}`}>
+        <g key={z.uid} className={`zdot-${z.kind}${z.asleep ? ' zasleep' : ''}`}>
           <title>
-            {z.hp > state.balance.zombies[z.kind].hp
-              ? `${texts.zombieKinds[z.kind].name} (${texts.ui.tougherZombie})`
-              : texts.zombieKinds[z.kind].name}
+            {[
+              texts.zombieKinds[z.kind].name,
+              z.hp > state.balance.zombies[z.kind].hp ? `(${texts.ui.tougherZombie})` : '',
+              z.asleep ? `(${texts.ui.asleep})` : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
           </title>
           <circle
             className={z.alerted ? 'zdot zdot-alert' : 'zdot'}
@@ -217,6 +221,18 @@ export function CityMap({
                   <rect x={x - NODE_W / 2 + 4} y={top + 4} width={44} height={16} rx={8} />
                   <text x={x - NODE_W / 2 + 26} y={top + 16} textAnchor="middle">
                     {texts.ui.scentMark}
+                  </text>
+                </g>
+              )}
+              {state.mission?.target === loc.id && (
+                <g
+                  className={state.mission.done ? 'mission-mark mission-done' : 'mission-mark'}
+                  aria-hidden="true"
+                >
+                  <rect x={x + NODE_W / 2 - 60} y={top + 4} width={56} height={16} rx={8} />
+                  <text x={x + NODE_W / 2 - 32} y={top + 16} textAnchor="middle">
+                    {state.mission.done ? '✓ ' : '★ '}
+                    {texts.missions.marker}
                   </text>
                 </g>
               )}

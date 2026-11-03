@@ -32,6 +32,7 @@ export {
   chooseLocker,
   dayBalance,
   daySeed,
+  dayMission,
   daySetup,
   finishDay,
   lockerChoices,
@@ -40,3 +41,4 @@ export {
   validateBuild,
 } from './campaign'
 export type { CampaignState, DayReport } from './campaign'
+export { survivorDeck, survivorOf } from './survivors'

@@ -91,10 +91,19 @@ export function checkInvariants(state: GameState, baseContent: Content = default
   // Player and turn.
   if (!content.locations[player.location]) fail('the player is nowhere')
   if (player.ap < 0) fail('negative AP')
+  if (player.poison < 0) fail('negative poison')
+  if (player.ammo < 0 || player.ammo > balance.ammo.max) fail('ammo out of range')
+  for (const z of state.zombies) {
+    if (z.asleep && z.alerted) fail(`a sleeping zombie has seen you: ${z.uid}`)
+  }
   if (player.hp > balance.maxHp) fail('health above the maximum')
   if (
     player.hp !==
-    stats.startHp + stats.healed - stats.damageFromZombies - stats.damageFromCards
+    stats.startHp +
+      stats.healed -
+      stats.damageFromZombies -
+      stats.damageFromCards -
+      stats.damageFromPlaces
   ) {
     fail('health does not match healing and damage')
   }

@@ -13,6 +13,7 @@ export function emptyStats(startHp: number, startCards: number): Stats {
     healed: 0,
     damageFromZombies: 0,
     damageFromCards: 0,
+    damageFromPlaces: 0,
     damageBlocked: 0,
     attacksByFollowers: 0,
     attacksByZombiesThere: 0,
@@ -58,8 +59,9 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
         s.healed += e.amount
         break
       case 'hpLost':
-        if (e.source === 'zombies') s.damageFromZombies += e.amount
-        else s.damageFromCards += e.amount
+        if (e.source === 'card') s.damageFromCards += e.amount
+        else if (e.source === 'place') s.damageFromPlaces += e.amount
+        else s.damageFromZombies += e.amount
         break
       case 'damageBlocked':
       case 'gearAbsorbed':
@@ -134,6 +136,7 @@ export function resultWith(
     water,
     materials: salvage ? owned.filter((c) => c.card === salvage).length : 0,
     ...(state.dog ? { dogHp: state.dog.hp } : {}),
+    ...(state.mission ? { missionDone: state.mission.done } : {}),
     hpLeft: Math.max(0, state.player.hp),
     turnsUsed: state.turn,
     cardsFound: state.stats.cardsTaken,

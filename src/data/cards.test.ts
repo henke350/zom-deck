@@ -33,7 +33,8 @@ describe('card catalog', () => {
   it('makes junk unplayable and every other card playable', () => {
     for (const [, def] of all) {
       // The Stray Dog is a companion, never played as a card.
-      if (def.kind === 'junk' || (def as CardDef).companion) expect(def.modes).toHaveLength(0)
+      const notACard = (def as CardDef).companion || (def as CardDef).ammoFind
+      if (def.kind === 'junk' || notACard) expect(def.modes).toHaveLength(0)
       else expect(def.modes.length).toBeGreaterThan(0)
       for (const mode of def.modes) expect(mode.effects.length).toBeGreaterThan(0)
     }
@@ -66,7 +67,7 @@ describe('card catalog', () => {
     const starters = new Set<string>(starterCardIds)
     const defs: readonly [string, CardDef][] = all
     const finds = defs.filter(
-      ([id, def]) => def.kind === 'action' && !def.companion && !starters.has(id),
+      ([id, def]) => def.kind === 'action' && !def.companion && !def.ammoFind && !starters.has(id),
     )
     expect(finds.filter(([, def]) => !def.rare)).toHaveLength(21)
     expect(defs.filter(([, def]) => def.companion).map(([id]) => id)).toEqual(['dog'])

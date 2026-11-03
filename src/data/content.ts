@@ -41,26 +41,31 @@ export const defaultContent: Content = {
     { card: 'alarmClock', weight: 2 },
     { card: 'flashlight', weight: 2 },
     { card: 'knife', weight: 2 },
+    { card: 'ammunition', weight: 2 },
   ],
   // Noise mostly brings Walkers; dusk brings more Runners, so the walk home gets faster and harder.
   // With the danger meter, noise and hordes bring the kinds of the current level instead.
   arrivals: {
+    // New kinds join as danger rises: Hounds from danger 2, Bats (only shots hit them) from 3.
     byDanger: [
       [{ kind: 'walker', weight: 1 }],
       [
         { kind: 'walker', weight: 3 },
         { kind: 'runner', weight: 1 },
+        { kind: 'hound', weight: 1 },
       ],
       [
         { kind: 'walker', weight: 2 },
         { kind: 'runner', weight: 1 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'bat', weight: 1 },
       ],
       [
         { kind: 'walker', weight: 1 },
         { kind: 'runner', weight: 2 },
         { kind: 'brute', weight: 1 },
         { kind: 'screamer', weight: 1 },
+        { kind: 'bat', weight: 2 },
       ],
     ],
     noise: [
@@ -71,6 +76,7 @@ export const defaultContent: Content = {
     dusk: [
       { kind: 'walker', weight: 1 },
       { kind: 'runner', weight: 1 },
+      { kind: 'bat', weight: 1 },
     ],
   },
 }

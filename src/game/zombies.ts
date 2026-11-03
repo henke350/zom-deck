@@ -1,4 +1,5 @@
 import type { Balance, DangerLevel, ZombieKind, ZombieStats } from '../data/balance'
+import { endTurnAt } from './places'
 import { buildingKnown, cityContent } from './city'
 import { gainCard } from './deck'
 import { dogGuard } from './dog'
@@ -61,13 +62,15 @@ export function revealZombies(state: GameState, content: Content, location: Loca
     if (z.location !== location || !z.rollOnReveal) return z
     const [kind, next] = rollKind(mix, rng)
     rng = next
+    const sleeps = zombieStats(state.balance, kind).sleeps
     return {
       uid: z.uid,
       kind,
       location: z.location,
       hp: zombieMaxHp(state, kind),
-      alerted: z.alerted,
+      alerted: sleeps ? false : z.alerted,
       neutralized: z.neutralized,
+      ...(sleeps ? { asleep: true } : {}),
     }
   })
   return { ...state, rng, zombies }
@@ -120,6 +123,7 @@ export function setupZombies(
         alerted: false,
         neutralized: false,
         ...(balance.danger.enabled && balance.danger.rollOnReveal ? { rollOnReveal: true } : {}),
+        ...(zombieStats(balance, kind).sleeps ? { asleep: true } : {}),
       })
     }
   }
@@ -169,8 +173,23 @@ function updateZombies(state: GameState, change: (z: Zombie) => Zombie): GameSta
 export function noticeHere(state: GameState): GameState {
   const here = state.player.location
   return updateZombies(state, (z) =>
-    z.location === here && !z.neutralized && !z.alerted ? { ...z, alerted: true } : z,
+    z.location === here && !z.neutralized && !z.alerted && !z.asleep ? { ...z, alerted: true } : z,
   )
+}
+
+/** Sleepers where you stand wake up and see you. */
+function wakeSleepers(state: GameState, location: LocationId, events: GameEvent[]): GameState {
+  return updateZombies(state, (z) => {
+    if (!z.asleep || z.location !== location) return z
+    events.push({ type: 'zombieWoke', uid: z.uid })
+    const { asleep: _gone, ...awake } = z
+    return { ...awake, alerted: location === state.player.location }
+  })
+}
+
+/** Can this zombie be hit by these effects? Bats fly: only shots and fire reach them. */
+export function canHitZombie(balance: Balance, zombie: Zombie, hitsFlying: boolean): boolean {
+  return hitsFlying || !zombieStats(balance, zombie.kind).flies
 }
 
 /** Sneak, Alarm Clock, Soft Soles: no attack this turn, and they lose track of you. */
@@ -195,6 +214,7 @@ export function damageZombies(
 ): GameState {
   const targets = new Set(uids)
   const zombies: Zombie[] = []
+  let burst = 0
   for (const z of state.zombies) {
     if (!targets.has(z.uid)) {
       zombies.push(z)
@@ -202,10 +222,24 @@ export function damageZombies(
     }
     const hp = Math.max(0, z.hp - amount)
     events.push({ type: 'zombieHit', uid: z.uid, damage: amount, hpLeft: hp })
-    if (hp === 0) events.push({ type: 'zombieKilled', uid: z.uid })
-    else zombies.push({ ...z, hp })
+    if (hp === 0) {
+      events.push({ type: 'zombieKilled', uid: z.uid })
+      // A Bloater bursts over you when it dies where you stand.
+      const blast = zombieStats(state.balance, z.kind).burst ?? 0
+      if (blast > 0 && z.location === state.player.location) {
+        events.push({ type: 'zombieBurst', uid: z.uid, damage: blast })
+        burst += blast
+      }
+    } else if (z.asleep) {
+      // A hit wakes a Sleeper, and it sees you if you are there.
+      events.push({ type: 'zombieWoke', uid: z.uid })
+      const { asleep: _gone, ...awake } = z
+      zombies.push({ ...awake, hp, alerted: z.location === state.player.location })
+    } else zombies.push({ ...z, hp })
   }
-  return { ...state, zombies }
+  if (burst === 0) return { ...state, zombies }
+  events.push({ type: 'hpLost', amount: burst, source: 'burst' })
+  return { ...state, zombies, player: { ...state.player, hp: state.player.hp - burst } }
 }
 
 /** Where a new zombie appears: at the player, but never inside the Shelter (then on a neighbouring street). */
@@ -265,6 +299,7 @@ function spawnZombie(
     alerted: location === state.player.location,
     neutralized: false,
   }
+  // Arrivals are awake, whatever their kind.
   events.push({ type: 'zombieArrived', uid: zombie.uid, kind, location, reason })
   return {
     ...state,
@@ -300,6 +335,8 @@ function settleNoise(
   while (noise >= threshold) {
     noise -= threshold
     for (let i = 0; i < arrivals; i++) next = spawnZombie(next, content, reason, events)
+    // The racket wakes any Sleeper where you stand.
+    next = wakeSleepers(next, next.player.location, events)
   }
   return { ...next, noise }
 }
@@ -364,7 +401,15 @@ export function noisePreview(state: GameState, amount: number): NoisePreview {
  * caller checks for death afterwards.
  */
 export function zombiePhase(state: GameState, content: Content, events: GameEvent[]): GameState {
-  return screams(attacks(state, content, events), content, events)
+  return poisonTick(screams(attacks(state, content, events), content, events), events)
+}
+
+/** Poison hurts at the end of the turn and fades by 1. Nothing blocks it. */
+function poisonTick(state: GameState, events: GameEvent[]): GameState {
+  const { poison, hp } = state.player
+  if (poison <= 0 || hp <= 0) return state
+  events.push({ type: 'hpLost', amount: poison, source: 'poison' })
+  return { ...state, player: { ...state.player, hp: hp - poison, poison: poison - 1 } }
 }
 
 function screams(state: GameState, content: Content, events: GameEvent[]): GameState {
@@ -388,6 +433,9 @@ function attacks(state: GameState, content: Content, events: GameEvent[]): GameS
   if (mode !== 'off') {
     next = updateZombies(next, (z) => {
       if (!z.alerted || z.location === here) return z
+      // A Spitter stays where it is and spits at you from there.
+      const spit = zombieStats(state.balance, z.kind).spit ?? 0
+      if (!atShelter && spit > 0 && distance(content, z.location, here) <= spit) return z
       const reach = zombieStats(state.balance, z.kind).followSteps
       if (!atShelter && distance(content, z.location, here) <= reach) {
         events.push({ type: 'zombieFollowed', uid: z.uid, from: z.location, to: here })
@@ -401,10 +449,15 @@ function attacks(state: GameState, content: Content, events: GameEvent[]): GameS
 
   if (atShelter) return next
   const damageOf = (z: Zombie) => zombieStats(state.balance, z.kind).damage
+  const spitsAt = (z: Zombie) => {
+    const spit = zombieStats(state.balance, z.kind).spit ?? 0
+    return spit > 0 && z.alerted && distance(content, z.location, here) <= spit
+  }
   const attackers = next.zombies.filter(
     (z) =>
-      z.location === here &&
+      (z.location === here || spitsAt(z)) &&
       !z.neutralized &&
+      !z.asleep &&
       damageOf(z) > 0 &&
       !(mode === 'gentle' && followed.has(z.uid)),
   )
@@ -426,7 +479,17 @@ function attacks(state: GameState, content: Content, events: GameEvent[]): GameS
   next = guarded
   if (lost > 0) events.push({ type: 'hpLost', amount: lost, source: 'zombies' })
   if (lost > 0) next = gearAfterHit(next, content, events)
-  const hurt: GameState = { ...next, player: { ...next.player, hp: next.player.hp - lost } }
+  // Spitters poison you, even through Block.
+  const poison = attackers.reduce(
+    (sum, z) => sum + (zombieStats(state.balance, z.kind).poison ?? 0),
+    0,
+  )
+  if (poison > 0)
+    events.push({ type: 'poisoned', amount: poison, total: next.player.poison + poison })
+  const hurt: GameState = {
+    ...next,
+    player: { ...next.player, hp: next.player.hp - lost, poison: next.player.poison + poison },
+  }
   const { wounds } = state.balance
   if (wounds.enabled && lost >= wounds.damageInOnePhase && hurt.player.hp > 0) {
     return gainCard(hurt, content.woundCard, 'wound', events)
@@ -455,7 +518,9 @@ export interface EndTurnPreview {
 export function previewEndTurn(state: GameState, baseContent: Content): EndTurnPreview {
   const content = cityContent(state, baseContent)
   const events: GameEvent[] = []
-  const after = zombiePhase(state, content, events)
+  const attacked = zombiePhase(state, content, events)
+  // A place may heal you afterwards (the infirmary): the preview counts what you really lose.
+  const after = attacked.player.hp > 0 ? endTurnAt(attacked, content, events) : attacked
   const count = (type: GameEvent['type']) => events.filter((e) => e.type === type).length
   // Block, gear (Kevlar Vest) and the dog all keep damage off you.
   const blocked = events.reduce(

@@ -69,6 +69,7 @@ const baseValue: Readonly<Record<string, number>> = {
   // Campaign only: material for the base.
   salvage: 5,
   dog: 8,
+  ammunition: 4,
   repack: 4,
   shotgun: 8,
   chainsaw: 8,

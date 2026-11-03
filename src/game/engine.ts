@@ -1,4 +1,5 @@
 import { defaultContent } from '../data/content'
+import { endTurnAt, firstVisit } from './places'
 import { dogBite, restDog } from './dog'
 import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
@@ -6,15 +7,18 @@ import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } fr
 import { equip, fireGear, tickGear } from './gear'
 import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
+import { healBonus } from './survivors'
+import { checkMission } from './missions'
 import { validate } from './validate'
 import {
   addNoise,
+  canHitZombie,
   damageZombies,
   neutralizeZombies,
   noticeHere,
+  revealZombies,
   zombiePhase,
   zombiesAt,
-  revealZombies,
 } from './zombies'
 import type {
   Action,
@@ -45,7 +49,12 @@ export function applyAction(
   if (!validation.ok) throw new Error(`Illegal action ${action.type}: ${validation.reason}`)
 
   const events: GameEvent[] = []
-  const next = step(state, action, content, events)
+  let next = checkMission(step(state, action, content, events), events)
+  // Anything can kill you mid-turn (a Bloater bursting): the expedition ends at once.
+  if (next.phase !== 'gameOver' && next.player.hp <= 0) {
+    const { pendingFind: _gone, ...ended } = next
+    next = gameOver(ended, { result: 'lost', cause: 'killed' }, events)
+  }
   return { state: { ...next, stats: updateStats(next.stats, events) }, events }
 }
 
@@ -133,9 +142,10 @@ function playCard(
 
   // Pay, then move the card out of the hand before its effects run, so a
   // reshuffle caused by drawing can never include it.
+  const bullets = mode.ammo ?? 0
   let next: GameState = {
     ...state,
-    player: { ...state.player, ap: state.player.ap - def.cost },
+    player: { ...state.player, ap: state.player.ap - def.cost, ammo: state.player.ammo - bullets },
     piles: {
       ...state.piles,
       hand: withoutCard(state.piles.hand, instance.uid),
@@ -151,6 +161,9 @@ function playCard(
     followUp,
     usedUp,
   })
+  if (bullets > 0) {
+    events.push({ type: 'ammoUsed', amount: bullets, left: state.player.ammo - bullets })
+  }
 
   for (const effect of effects) {
     next = resolveEffect(next, effect, action, instance.card, content, events)
@@ -198,9 +211,11 @@ function resolveEffect(
     case 'draw':
       return drawCards(state, effect.amount, events)
     case 'heal': {
-      const hp = Math.min(state.balance.maxHp, player.hp + effect.amount)
+      // Healing also cures Spitter poison.
+      const amount = effect.amount + healBonus(state.balance, state.survivor)
+      const hp = Math.min(state.balance.maxHp, player.hp + amount)
       events.push({ type: 'healed', amount: hp - player.hp })
-      return { ...state, player: { ...player, hp } }
+      return { ...state, player: { ...player, hp, poison: 0 } }
     }
     case 'loseHp':
       events.push({ type: 'hpLost', amount: effect.amount, source: 'card' })
@@ -252,10 +267,13 @@ function resolveEffect(
       return arrive(state, to, card, 0, content, events, effect.unnoticed === true)
     }
     case 'damage': {
+      // Blows that hit everything here miss the Bats, unless they are shots or fire.
       const targets =
         effect.target === 'one'
           ? [action.target?.zombie ?? '']
-          : zombiesAt(state, here).map((z) => z.uid)
+          : zombiesAt(state, here)
+              .filter((z) => canHitZombie(state.balance, z, effect.hitsFlying === true))
+              .map((z) => z.uid)
       return damageZombies(state, targets, effect.amount, events)
     }
     case 'kill': {
@@ -330,12 +348,14 @@ function arrive(
   unnoticed = false,
 ): GameState {
   events.push({ type: 'moved', from: state.player.location, to, by, apCost })
+  const firstTime = !state.visited.includes(to)
   let moved: GameState = {
     ...state,
     player: { ...state.player, location: to },
-    visited: state.visited.includes(to) ? state.visited : [...state.visited, to],
+    visited: firstTime ? [...state.visited, to] : state.visited,
   }
   moved = revealZombies(moved, content, to)
+  if (firstTime) moved = firstVisit(moved, content, to, events)
   const atShelter = content.locations[to]?.kind === 'shelter'
   if (atShelter && moved.player.packs >= state.balance.packsToWin) {
     const stars = starsFor(moved, moved.player.packs)
@@ -381,6 +401,7 @@ function endTurn(
   // Zombies first: they follow, then attack. Then dusk noise may bring more.
   let next = zombiePhase(state, content, events)
   if (next.player.hp <= 0) return gameOver(next, { result: 'lost', cause: 'killed' }, events)
+  next = endTurnAt(next, content, events)
   if (state.turn >= state.balance.duskFromTurn) {
     next = addNoise(next, state.balance.duskNoise, content, 'dusk', events)
   }
@@ -413,5 +434,6 @@ function endTurn(
 
 function gameOver(state: GameState, outcome: Outcome, events: GameEvent[]): GameState {
   events.push({ type: 'gameOver', outcome })
-  return { ...state, phase: 'gameOver', outcome }
+  const { pendingFind: _gone, ...ended } = state
+  return { ...ended, phase: 'gameOver', outcome }
 }

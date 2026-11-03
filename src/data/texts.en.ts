@@ -99,6 +99,10 @@ export const texts = {
       close: 'Got it',
     },
     tougherZombie: 'tougher than usual',
+    asleep: 'asleep',
+    ammoStat: 'Ammo',
+    ammoBadge: (n: number) => `${n} bullet${n === 1 ? '' : 's'}`,
+    poisonStat: 'Poison',
     dangerBonus: (finds: number) => `Danger · +${finds} find`,
     noiseBadge: (n: number, arrivals: number) =>
       arrivals > 0 ? `+${n} noise · zombie!` : `+${n} noise`,
@@ -250,8 +254,140 @@ export const texts = {
       short: 'S',
       text: 'Does not bite, but while it has seen you it shrieks: +2 noise every turn.',
     },
+    spitter: {
+      name: 'Spitter',
+      short: 'P',
+      text: 'Never moves, but once it has seen you it spits from up to 1 step away: 1 damage and 1 poison.',
+    },
+    hound: {
+      name: 'Hound',
+      short: 'H',
+      text: 'A dead dog: fragile, but follows you up to three steps.',
+    },
+    bloater: {
+      name: 'Bloater',
+      short: 'O',
+      text: 'Bursts when it dies where you stand: 2 damage to you. Kill it from a distance.',
+    },
+    sleeper: {
+      name: 'Sleeper',
+      short: 'Z',
+      text: 'Asleep: it does not notice you. A hit, or a full noise meter where you stand, wakes it: then it hits for 2.',
+    },
+    bat: {
+      name: 'Bat',
+      short: 'V',
+      text: 'Flies and follows you two steps. Only shots and fire can hit it: guns, bows, the Crossbow, Molotov.',
+    },
+    boss: {
+      name: 'Boss',
+      short: 'X',
+      text: 'A huge, bloated thing that guards its building. Very tough, hits for 2, never leaves.',
+    },
   },
 
+  /** Events of the day (balance.events). */
+  dayEvents: {
+    label: 'Today',
+    quiet: { name: 'A quiet morning', text: 'Nothing unusual today.' },
+    rain: {
+      name: 'Pouring rain',
+      text: 'The rain drowns out sound: every noise threshold is 1 higher.',
+    },
+    fullMoon: { name: 'Full moon', text: 'The dead get restless early: dusk comes 1 turn sooner.' },
+    foundMap: {
+      name: 'A survivor’s map',
+      text: 'Two buildings are marked on it: you know what is inside.',
+    },
+    restless: { name: 'Restless dead', text: 'Every building holds 1 more zombie than usual.' },
+    supplyDrop: {
+      name: 'Supply drop',
+      text: 'A helicopter dropped supplies: 1 more pack in the city.',
+    },
+    cache: {
+      name: 'Weapons cache',
+      text: 'You found a Pistol at the shelter: it is in your deck.',
+    },
+    fog: { name: 'Thick fog', text: 'Zombies lose you more easily: they follow 1 step less.' },
+    close: 'Got it',
+  },
+  /** Survivors: who goes out (`balance.survivors`). */
+  survivors: {
+    heading: 'Who goes out?',
+    intro:
+      'Each survivor starts with a slightly different deck and has one ability. In a campaign, the same survivor goes out every day.',
+    choose: 'Choose',
+    back: 'Back',
+    scavenger: { name: 'Scavenger', text: 'Knows the streets. The classic start.' },
+    firefighter: { name: 'Firefighter', text: 'Strong, and hard to stop.' },
+    hunter: { name: 'Hunter', text: 'Quiet, and watches before going in.' },
+    medic: { name: 'Medic', text: 'Steady hands, and a full kit.' },
+    mechanic: { name: 'Mechanic', text: 'Keeps every tool working.' },
+    noChange: 'No changes',
+    swap: (to: string, from: string) => `${to} instead of ${from}`,
+    maxHp: (n: number) => `+${n} max health`,
+    heal: (n: number) => `Every heal gives +${n} health`,
+    scout: (n: number) => `Sees ${n} building${n === 1 ? '' : 's'} from the start`,
+    gear: (n: number) => `Gear lasts ${n} longer`,
+  },
+  /** Campaign missions (`balance.campaign.missions`). */
+  missions: {
+    label: 'Mission',
+    rescue: {
+      name: 'Rescue',
+      text: (place: string) => `Someone is trapped in the ${place}. Reach it, then get home.`,
+    },
+    clear: {
+      name: 'Clear out',
+      text: (place: string) => `Clear the ${place}: stand in it with no zombies there.`,
+    },
+    boss: {
+      name: 'The Boss',
+      text: (place: string) => `Something huge has made the ${place} its nest. Kill it.`,
+    },
+    done: 'Done: get home to collect the reward.',
+    reward: (r: { food: number; water: number; materials: number }) =>
+      [
+        r.food ? `${r.food} food` : '',
+        r.water ? `${r.water} water` : '',
+        r.materials ? `${r.materials} materials` : '',
+      ]
+        .filter(Boolean)
+        .join(', '),
+    rewardLine: (reward: string) => `Reward when you get home: ${reward}.`,
+    report: (name: string, reward: string) => `Mission done (${name}): ${reward}.`,
+    marker: 'Mission',
+  },
+  /** Special places (`feature` on a location). */
+  places: {
+    infirmary: {
+      name: 'Infirmary',
+      text: (p: Balance['places']) =>
+        `End your turn here: +${p.infirmaryHeal} health, and poison is cured.`,
+      log: (n: number) => `You rest in the infirmary: +${n} health.`,
+    },
+    armory: {
+      name: 'Armory',
+      text: (p: Balance['places']) => `First time in: ${p.armoryAmmo} bullets in a locker.`,
+      log: (n: number) => `A locker full of bullets: +${n}.`,
+    },
+    fuel: {
+      name: 'Fuel and tools',
+      text: (p: Balance['places']) =>
+        `First time in: your next search here finds +${p.fuelSearchBonus}.`,
+      log: (n: number) => `Plenty to look through here: +${n} find on your next search.`,
+    },
+    trap: {
+      name: 'Booby-trapped',
+      text: (p: Balance['places']) => `First time in: a trap hurts you for ${p.trapDamage}.`,
+      log: (n: number) => `A tripwire! You lose ${n} health.`,
+    },
+    sanctuary: {
+      name: 'Sanctuary',
+      text: (p: Balance['places']) => `End your turn here: noise drops by ${p.sanctuaryQuiet}.`,
+      log: (n: number) => `The thick walls muffle everything: noise −${n}.`,
+    },
+  },
   services: {
     dismantle: { name: 'Dismantle', text: 'Trash a card from your hand.' },
     patchUp: { name: 'Patch up', text: 'Trash a Nerves or Wound from your hand.' },
@@ -303,6 +439,7 @@ export const texts = {
         items: [
           `When you end your turn, zombies that have seen you follow you. Then every zombie where you stand attacks. Block soaks up damage.`,
           `Walker: ${b.zombies.walker.hp} health, hits for ${b.zombies.walker.damage}, follows ${b.zombies.walker.followSteps} step. Runner: ${b.zombies.runner.hp} health, follows up to ${b.zombies.runner.followSteps} steps. Brute: ${b.zombies.brute.hp} health, hits for ${b.zombies.brute.damage}, never follows. Screamer: does not bite, but adds ${b.zombies.screamer.screamNoise} noise every turn while it has seen you.`,
+          `Spitter: never moves; once it has seen you it spits from up to ${b.zombies.spitter.spit ?? 1} step away (+${b.zombies.spitter.poison ?? 1} poison: 1 damage a turn, fading by 1; any healing cures it). Hound: follows up to ${b.zombies.hound.followSteps} steps. Bloater: bursts for ${b.zombies.bloater.burst ?? 2} damage when it dies where you stand. Sleeper: asleep until a hit or a full noise meter where you stand wakes it, then hits for ${b.zombies.sleeper.damage}. Bat: only shots and fire can hit it.`,
           `Kill a zombie and you can search its body: pick from ${b.zombies.walker.loot} find (a Brute: ${b.zombies.brute.loot}), up to ${b.bodyLootMax} when one card kills several. No noise.`,
           'Zombies two steps away lose track of you, and they never enter the Shelter.',
           'Bow and Crossbow are silent and can hit a zombie one step away, if you can see it (a street, or a building you have been in or scouted). Knife is silent too.',
@@ -363,6 +500,31 @@ export const texts = {
         heading: 'Losing',
         items: [
           `At 0 health you die. At the end of turn ${b.turnLimit} night falls and the expedition is lost.`,
+        ],
+      },
+      {
+        heading: 'Survivors',
+        items: [
+          'Before you set out you choose who goes: the Scavenger (the classic start), the Firefighter (more health, an Axe), the Hunter (a Bow, and sees one building from the start), the Medic (healing instead of Nerves, and heals better) or the Mechanic (a Flashlight, and gear lasts longer). The choice page lists exactly what each one changes.',
+        ],
+      },
+      {
+        heading: 'Campaign missions',
+        items: [
+          'In a campaign every day has an optional mission in a marked building (★ on the map): a rescue (reach the building), clearing it out (stand in it with no zombies there) or, near the end, the Boss (kill it). Do it and get home, and the base gets the reward shown on the base page.',
+        ],
+      },
+      {
+        heading: 'Events of the day',
+        items: [
+          'Every expedition starts with an event that changes the day: pouring rain (noise carries less), a full moon (earlier dusk), a survivor’s map, restless dead, a supply drop, a weapons cache or thick fog. It shows above your hand at the start and in the top bar.',
+        ],
+      },
+      {
+        heading: 'Special places',
+        items: [
+          'Some buildings do something by themselves: the Hospital heals you when you end your turn there, the Police station has bullets, the petrol station is full of things to search, the Apartments are booby-trapped, and the Church lets noise die down. The side panel says what each one does.',
+          `Guns (Pistol, Shotgun, Head Shot) use bullets. You start with ${b.ammo.start}; each Ammunition you find gives ${b.ammo.perFind}, up to ${b.ammo.max}.`,
         ],
       },
       {
@@ -547,6 +709,13 @@ export const texts = {
     apGained: (n: number) => `You gain ${n} AP.`,
     healed: (n: number) => `You heal ${n}.`,
     hpLost: (n: number) => `You lose ${n} health.`,
+    poisonHurts: (n: number) => `The poison burns: you lose ${n} health.`,
+    poisoned: (n: number, total: number) => `Spit hits you: +${n} poison (${total} in all).`,
+    zombieWoke: 'A Sleeper wakes up.',
+    missionDone: (mission: string) => `Mission done: ${mission}. Get home to collect the reward.`,
+    ammoFound: (n: number, total: number) => `You pocket ${n} bullets (${total} in all).`,
+    ammoUsed: (left: number) => `Bang. ${left} bullet${left === 1 ? '' : 's'} left.`,
+    zombieBurst: (n: number) => `It bursts all over you: ${n} damage.`,
     cardTrashed: (name: string) => `You trash ${name}.`,
     cardDiscarded: (name: string) => `You discard ${name}.`,
     serviceUsed: (service: string, place: string) => `You use ${service} at the ${place}.`,
@@ -662,7 +831,11 @@ export const texts = {
     },
     baseballBat: { name: 'Baseball Bat', text: 'Deal 1 damage. Draw 1 card.' },
     axe: { name: 'Axe', text: 'Deal 2 damage. Follow-up Weapon: +1 damage.' },
-    pistol: { name: 'Pistol', text: 'Deal 3 damage. +2 noise.' },
+    pistol: { name: 'Pistol', text: 'Uses 1 bullet. Deal 3 damage. +2 noise.' },
+    ammunition: {
+      name: 'Ammunition',
+      text: 'Not a card: a box of bullets for your guns (Pistol, Shotgun, Head Shot).',
+    },
     molotov: {
       name: 'Molotov',
       text: "Use up: deal 2 damage to every zombie here. +2 noise. This building can't be searched again.",
@@ -691,7 +864,10 @@ export const texts = {
       text: 'Heal 1. Use up: heal 3 instead.',
       modes: ['Heal 1', 'Use up: heal 3'],
     },
-    shotgun: { name: 'Shotgun', text: 'Deal 2 damage to every zombie here. +2 noise.' },
+    shotgun: {
+      name: 'Shotgun',
+      text: 'Uses 1 bullet. Deal 2 damage to every zombie here. +2 noise.',
+    },
     chainsaw: { name: 'Chainsaw', text: 'Deal 4 damage to every zombie here. +3 noise.' },
     bicycle: { name: 'Bicycle', text: 'Move up to 3.' },
     firstAidKit: {
@@ -701,7 +877,7 @@ export const texts = {
     },
     headShot: {
       name: 'Head Shot',
-      text: 'Deal 1 damage. Follow-up Weapon: kill a zombie here instead, whatever its health.',
+      text: 'Uses 1 bullet. Deal 1 damage. Follow-up Weapon: kill a zombie here instead, whatever its health.',
     },
     silentTakedown: {
       name: 'Silent Takedown',
@@ -788,6 +964,9 @@ export const texts = {
     zombieSeesYou: 'That zombie has seen you. Sneak, distract it or arrive unnoticed first.',
     gearNotUsable: 'This gear works by itself; there is nothing to use.',
     noDog: 'You have no dog.',
+    onlyShotsHitFlying: 'Bats fly: only a shot or fire can hit them.',
+    noAmmo: (need: number, have: number) =>
+      `Needs ${need} bullet${need === 1 ? '' : 's'}. You have ${have}. Find Ammunition.`,
     dogBitten: 'Your dog has already attacked this turn.',
   },
 } as const
