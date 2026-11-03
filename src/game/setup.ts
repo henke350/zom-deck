@@ -1,6 +1,7 @@
 import { balance as defaultBalance, type Balance } from '../data/balance'
 import { eventScoutCount, eventStartCards, pickDayEvent, withDayEvent } from './dayEvents'
 import { adoptDog } from './dog'
+import { placeBoss } from './missions'
 import { survivorDeck, survivorOf, withSurvivor } from './survivors'
 import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
@@ -112,6 +113,9 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     visited: [content.startLocation],
     ...(dayEvent ? { dayEvent: dayEvent.id } : {}),
     ...(survivor ? { survivor: survivor.id } : {}),
+    ...(setup?.mission && sites[setup.mission.target]
+      ? { mission: { ...setup.mission, done: false } }
+      : {}),
     ...(city ? { city } : {}),
     ...(campaign
       ? {
@@ -124,7 +128,8 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
   }
   const events: GameEvent[] = []
   const scouted = scoutedIds.filter((id) => sites[id])
-  const revealed = scouted.reduce((s, id) => revealZombies(s, here, id), initial)
+  const withBoss = initial.mission ? placeBoss(initial, initial.mission) : initial
+  const revealed = scouted.reduce((s, id) => revealZombies(s, here, id), withBoss)
   // Campaign: the dog from earlier days comes along.
   const withDog = setup?.dog ? adoptDog(revealed, setup.dog.hp, events) : revealed
   return startTurn(withDog, events)

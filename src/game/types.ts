@@ -1,4 +1,4 @@
-import type { Balance, DayEventId, SurvivorId, ZombieKind } from '../data/balance'
+import type { Balance, DayEventId, MissionKind, SurvivorId, ZombieKind } from '../data/balance'
 
 export type { ZombieKind }
 
@@ -352,6 +352,8 @@ export interface GameState {
   readonly dayEvent?: DayEventId
   /** Who is out there (absent: the classic start). */
   readonly survivor?: SurvivorId
+  /** Campaign: today's optional mission. */
+  readonly mission?: Mission
   /** Running totals for the end screen. Updated from the events of every action. */
   readonly stats: Stats
   readonly outcome?: Outcome
@@ -414,6 +416,8 @@ export interface ExpeditionResult {
   readonly materials: number
   /** The Stray Dog's health at the end, if it is still with you. */
   readonly dogHp?: number
+  /** Campaign: today's mission was done. */
+  readonly missionDone?: boolean
   readonly hpLeft: number
   readonly turnsUsed: number
   readonly cardsFound: readonly CardId[]
@@ -442,6 +446,15 @@ export interface ExpeditionSetup {
   readonly dayEvent?: DayEventId | 'none'
   /** Who goes out; leave out for the classic start. */
   readonly survivor?: SurvivorId
+  /** Campaign: today's optional mission in a marked building. */
+  readonly mission?: { readonly kind: MissionKind; readonly target: LocationId }
+}
+
+/** A campaign mission: go to the marked building and do what it asks. */
+export interface Mission {
+  readonly kind: MissionKind
+  readonly target: LocationId
+  readonly done: boolean
 }
 
 export interface PlayCardAction {
@@ -642,6 +655,7 @@ export type GameEvent =
     }
   | { readonly type: 'ammoFound'; readonly amount: number; readonly total: number }
   | { readonly type: 'zombieWoke'; readonly uid: string }
+  | { readonly type: 'missionDone'; readonly kind: MissionKind; readonly target: LocationId }
   | { readonly type: 'zombieBurst'; readonly uid: string; readonly damage: number }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'cardDiscarded'; readonly uid: string; readonly card: CardId }

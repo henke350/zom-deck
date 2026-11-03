@@ -6,7 +6,16 @@
 export type ZombieFollow = 'chase' | 'gentle' | 'off'
 
 export type ZombieKind =
-  'walker' | 'runner' | 'brute' | 'screamer' | 'spitter' | 'hound' | 'bloater' | 'sleeper' | 'bat'
+  | 'walker'
+  | 'runner'
+  | 'brute'
+  | 'screamer'
+  | 'spitter'
+  | 'hound'
+  | 'bloater'
+  | 'sleeper'
+  | 'bat'
+  | 'boss'
 
 export interface ZombieStats {
   readonly hp: number
@@ -114,6 +123,22 @@ export interface CampaignBalance {
   readonly productionEvery: number
   /** Searches a plundered building gets back each night (others move in, things wash up). */
   readonly searchesRegrowPerNight: number
+  /** Today's mission, day 1 first (the last value repeats). Missions are optional. */
+  readonly missions: readonly MissionKind[]
+  /** What a mission done brings when you get home. */
+  readonly missionReward: Readonly<Record<MissionKind, MissionReward>>
+}
+
+/**
+ * Campaign missions (inspired by Maximum Apocalypse's scenarios): rescue (reach the marked
+ * building), clear (stand in it with no zombies there) and boss (kill the boss waiting in it).
+ */
+export type MissionKind = 'rescue' | 'clear' | 'boss'
+
+export interface MissionReward {
+  readonly food: number
+  readonly water: number
+  readonly materials: number
 }
 
 /** One step of the danger meter. */
@@ -286,6 +311,8 @@ export const balance: Balance = {
     bloater: { hp: 3, damage: 1, followSteps: 1, screamNoise: 0, loot: 1, burst: 2 },
     sleeper: { hp: 3, damage: 2, followSteps: 1, screamNoise: 0, loot: 1, sleeps: true },
     bat: { hp: 1, damage: 1, followSteps: 2, screamNoise: 0, loot: 0, flies: true },
+    // Campaign only: the boss of a mission. It never leaves its building.
+    boss: { hp: 7, damage: 2, followSteps: 0, screamNoise: 0, loot: 3 },
   },
   danger: {
     enabled: true,
@@ -402,6 +429,13 @@ export const balance: Balance = {
     // First campaign simulation (25 Oct 2026): with no regrowth and one lost day allowed, no bot
     // survived 7 days; with these values 10–63 % do (players can also go home early).
     searchesRegrowPerNight: 1,
+    // Missions (3 Nov 2026): a reason to go somewhere new every day, and a boss near the end.
+    missions: ['rescue', 'clear', 'rescue', 'clear', 'rescue', 'boss', 'clear'],
+    missionReward: {
+      rescue: { food: 1, water: 0, materials: 1 },
+      clear: { food: 0, water: 1, materials: 1 },
+      boss: { food: 1, water: 1, materials: 3 },
+    },
   },
 }
 

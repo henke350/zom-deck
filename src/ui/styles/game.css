@@ -754,7 +754,8 @@
 .zdot-sleeper .zdot {
   fill: var(--ink-2);
 }
-.zdot-bat .zdot {
+.zdot-bat .zdot,
+.zdot-boss .zdot {
   fill: var(--red);
 }
 /* A Sleeper that has not woken: faded */
@@ -1002,6 +1003,21 @@
 }
 .gear-dog b {
   color: var(--teal);
+}
+
+/* Today's campaign mission: a mark on its building */
+.mission-mark rect {
+  fill: var(--amber-ink);
+}
+.mission-mark.mission-done rect {
+  fill: var(--teal);
+}
+.mission-mark text {
+  fill: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 
 /* The event of the day: a small label in the top bar */

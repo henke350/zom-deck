@@ -279,6 +279,11 @@ export const texts = {
       short: 'V',
       text: 'Flies and follows you two steps. Only shots and fire can hit it: guns, bows, the Crossbow, Molotov.',
     },
+    boss: {
+      name: 'Boss',
+      short: 'X',
+      text: 'A huge, bloated thing that guards its building. Very tough, hits for 2, never leaves.',
+    },
   },
 
   /** Events of the day (balance.events). */
@@ -324,6 +329,34 @@ export const texts = {
     heal: (n: number) => `Every heal gives +${n} health`,
     scout: (n: number) => `Sees ${n} building${n === 1 ? '' : 's'} from the start`,
     gear: (n: number) => `Gear lasts ${n} longer`,
+  },
+  /** Campaign missions (`balance.campaign.missions`). */
+  missions: {
+    label: 'Mission',
+    rescue: {
+      name: 'Rescue',
+      text: (place: string) => `Someone is trapped in the ${place}. Reach it, then get home.`,
+    },
+    clear: {
+      name: 'Clear out',
+      text: (place: string) => `Clear the ${place}: stand in it with no zombies there.`,
+    },
+    boss: {
+      name: 'The Boss',
+      text: (place: string) => `Something huge has made the ${place} its nest. Kill it.`,
+    },
+    done: 'Done: get home to collect the reward.',
+    reward: (r: { food: number; water: number; materials: number }) =>
+      [
+        r.food ? `${r.food} food` : '',
+        r.water ? `${r.water} water` : '',
+        r.materials ? `${r.materials} materials` : '',
+      ]
+        .filter(Boolean)
+        .join(', '),
+    rewardLine: (reward: string) => `Reward when you get home: ${reward}.`,
+    report: (name: string, reward: string) => `Mission done (${name}): ${reward}.`,
+    marker: 'Mission',
   },
   /** Special places (`feature` on a location). */
   places: {
@@ -473,6 +506,12 @@ export const texts = {
         heading: 'Survivors',
         items: [
           'Before you set out you choose who goes: the Scavenger (the classic start), the Firefighter (more health, an Axe), the Hunter (a Bow, and sees one building from the start), the Medic (healing instead of Nerves, and heals better) or the Mechanic (a Flashlight, and gear lasts longer). The choice page lists exactly what each one changes.',
+        ],
+      },
+      {
+        heading: 'Campaign missions',
+        items: [
+          'In a campaign every day has an optional mission in a marked building (★ on the map): a rescue (reach the building), clearing it out (stand in it with no zombies there) or, near the end, the Boss (kill it). Do it and get home, and the base gets the reward shown on the base page.',
         ],
       },
       {
@@ -673,6 +712,7 @@ export const texts = {
     poisonHurts: (n: number) => `The poison burns: you lose ${n} health.`,
     poisoned: (n: number, total: number) => `Spit hits you: +${n} poison (${total} in all).`,
     zombieWoke: 'A Sleeper wakes up.',
+    missionDone: (mission: string) => `Mission done: ${mission}. Get home to collect the reward.`,
     ammoFound: (n: number, total: number) => `You pocket ${n} bullets (${total} in all).`,
     ammoUsed: (left: number) => `Bang. ${left} bullet${left === 1 ? '' : 's'} left.`,
     zombieBurst: (n: number) => `It bursts all over you: ${n} damage.`,

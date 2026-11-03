@@ -28,8 +28,12 @@ describe('campaign', () => {
     expect(
       screen.getByRole('heading', { name: t.dayHeading(1, balance.campaign.days) }),
     ).toBeTruthy()
+    // Today's mission and its reward are on the base page.
+    const first = balance.campaign.missions[0]!
+    expect(screen.getByText(`${texts.missions.label}: ${texts.missions[first].name}.`)).toBeTruthy()
 
     await user.click(screen.getByRole('button', { name: t.setOut(1) }))
+    expect(screen.getByText(texts.missions[first].name, { exact: false })).toBeTruthy()
     expect(screen.getByText(`1/${balance.campaign.days}`)).toBeTruthy()
     expect(loadCampaign()?.expedition?.campaignDay).toBe(1)
 

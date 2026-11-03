@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 import type { Balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
-import { lockerChoices, upgradeIds, validateBuild } from '../../game'
+import { dayMission, lockerChoices, upgradeIds, validateBuild } from '../../game'
 import type { CampaignState, CardId } from '../../game'
 import type { UpgradeId } from '../../data/balance'
-import { cardText } from '../names'
+import { cardText, locationText } from '../names'
 import { Page } from './Page'
 
 interface BaseScreenProps {
@@ -36,6 +36,7 @@ export function BaseScreen({
   const c = balance.campaign
   const last = campaign.history.at(-1)
   const choices = lockerChoices(campaign)
+  const mission = dayMission(campaign, balance)
 
   return (
     <Page labelledBy="base-title">
@@ -80,7 +81,13 @@ export function BaseScreen({
             {last.producedFood + last.producedWater > 0
               ? t.produced(last.producedFood, last.producedWater)
               : ''}{' '}
-            {last.dog ? t.dogNews[last.dog] : ''}
+            {last.dog ? t.dogNews[last.dog] : ''}{' '}
+            {last.mission
+              ? texts.missions.report(
+                  texts.missions[last.mission].name,
+                  texts.missions.reward(c.missionReward[last.mission]),
+                )
+              : ''}
           </p>
         </section>
       )}
@@ -94,6 +101,15 @@ export function BaseScreen({
             {campaign.wounds > 0 && <li>{t.penaltyWounds(campaign.wounds)}</li>}
             {!campaign.hungry && !campaign.thirsty && campaign.wounds === 0 && (
               <li>{t.noPenalty}</li>
+            )}
+            {mission && (
+              <li>
+                <strong>
+                  {texts.missions.label}: {texts.missions[mission.kind].name}.
+                </strong>{' '}
+                {texts.missions[mission.kind].text(locationText(mission.target).name)}{' '}
+                {texts.missions.rewardLine(texts.missions.reward(c.missionReward[mission.kind]))}
+              </li>
             )}
             {campaign.dog && (
               <li>{t.dogAtBase(campaign.dog.hp, balance.dog.hp, balance.dog.foodEvery)}</li>

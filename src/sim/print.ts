@@ -130,6 +130,7 @@ export const zombieTokens: Readonly<Record<ZombieKind, number>> = {
   bloater: 3,
   sleeper: 3,
   bat: 4,
+  boss: 1,
 }
 
 const DECK_COLORS = [

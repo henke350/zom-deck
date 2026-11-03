@@ -8,6 +8,7 @@ import { equip, fireGear, tickGear } from './gear'
 import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
 import { healBonus } from './survivors'
+import { checkMission } from './missions'
 import { validate } from './validate'
 import {
   addNoise,
@@ -48,7 +49,7 @@ export function applyAction(
   if (!validation.ok) throw new Error(`Illegal action ${action.type}: ${validation.reason}`)
 
   const events: GameEvent[] = []
-  let next = step(state, action, content, events)
+  let next = checkMission(step(state, action, content, events), events)
   // Anything can kill you mid-turn (a Bloater bursting): the expedition ends at once.
   if (next.phase !== 'gameOver' && next.player.hp <= 0) {
     const { pendingFind: _gone, ...ended } = next

@@ -71,11 +71,17 @@ function campaignSetups(content: Content, deck: readonly CardId[]): FuzzSetup[] 
     burned: buildings.slice(-1),
   }
   const laterSetup = daySetup(later, standard, content)
+  const bossDay: CampaignState = { ...first, day: standard.campaign.missions.indexOf('boss') + 1 }
   return [
     {
       name: 'kampagne dag 1',
       balance: dayBalance(first, standard),
       setup: daySetup(first, standard, content),
+    },
+    {
+      name: 'kampagne, bossdag',
+      balance: dayBalance(bossDay, standard),
+      setup: daySetup(bossDay, standard, content),
     },
     {
       name: 'kampagne, plyndret by',

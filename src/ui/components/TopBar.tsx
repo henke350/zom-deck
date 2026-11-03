@@ -1,6 +1,7 @@
 import { texts } from '../../data/texts.en'
 import type { GameState } from '../../game'
 import { dangerLevel, noiseThreshold, packsCarried, resultWith } from '../../game'
+import { locationText } from '../names'
 
 interface StatProps {
   readonly label: string
@@ -112,6 +113,19 @@ export function TopBar({ state, onShowRules }: { state: GameState; onShowRules: 
           {ui.removedPile} <b>{piles.removed.length}</b>
         </span>
       </div>
+      {state.mission && (
+        <span
+          className={state.mission.done ? 'day-event mission-chip done' : 'day-event mission-chip'}
+          title={
+            state.mission.done
+              ? texts.missions.done
+              : texts.missions[state.mission.kind].text(locationText(state.mission.target).name)
+          }
+        >
+          {state.mission.done ? '✓ ' : '★ '}
+          {texts.missions[state.mission.kind].name}
+        </span>
+      )}
       {state.survivor && state.survivor !== 'scavenger' && (
         <span className="day-event survivor-chip">{texts.survivors[state.survivor].name}</span>
       )}

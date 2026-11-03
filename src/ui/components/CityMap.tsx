@@ -224,6 +224,18 @@ export function CityMap({
                   </text>
                 </g>
               )}
+              {state.mission?.target === loc.id && (
+                <g
+                  className={state.mission.done ? 'mission-mark mission-done' : 'mission-mark'}
+                  aria-hidden="true"
+                >
+                  <rect x={x + NODE_W / 2 - 60} y={top + 4} width={56} height={16} rx={8} />
+                  <text x={x + NODE_W / 2 - 32} y={top + 16} textAnchor="middle">
+                    {state.mission.done ? '✓ ' : '★ '}
+                    {texts.missions.marker}
+                  </text>
+                </g>
+              )}
               <rect
                 className="node-box"
                 x={x - NODE_W / 2}

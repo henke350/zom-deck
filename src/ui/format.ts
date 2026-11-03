@@ -95,6 +95,8 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.poisoned(event.amount, event.total)
     case 'zombieWoke':
       return log.zombieWoke
+    case 'missionDone':
+      return log.missionDone(texts.missions[event.kind].name)
     case 'ammoFound':
       return log.ammoFound(event.amount, event.total)
     case 'ammoUsed':

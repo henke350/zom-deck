@@ -32,6 +32,7 @@ export {
   chooseLocker,
   dayBalance,
   daySeed,
+  dayMission,
   daySetup,
   finishDay,
   lockerChoices,

@@ -191,6 +191,18 @@ export function LocationPanel({
           {!forceCheck.ok && <p className="reason">{forceCheck.reason}</p>}
         </div>
       )}
+      {def && state.mission?.target === def.id && (
+        <div className="service">
+          <h3 className="eyebrow">
+            {texts.missions.label}: {texts.missions[state.mission.kind].name}
+          </h3>
+          <p>
+            {state.mission.done
+              ? texts.missions.done
+              : texts.missions[state.mission.kind].text(locationText(def.id).name)}
+          </p>
+        </div>
+      )}
       {def?.feature && (
         <div className="service">
           <h3 className="eyebrow">{texts.places[def.feature].name}</h3>
