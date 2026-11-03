@@ -124,6 +124,7 @@ describe('noise', () => {
     expect(result.state.zombies[0]).toMatchObject({ uid: 'z2', location: 'street', alerted: true })
     expect(types(result.events)).toEqual([
       'cardPlayed',
+      'ammoUsed',
       'zombieHit',
       'zombieKilled',
       'noiseAdded',

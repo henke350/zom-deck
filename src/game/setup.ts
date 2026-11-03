@@ -74,6 +74,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
       searchBonus: 0,
       block: 0,
       poison: 0,
+      ammo: balance.ammo.start,
     },
     piles: { draw, hand: [], inPlay: [], discard: [], removed: [], gear: [] },
     sites,

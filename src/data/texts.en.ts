@@ -100,6 +100,8 @@ export const texts = {
     },
     tougherZombie: 'tougher than usual',
     asleep: 'asleep',
+    ammoStat: 'Ammo',
+    ammoBadge: (n: number) => `${n} bullet${n === 1 ? '' : 's'}`,
     poisonStat: 'Poison',
     dangerBonus: (finds: number) => `Danger · +${finds} find`,
     noiseBadge: (n: number, arrivals: number) =>
@@ -578,6 +580,8 @@ export const texts = {
     poisonHurts: (n: number) => `The poison burns: you lose ${n} health.`,
     poisoned: (n: number, total: number) => `Spit hits you: +${n} poison (${total} in all).`,
     zombieWoke: 'A Sleeper wakes up.',
+    ammoFound: (n: number, total: number) => `You pocket ${n} bullets (${total} in all).`,
+    ammoUsed: (left: number) => `Bang. ${left} bullet${left === 1 ? '' : 's'} left.`,
     zombieBurst: (n: number) => `It bursts all over you: ${n} damage.`,
     cardTrashed: (name: string) => `You trash ${name}.`,
     cardDiscarded: (name: string) => `You discard ${name}.`,
@@ -694,7 +698,11 @@ export const texts = {
     },
     baseballBat: { name: 'Baseball Bat', text: 'Deal 1 damage. Draw 1 card.' },
     axe: { name: 'Axe', text: 'Deal 2 damage. Follow-up Weapon: +1 damage.' },
-    pistol: { name: 'Pistol', text: 'Deal 3 damage. +2 noise.' },
+    pistol: { name: 'Pistol', text: 'Uses 1 bullet. Deal 3 damage. +2 noise.' },
+    ammunition: {
+      name: 'Ammunition',
+      text: 'Not a card: a box of bullets for your guns (Pistol, Shotgun, Head Shot).',
+    },
     molotov: {
       name: 'Molotov',
       text: "Use up: deal 2 damage to every zombie here. +2 noise. This building can't be searched again.",
@@ -723,7 +731,10 @@ export const texts = {
       text: 'Heal 1. Use up: heal 3 instead.',
       modes: ['Heal 1', 'Use up: heal 3'],
     },
-    shotgun: { name: 'Shotgun', text: 'Deal 2 damage to every zombie here. +2 noise.' },
+    shotgun: {
+      name: 'Shotgun',
+      text: 'Uses 1 bullet. Deal 2 damage to every zombie here. +2 noise.',
+    },
     chainsaw: { name: 'Chainsaw', text: 'Deal 4 damage to every zombie here. +3 noise.' },
     bicycle: { name: 'Bicycle', text: 'Move up to 3.' },
     firstAidKit: {
@@ -733,7 +744,7 @@ export const texts = {
     },
     headShot: {
       name: 'Head Shot',
-      text: 'Deal 1 damage. Follow-up Weapon: kill a zombie here instead, whatever its health.',
+      text: 'Uses 1 bullet. Deal 1 damage. Follow-up Weapon: kill a zombie here instead, whatever its health.',
     },
     silentTakedown: {
       name: 'Silent Takedown',
@@ -821,6 +832,8 @@ export const texts = {
     gearNotUsable: 'This gear works by itself; there is nothing to use.',
     noDog: 'You have no dog.',
     onlyShotsHitFlying: 'Bats fly: only a shot or fire can hit them.',
+    noAmmo: (need: number, have: number) =>
+      `Needs ${need} bullet${need === 1 ? '' : 's'}. You have ${have}. Find Ammunition.`,
     dogBitten: 'Your dog has already attacked this turn.',
   },
 } as const

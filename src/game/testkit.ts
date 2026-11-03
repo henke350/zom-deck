@@ -57,6 +57,8 @@ export interface StateSpec {
   readonly dog?: number
   /** Spitter poison on the player. */
   readonly poison?: number
+  /** Bullets for guns. */
+  readonly ammo?: number
 }
 
 function instances(prefix: string, ids: readonly CardId[] = []): CardInstance[] {
@@ -130,6 +132,7 @@ export function makeState(spec: StateSpec = {}): GameState {
       searchBonus: 0,
       block: 0,
       poison: spec.poison ?? 0,
+      ammo: spec.ammo ?? balance.ammo.start,
     },
     piles,
     sites,

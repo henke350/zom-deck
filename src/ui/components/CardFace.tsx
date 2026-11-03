@@ -29,6 +29,9 @@ export function CardFace({ card, state, content, showFollowUp = false }: CardFac
         </span>
         <h3>{info.name}</h3>
         {def?.rare && <span className="rare-badge">{texts.ui.rare}</span>}
+        {(firstMode?.ammo ?? 0) > 0 && (
+          <span className="noise ammo">{texts.ui.ammoBadge(firstMode?.ammo ?? 0)}</span>
+        )}
         {noise > 0 && (
           <span className="noise">
             {texts.ui.noiseBadge(noise, noisePreview(state, noise).arrivals)}

@@ -81,7 +81,7 @@ export function printDecks(content: Content, balance: Balance): PrintCard[] {
       // Rare finds have their own deck; the print-and-play game has no campaign (Salvage).
       // The Stray Dog has no print-and-play rules yet.
       const def = content.cards[entry.card]
-      if (def?.rare || def?.companion || entry.campaignOnly) continue
+      if (def?.rare || def?.companion || def?.ammoFind || entry.campaignOnly) continue
       for (let i = 0; i < entry.weight; i++) out.push({ card: entry.card, deck: building.id })
     }
   }

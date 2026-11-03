@@ -129,6 +129,7 @@ export const cards = {
     trashable: true,
     modes: [
       {
+        ammo: 1,
         effects: [{ kind: 'damage', amount: 1, target: 'one', hitsFlying: true }],
         followUp: { tag: 'weapon', effects: [{ kind: 'kill', target: 'one', hitsFlying: true }] },
       },
@@ -185,7 +186,11 @@ export const cards = {
     tags: ['weapon'],
     trashable: true,
     modes: [
-      { noise: 2, effects: [{ kind: 'damage', amount: 3, target: 'one', hitsFlying: true }] },
+      {
+        noise: 2,
+        ammo: 1,
+        effects: [{ kind: 'damage', amount: 3, target: 'one', hitsFlying: true }],
+      },
     ],
   },
   molotov: {
@@ -314,6 +319,16 @@ export const cards = {
       },
     ],
   },
+  // Not a card: taking this find gives you bullets for guns (balance.ammo).
+  ammunition: {
+    id: 'ammunition',
+    kind: 'action',
+    cost: 0,
+    tags: [],
+    trashable: true,
+    modes: [],
+    ammoFind: true,
+  },
   // A companion, not a card: taking this find gives you the Stray Dog (src/game/dog.ts).
   dog: {
     id: 'dog',
@@ -346,7 +361,11 @@ export const cards = {
     trashable: true,
     rare: true,
     modes: [
-      { noise: 2, effects: [{ kind: 'damage', amount: 2, target: 'allHere', hitsFlying: true }] },
+      {
+        noise: 2,
+        ammo: 1,
+        effects: [{ kind: 'damage', amount: 2, target: 'allHere', hitsFlying: true }],
+      },
     ],
   },
   chainsaw: {

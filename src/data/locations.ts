@@ -66,6 +66,7 @@ export const locations = {
       { card: 'districtMap', weight: 2 },
       { card: 'flashlight', weight: 1 },
       { card: 'shotgun', weight: 1 },
+      { card: 'ammunition', weight: 3 },
     ],
   },
   houseA: {
@@ -176,6 +177,7 @@ export const extraBuildings = {
       { card: 'flashlight', weight: 2 },
       { card: 'toolbox', weight: 1 },
       { card: 'bicycle', weight: 1 },
+      { card: 'ammunition', weight: 1 },
     ],
   },
   school: {
@@ -297,6 +299,7 @@ export const extraBuildings = {
       { card: 'softSoles', weight: 1 },
       { card: 'travelLight', weight: 1 },
       { card: 'bicycle', weight: 1 },
+      { card: 'ammunition', weight: 1 },
     ],
   },
 } as const satisfies Record<string, Omit<LocationDef, 'mapPos'>>

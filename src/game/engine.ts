@@ -139,9 +139,10 @@ function playCard(
 
   // Pay, then move the card out of the hand before its effects run, so a
   // reshuffle caused by drawing can never include it.
+  const bullets = mode.ammo ?? 0
   let next: GameState = {
     ...state,
-    player: { ...state.player, ap: state.player.ap - def.cost },
+    player: { ...state.player, ap: state.player.ap - def.cost, ammo: state.player.ammo - bullets },
     piles: {
       ...state.piles,
       hand: withoutCard(state.piles.hand, instance.uid),
@@ -157,6 +158,9 @@ function playCard(
     followUp,
     usedUp,
   })
+  if (bullets > 0) {
+    events.push({ type: 'ammoUsed', amount: bullets, left: state.player.ammo - bullets })
+  }
 
   for (const effect of effects) {
     next = resolveEffect(next, effect, action, instance.card, content, events)

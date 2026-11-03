@@ -88,6 +88,8 @@ export interface CardMode {
   readonly noise?: number
   /** "Use up": the card is removed from the game when played in this mode. */
   readonly useUp?: boolean
+  /** Guns: bullets this mode uses (see `balance.ammo`). */
+  readonly ammo?: number
   /** "Follow-up": these effects replace `effects` if a card with `tag` was played earlier this turn. */
   readonly followUp?: { readonly tag: Tag; readonly effects: readonly Effect[] }
 }
@@ -110,6 +112,8 @@ export interface CardDef {
   readonly rare?: boolean
   /** The Stray Dog: taking this find gives you a companion instead of a card. */
   readonly companion?: boolean
+  /** Ammunition: taking this find gives you bullets instead of a card. */
+  readonly ammoFind?: boolean
   /** Gear: what the card does while it lies in front of you, and how long it lasts. */
   readonly gear?: GearDef
 }
@@ -289,6 +293,8 @@ export interface PlayerState {
   readonly block: number
   /** Spitter poison: this much damage at the end of the turn, then it fades by 1. */
   readonly poison: number
+  /** Bullets for guns. */
+  readonly ammo: number
 }
 
 export interface Outcome {
@@ -610,6 +616,8 @@ export type GameEvent =
       readonly source: 'zombies' | 'card' | 'poison' | 'burst' | 'place'
     }
   | { readonly type: 'poisoned'; readonly amount: number; readonly total: number }
+  | { readonly type: 'ammoUsed'; readonly amount: number; readonly left: number }
+  | { readonly type: 'ammoFound'; readonly amount: number; readonly total: number }
   | { readonly type: 'zombieWoke'; readonly uid: string }
   | { readonly type: 'zombieBurst'; readonly uid: string; readonly damage: number }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }

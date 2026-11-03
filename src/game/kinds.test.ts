@@ -161,3 +161,40 @@ describe('Hound', () => {
     expect(next.zombies[0]?.location).toBe('street')
   })
 })
+
+describe('ammunition', () => {
+  it('a gun uses a bullet, and without bullets it cannot fire', () => {
+    const state = makeState({
+      location: 'houseA',
+      hand: ['pistol'],
+      ammo: 1,
+      zombies: [{ at: 'houseA' }],
+    })
+    const shot = applyAction(state, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })
+    expect(shot.state.player.ammo).toBe(0)
+    expect(shot.events).toContainEqual({ type: 'ammoUsed', amount: 1, left: 0 })
+    const empty = makeState({
+      location: 'houseA',
+      hand: ['pistol'],
+      ammo: 0,
+      zombies: [{ at: 'houseA' }],
+    })
+    expect(reasonFor(empty, { type: 'playCard', uid: 'h1', target: { zombie: 'z1' } })).toBe(
+      texts.reasons.noAmmo(1, 0),
+    )
+  })
+
+  it('taking Ammunition fills your pockets instead of your deck, up to the maximum', () => {
+    const { perFind, max } = classicBalance.ammo
+    const base = makeState({ location: 'police', ammo: max - 1 })
+    const state: GameState = {
+      ...base,
+      phase: 'chooseFind',
+      pendingFind: { location: 'police', options: ['ammunition'], packFound: false, noise: 0 },
+    }
+    const { state: next, events } = applyAction(state, { type: 'takeFind', card: 'ammunition' })
+    expect(next.player.ammo).toBe(max)
+    expect(events).toContainEqual({ type: 'ammoFound', amount: Math.min(perFind, 1), total: max })
+    expect(next.piles.hand.some((c) => c.card === 'ammunition')).toBe(false)
+  })
+})

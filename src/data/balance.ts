@@ -173,6 +173,8 @@ export interface Balance {
   readonly scrapInFinds: boolean
   /** The most finds one body search can show, however many zombies a card killed. */
   readonly bodyLootMax: number
+  /** Bullets for guns (Pistol, Shotgun, Head Shot): at the start, per Ammunition find, at most. */
+  readonly ammo: { readonly start: number; readonly perFind: number; readonly max: number }
   /** Buildings that hide a locked stash of rare finds (placed at random). */
   readonly stashesOnMap: number
   /** Rare finds to choose from in an opened stash. */
@@ -258,6 +260,8 @@ export const balance: Balance = {
   // for killing zombies (search the body).
   findsToHand: true,
   bodyLootMax: 3,
+  // Guns need bullets (inspired by Maximum Apocalypse): a scarce resource, not a free card.
+  ammo: { start: 3, perFind: 3, max: 9 },
   rareFindWeight: 0.25,
   // Tuning 5 (25 Oct 2026, user's call): no scrapping a card while choosing finds. Trashing is
   // done with Toolbox, Painkillers and the Dismantle / Patch up services.

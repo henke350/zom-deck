@@ -319,6 +319,12 @@ export function chooseFind(
   let next: GameState = { ...state, phase: 'action', pendingFind: undefined }
   if (choice === 'decline') {
     events.push({ type: 'findDeclined' })
+  } else if ('take' in choice && content.cards[choice.take]?.ammoFind) {
+    // Ammunition goes into your pockets, not your deck.
+    const { perFind, max } = state.balance.ammo
+    const total = Math.min(max, next.player.ammo + perFind)
+    events.push({ type: 'ammoFound', amount: total - next.player.ammo, total })
+    next = { ...next, player: { ...next.player, ammo: total } }
   } else if ('take' in choice && content.cards[choice.take]?.companion) {
     // The Stray Dog walks with you; it is not a card in your deck.
     next = adoptDog(next, state.balance.dog.hp, events)

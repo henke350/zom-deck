@@ -198,6 +198,9 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
     return no(texts.reasons.ownedTooMany(def.requires.count, ownedCount(state.piles)))
   }
   if (state.player.ap < def.cost) return no(texts.reasons.notEnoughAp(def.cost, state.player.ap))
+  if (mode.ammo && state.player.ammo < mode.ammo) {
+    return no(texts.reasons.noAmmo(mode.ammo, state.player.ammo))
+  }
 
   const effects = activeEffects(state, mode)
   if (effects.some((e) => !implementedEffects.has(e.kind))) return no(texts.reasons.notBuiltYet)

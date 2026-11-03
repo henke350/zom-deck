@@ -41,6 +41,7 @@ export const defaultContent: Content = {
     { card: 'alarmClock', weight: 2 },
     { card: 'flashlight', weight: 2 },
     { card: 'knife', weight: 2 },
+    { card: 'ammunition', weight: 2 },
   ],
   // Noise mostly brings Walkers; dusk brings more Runners, so the walk home gets faster and harder.
   // With the danger meter, noise and hordes bring the kinds of the current level instead.
