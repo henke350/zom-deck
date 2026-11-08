@@ -352,6 +352,58 @@ export const cards = {
     ],
   },
 
+  // Loud and a bit silly (8 Nov 2026, the user's wish for weapons that hit many zombies).
+  meatBait: {
+    id: 'meatBait',
+    kind: 'action',
+    cost: 1,
+    tags: ['quiet'],
+    trashable: true,
+    modes: [{ useUp: true, effects: [{ kind: 'lure', range: 2 }] }],
+  },
+  machineGun: {
+    id: 'machineGun',
+    kind: 'action',
+    cost: 1,
+    tags: ['weapon'],
+    trashable: true,
+    modes: [
+      {
+        noise: 3,
+        ammo: 1,
+        effects: [{ kind: 'damage', amount: 1, target: 'allHere', hitsFlying: true }],
+      },
+      {
+        noise: 4,
+        ammo: 3,
+        effects: [{ kind: 'damage', amount: 2, target: 'allHere', hitsFlying: true }],
+      },
+    ],
+  },
+  bazooka: {
+    id: 'bazooka',
+    kind: 'action',
+    cost: 1,
+    tags: ['weapon'],
+    trashable: true,
+    rare: true,
+    modes: [
+      {
+        useUp: true,
+        noise: 4,
+        effects: [{ kind: 'blast', amount: 3, range: 1, selfDamage: 1 }],
+      },
+    ],
+  },
+  leafBlower: {
+    id: 'leafBlower',
+    kind: 'action',
+    cost: 1,
+    tags: ['tool'],
+    trashable: true,
+    modes: [{ noise: 2, effects: [{ kind: 'blowAway' }] }],
+  },
+
   // Allies: people you find. Played, they stay in front of you (like gear) with health, take
   // damage for you in the zombie phase and go to your discard pile when knocked out. People
   // cannot be trashed. In a campaign they live at the base (src/game/baseAllies.ts).

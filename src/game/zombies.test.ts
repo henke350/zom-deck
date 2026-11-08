@@ -577,6 +577,32 @@ describe('danger meter', () => {
     expect(next.stats.zombiesFromHordes).toBe(1)
   })
 
+  it('warns of a horde at danger 4, which arrives next door when the turn ends, hunting you', () => {
+    const size = classicBalance.danger.hordeWarning[3]!
+    expect(size).toBeGreaterThan(0)
+    const state = makeState({
+      location: 'pharmacy',
+      packsAt: ['pharmacy'],
+      packs: 1,
+      danger: 3,
+      draw: ['bandage', 'bandage', 'bandage', 'bandage', 'bandage', 'bandage'],
+    })
+    const { state: warned, events } = applyAction(state, { type: 'quickSearch' })
+    expect(warned.danger).toBe(4)
+    const horde = warned.horde!
+    expect(horde.size).toBe(size)
+    expect(defaultContent.locations[horde.at]?.kind).not.toBe('shelter')
+    expect(events).toContainEqual({ type: 'hordeWarned', at: horde.at, size })
+    expect(previewEndTurn(warned, defaultContent).horde).toEqual(horde)
+    const ready = warned.pendingFind ? play(warned, { type: 'declineFind' }) : warned
+    const before = zombiesAt(ready, horde.at).length
+    const after = play(ready, { type: 'endTurn' })
+    expect(after.horde).toBeUndefined()
+    const arrived = zombiesAt(after, horde.at).slice(before)
+    expect(arrived).toHaveLength(size)
+    expect(arrived.every((z) => z.alerted)).toBe(true)
+  })
+
   it('rewards higher danger with extra finds in every search', () => {
     const levels = balance.danger.levels
     const top = levels.length
