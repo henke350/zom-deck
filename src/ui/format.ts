@@ -1,6 +1,12 @@
+import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import type { GameEvent, GameState } from '../game'
 import { cardIdOf, cardText, locationText } from './names'
+
+/** Allies are people: the log speaks of them differently from things. */
+function isAlly(card: string): boolean {
+  return defaultContent.cards[card]?.gear?.ally === true
+}
 
 /** Turns an engine event into a log line, or null if it isn't worth showing. */
 export function formatEvent(event: GameEvent, state: GameState): string | null {
@@ -46,7 +52,9 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
     case 'gearEquipped':
       return log.gearEquipped(cardText(event.card).name)
     case 'gearUsed':
-      return log.gearUsed(cardText(event.card).name)
+      return log.gearUsed(cardText(event.card).name, isAlly(event.card))
+    case 'allyHealed':
+      return log.allyHealed(cardText(event.card).name, event.amount)
     case 'dogFound':
       return log.dogFound(event.hp)
     case 'dogBit':
@@ -55,8 +63,10 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.dogGuarded(event.amount, event.hpLeft)
     case 'dogDied':
       return log.dogDied
-    case 'gearAbsorbed':
-      return log.gearAbsorbed(event.amount)
+    case 'gearAbsorbed': {
+      const card = cardIdOf(state, event.uid) ?? ''
+      return log.gearAbsorbed(cardText(card).name, event.amount, isAlly(card))
+    }
     case 'gearLost':
       return log.gearLost(cardText(event.card).name, event.reason)
     case 'bodySearched':

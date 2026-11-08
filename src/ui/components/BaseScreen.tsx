@@ -1,9 +1,16 @@
 import { useEffect, useRef } from 'react'
 import type { Balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
-import { dayMission, lockerChoices, upgradeIds, validateBuild } from '../../game'
-import type { CampaignState, CardId } from '../../game'
-import type { UpgradeId } from '../../data/balance'
+import {
+  alliesOf,
+  dayMission,
+  lockerChoices,
+  upgradeIds,
+  validateBuild,
+  validateToggleAlly,
+} from '../../game'
+import type { CampaignState, CardId, DayReport } from '../../game'
+import type { AllyJob, UpgradeId } from '../../data/balance'
 import { cardText, locationText } from '../names'
 import { Page } from './Page'
 
@@ -12,6 +19,8 @@ interface BaseScreenProps {
   readonly balance: Balance
   readonly onBuild: (id: UpgradeId) => void
   readonly onLocker: (card: CardId | undefined) => void
+  /** Take an ally along today, or leave them home. */
+  readonly onToggleAlly: (uid: string) => void
   readonly onSetOut: () => void
   readonly onNewCampaign: () => void
   readonly onExit: () => void
@@ -26,6 +35,7 @@ export function BaseScreen({
   balance,
   onBuild,
   onLocker,
+  onToggleAlly,
   onSetOut,
   onNewCampaign,
   onExit,
@@ -87,7 +97,8 @@ export function BaseScreen({
                   texts.missions[last.mission].name,
                   texts.missions.reward(c.missionReward[last.mission]),
                 )
-              : ''}
+              : ''}{' '}
+            {allyReport(last, c)}
           </p>
         </section>
       )}
@@ -117,6 +128,10 @@ export function BaseScreen({
             <li className="muted">{t.lossesLeft(c.lossesAllowed - campaign.losses)}</li>
           </ul>
         </section>
+      )}
+
+      {!campaign.over && (
+        <AlliesSection campaign={campaign} balance={balance} onToggle={onToggleAlly} />
       )}
 
       {choices.length > 0 && (
@@ -196,5 +211,98 @@ export function BaseScreen({
         </button>
       </div>
     </Page>
+  )
+}
+
+const names = (cards: readonly CardId[]) => cards.map((card) => cardText(card).name).join(', ')
+
+/** Yesterday's news about the allies: who joined, got hurt, was lost or left; jobs and raids. */
+function allyReport(day: DayReport, c: Balance['campaign']): string {
+  const n = texts.allies.news
+  const a = day.allies
+  return [
+    a && a.joined.length > 0 ? n.joined(names(a.joined)) : '',
+    a && a.wounded.length > 0 ? n.wounded(names(a.wounded)) : '',
+    a && a.died.length > 0 ? n.died(names(a.died)) : '',
+    a && a.left.length > 0 ? n.left(names(a.left)) : '',
+    day.allyFood ? n.food(day.allyFood) : '',
+    day.allyMaterials ? n.materials(day.allyMaterials) : '',
+    day.raid === 'raided' ? n.raided(c.allies.raid.food, c.allies.raid.water) : '',
+    day.raid === 'stopped' ? n.stopped : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+}
+
+function jobText(job: AllyJob | undefined): string {
+  const j = texts.allies.jobs
+  switch (job?.kind) {
+    case 'heal':
+      return j.heal(job.hp, job.wounds)
+    case 'guard':
+      return j.guard
+    case 'scout':
+      return j.scout(job.buildings)
+    case 'forage':
+      return j.forage(job.food, job.every)
+    case 'build':
+      return j.build(job.materials)
+    default:
+      return ''
+  }
+}
+
+/** The allies at the base: who goes out today and what the others do at home. */
+function AlliesSection({
+  campaign,
+  balance,
+  onToggle,
+}: {
+  campaign: CampaignState
+  balance: Balance
+  onToggle: (uid: string) => void
+}) {
+  const t = texts.allies
+  const a = balance.campaign.allies
+  const allies = alliesOf(campaign)
+  return (
+    <section aria-labelledby="base-allies">
+      <h3 id="base-allies">{t.heading}</h3>
+      <p className="muted">{allies.length > 0 ? t.intro(a.maxAlong, a.foodEvery) : t.none}</p>
+      {allies.length > 0 && (
+        <ul className="base-upgrades">
+          {allies.map((ally) => {
+            const name = cardText(ally.card).name
+            const check = validateToggleAlly(campaign, ally.uid, balance)
+            return (
+              <li
+                key={ally.uid}
+                className={ally.going ? 'upgrade upgrade-built' : 'upgrade'}
+                data-ally={ally.card}
+              >
+                <div>
+                  <strong>{name}</strong>
+                  <span>{ally.wounded ? t.resting : ally.going ? t.going : t.home}</span>
+                  <span>{jobText(a.jobs[ally.card])}</span>
+                </div>
+                <div className="upgrade-action">
+                  <button
+                    type="button"
+                    className={ally.going ? 'btn' : 'btn btn-primary'}
+                    aria-label={ally.going ? t.leaveHome(name) : t.takeAlong(name)}
+                    disabled={!check.ok}
+                    title={check.ok ? undefined : check.reason}
+                    onClick={() => onToggle(ally.uid)}
+                  >
+                    {ally.going ? t.leave : t.take}
+                  </button>
+                  {!check.ok && !ally.wounded && <span className="reason">{check.reason}</span>}
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
   )
 }

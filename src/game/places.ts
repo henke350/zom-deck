@@ -1,4 +1,5 @@
 import type { Content, GameEvent, GameState, LocationId } from './types'
+import { alliesEndOfTurn } from './gear'
 
 /**
  * Special places: some buildings do something by themselves (inspired by the map tiles of
@@ -39,6 +40,10 @@ export function firstVisit(
 
 /** You end your turn here (after the zombies, if you are still standing). */
 export function endTurnAt(state: GameState, content: Content, events: GameEvent[]): GameState {
+  return alliesEndOfTurn(placeEndOfTurn(state, content, events), content, events)
+}
+
+function placeEndOfTurn(state: GameState, content: Content, events: GameEvent[]): GameState {
   const location = state.player.location
   const feature = content.locations[location]?.feature
   const p = state.balance.places

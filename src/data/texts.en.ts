@@ -178,16 +178,18 @@ export const texts = {
     chooseDestination: 'Choose where to go on the map.',
     goHere: 'Go here',
     gear: 'Gear',
-    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns' | 'uses', n: number) =>
-      lasts === 'absorbs'
-        ? `takes ${n} more damage`
-        : lasts === 'untilHit'
-          ? 'until a zombie hurts you'
-          : lasts === 'uses'
-            ? `${n} ${n === 1 ? 'bolt' : 'bolts'} left`
-            : n === 1
-              ? 'last turn'
-              : `${n} turns left`,
+    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns' | 'uses' | 'health', n: number) =>
+      lasts === 'health'
+        ? `${n} health`
+        : lasts === 'absorbs'
+          ? `takes ${n} more damage`
+          : lasts === 'untilHit'
+            ? 'until a zombie hurts you'
+            : lasts === 'uses'
+              ? `${n} ${n === 1 ? 'bolt' : 'bolts'} left`
+              : n === 1
+                ? 'last turn'
+                : `${n} turns left`,
     shoot: (cost: number) => `Shoot (${cost} AP)`,
     dog: 'Dog',
     dogStatus: (hp: number, max: number) => `Stray Dog · ${hp}/${max} health`,
@@ -329,6 +331,45 @@ export const texts = {
     heal: (n: number) => `Every heal gives +${n} health`,
     scout: (n: number) => `Sees ${n} building${n === 1 ? '' : 's'} from the start`,
     gear: (n: number) => `Gear lasts ${n} longer`,
+  },
+  /** Allies at the campaign base (src/game/baseAllies.ts). */
+  allies: {
+    heading: 'Allies',
+    intro: (max: number, every: number) =>
+      `Take up to ${max} along (their card is in your deck), or leave them home to work. Each eats 1 food every ${every} nights. Knocked out, they rest a day. Lose the day and the allies with you are lost.`,
+    none: 'No allies yet. People you find and bring home move in here.',
+    going: 'Going out',
+    home: 'At home',
+    resting: 'Wounded: resting today',
+    takeAlong: (name: string) => `Take ${name} along`,
+    leaveHome: (name: string) => `Leave ${name} home`,
+    take: 'Take along',
+    leave: 'Leave home',
+    jobs: {
+      heal: (hp: number, wounds: number) =>
+        `At home: tends you, +${hp} health and ${wounds} Wound fewer today.`,
+      guard: 'At home: stands guard, so no night raid.',
+      scout: (n: number) => `At home: scouts ahead, ${n} buildings known at the start.`,
+      forage: (food: number, every: number) =>
+        `At home: scrounges ${food} food every ${every} nights.`,
+      build: (n: number) => `At home: builds, +${n} material every night.`,
+    },
+    news: {
+      joined: (names: string) => `${names} moved into the base.`,
+      wounded: (names: string) => `${names} came home wounded and must rest tomorrow.`,
+      died: (names: string) => `${names} did not make it back.`,
+      left: (names: string) => `There was not enough food: ${names} left in the night.`,
+      food: (n: number) => `Your allies scrounged ${n} food.`,
+      materials: (n: number) => `Your allies built up ${n} material.`,
+      raided: (food: number, water: number) =>
+        `Raiders came in the night and took up to ${food} food and ${water} water.`,
+      stopped: 'Raiders came in the night, but your guard drove them off.',
+    },
+    reasons: {
+      unknown: 'No such ally.',
+      wounded: 'Wounded: resting today.',
+      full: (max: number) => `You can take ${max} allies at most.`,
+    },
   },
   /** Campaign missions (`balance.campaign.missions`). */
   missions: {
@@ -500,6 +541,13 @@ export const texts = {
         heading: 'Losing',
         items: [
           `At 0 health you die. At the end of turn ${b.turnLimit} night falls and the expedition is lost.`,
+        ],
+      },
+      {
+        heading: 'Allies',
+        items: [
+          'Some finds are people: the Nurse, the Soldier, the Scout, the Street Kid and the Bouncer. Play one (1 AP) and they stay in front of you, like gear, with their own health and ability. In the zombie phase they take damage for you. At 0 health they are knocked out and go to your discard pile, so you can play them again later.',
+          'In a campaign, allies you bring home move into the base. Each morning you choose who goes out (up to 2; their card is in your start deck) and who stays home to work: the Nurse tends you, the Soldier stands guard against night raids, the Scout scouts ahead, the Street Kid scrounges food and the Bouncer builds. Allies knocked out come home wounded and rest a day; lose the day and the allies with you are lost. Every ally eats 1 food every 2 nights, or leaves.',
         ],
       },
       {
@@ -751,16 +799,21 @@ export const texts = {
     zombieAttacked: (damage: number, kind: string) => `A ${kind} attacks you (${damage} damage).`,
     zombieScreamed: (noise: number) => `A Screamer shrieks: +${noise} noise.`,
     gearEquipped: (card: string) => `You put on ${card}. It stays in front of you.`,
-    gearAbsorbed: (n: number) => `Your vest takes ${n} damage.`,
-    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns' | 'uses') =>
-      reason === 'absorbs'
-        ? `${card} is worn out.`
-        : reason === 'untilHit'
-          ? `You stumble: ${card} comes off.`
-          : reason === 'uses'
-            ? `${card} is out of bolts.`
-            : `${card} runs out.`,
-    gearUsed: (card: string) => `You shoot with the ${card}. Not a sound.`,
+    gearAbsorbed: (card: string, n: number, ally: boolean) =>
+      ally ? `${card} takes ${n} damage for you.` : `Your ${card} takes ${n} damage.`,
+    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns' | 'uses' | 'health') =>
+      reason === 'health'
+        ? `${card} is knocked out and falls back (to your discard pile).`
+        : reason === 'absorbs'
+          ? `${card} is worn out.`
+          : reason === 'untilHit'
+            ? `You stumble: ${card} comes off.`
+            : reason === 'uses'
+              ? `${card} is out of bolts.`
+              : `${card} runs out.`,
+    gearUsed: (card: string, ally: boolean) =>
+      ally ? `${card} fires: the shot echoes.` : `You shoot with the ${card}. Not a sound.`,
+    allyHealed: (card: string, n: number) => `${card} patches you up: +${n} health.`,
     dogFound: (hp: number) => `A scared dog creeps out and follows you. (${hp} health)`,
     dogBit: (damage: number) => `Your dog attacks, barking: ${damage} damage.`,
     dogGuarded: (n: number, left: number) =>
@@ -887,6 +940,26 @@ export const texts = {
     bow: {
       name: 'Bow',
       text: 'Deal 2 damage to a zombie here or 1 step away (where you can see it). Silent.',
+    },
+    nurse: {
+      name: 'Nurse',
+      text: 'Ally (2 health): stays in front of you. Heals you 1 at the end of each turn and cures poison. Takes 1 damage for you each zombie phase.',
+    },
+    soldier: {
+      name: 'Soldier',
+      text: 'Ally (3 health): stays in front of you. Pay 1 AP: deal 2 damage to a zombie here or 1 step away (no bullets, +1 noise). Takes 1 damage for you each zombie phase.',
+    },
+    scout: {
+      name: 'Scout',
+      text: 'Ally (2 health): stays in front of you. You see the zombies and pack in every building next to you. Takes 1 damage for you each zombie phase.',
+    },
+    streetKid: {
+      name: 'Street Kid',
+      text: 'Ally (1 health): stays in front of you. Every search reveals +1 find. Takes 1 damage for you each zombie phase.',
+    },
+    bouncer: {
+      name: 'Bouncer',
+      text: 'Ally (4 health): stays in front of you and takes up to 2 damage for you each zombie phase.',
     },
     crossbow: {
       name: 'Crossbow',

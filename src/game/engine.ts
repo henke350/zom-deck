@@ -4,7 +4,7 @@ import { dogBite, restDog } from './dog'
 import { cityContent } from './city'
 import { drawCards, withoutCard } from './deck'
 import { activeEffects, freeMoveCost, isFollowUpActive, modeNoise, starsFor } from './rules'
-import { equip, fireGear, tickGear } from './gear'
+import { equip, fireGear, scoutAround, tickGear } from './gear'
 import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
 import { healBonus } from './survivors'
@@ -356,6 +356,7 @@ function arrive(
   }
   moved = revealZombies(moved, content, to)
   if (firstTime) moved = firstVisit(moved, content, to, events)
+  moved = scoutAround(moved, content, events)
   const atShelter = content.locations[to]?.kind === 'shelter'
   if (atShelter && moved.player.packs >= state.balance.packsToWin) {
     const stars = starsFor(moved, moved.player.packs)

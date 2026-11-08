@@ -62,7 +62,13 @@ export type GearEffect =
       readonly damage: number
       readonly range: number
       readonly cost: number
+      /** Noise each shot makes (the Soldier's rifle). */
+      readonly noise?: number
     }
+  /** The Nurse: at the end of each of your turns, heal this much (and cure poison). */
+  | { readonly kind: 'healEachTurn'; readonly amount: number }
+  /** The Scout: you see the exact zombies and pack in the buildings next to you. */
+  | { readonly kind: 'scoutAround' }
 
 /** When a piece of gear goes to the discard pile. */
 export type GearLasts =
@@ -74,10 +80,16 @@ export type GearLasts =
   | { readonly kind: 'turns'; readonly turns: number }
   /** After you have used it this many times (Crossbow bolts). */
   | { readonly kind: 'uses'; readonly uses: number }
+  /** An ally: knocked out when the zombies have done this much damage to them. */
+  | { readonly kind: 'health'; readonly hp: number }
 
 export interface GearDef {
   readonly effect: GearEffect
   readonly lasts: GearLasts
+  /** An ally: a person, not a thing (shown with health, knocked out instead of worn out). */
+  readonly ally?: boolean
+  /** Damage this takes for you in each zombie phase, from its counter. */
+  readonly guard?: number
 }
 
 export type EffectKind = Effect['kind']
@@ -403,6 +415,8 @@ export interface Stats {
   /** Wound variant: Wounds added by heavy attacks. */
   readonly woundsGained: number
   readonly stashesOpened: number
+  /** Allies knocked out by zombies, by card. */
+  readonly alliesKnockedOut: readonly CardId[]
 }
 
 /** The outcome of one expedition. The version-2 campaign builds on this. */
@@ -655,6 +669,12 @@ export type GameEvent =
     }
   | { readonly type: 'ammoFound'; readonly amount: number; readonly total: number }
   | { readonly type: 'zombieWoke'; readonly uid: string }
+  | {
+      readonly type: 'allyHealed'
+      readonly uid: string
+      readonly card: CardId
+      readonly amount: number
+    }
   | { readonly type: 'missionDone'; readonly kind: MissionKind; readonly target: LocationId }
   | { readonly type: 'zombieBurst'; readonly uid: string; readonly damage: number }
   | { readonly type: 'cardTrashed'; readonly uid: string; readonly card: CardId }

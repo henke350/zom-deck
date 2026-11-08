@@ -1001,6 +1001,7 @@
   letter-spacing: 0.04em;
   pointer-events: none;
 }
+.gear-ally b,
 .gear-dog b {
   color: var(--teal);
 }

@@ -83,9 +83,31 @@ describe('the base screen', () => {
   const handlers = () => ({
     onBuild: vi.fn(),
     onLocker: vi.fn(),
+    onToggleAlly: vi.fn(),
     onSetOut: vi.fn(),
     onNewCampaign: vi.fn(),
     onExit: vi.fn(),
+  })
+
+  it('lists the allies with their jobs, takes one along and explains who cannot go', async () => {
+    const on = handlers()
+    const campaign = {
+      ...newCampaign(1),
+      allies: [
+        { uid: 'a1', card: 'nurse', going: false, wounded: false },
+        { uid: 'a2', card: 'soldier', going: false, wounded: true },
+      ],
+    }
+    render(<BaseScreen campaign={campaign} balance={balance} {...on} />)
+    const a = texts.allies
+    expect(screen.getByText(a.jobs.guard)).toBeTruthy()
+    expect(screen.getByText(a.resting)).toBeTruthy()
+    const soldier = screen.getByRole('button', { name: a.takeAlong(texts.cards.soldier.name) })
+    expect(soldier).toHaveProperty('disabled', true)
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: a.takeAlong(texts.cards.nurse.name) }))
+    expect(on.onToggleAlly).toHaveBeenCalledWith('a1')
   })
 
   it('builds what you can afford and explains what you cannot', async () => {

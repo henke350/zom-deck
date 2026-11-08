@@ -42,3 +42,5 @@ export {
 } from './campaign'
 export type { CampaignState, DayReport } from './campaign'
 export { survivorDeck, survivorOf } from './survivors'
+export { alliesOf, toggleAlly, validateToggleAlly } from './baseAllies'
+export type { AllyNews, BaseAlly } from './baseAllies'

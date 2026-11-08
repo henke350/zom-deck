@@ -271,6 +271,25 @@ describe('GameScreen: gear', () => {
   })
 })
 
+describe('GameScreen: allies', () => {
+  it('shows allies in front of you with their health, and the Soldier shoots', async () => {
+    const state = makeState({
+      location: 'houseA',
+      gear: ['nurse', 'soldier'],
+      zombies: [{ at: 'houseA', hp: 3 }],
+    })
+    const handlers = { onNewExpedition: vi.fn(), onRestart: vi.fn(), onExit: vi.fn() }
+    render(<GameScreen seed={1} initialState={state} {...handlers} />)
+    const gear = within(screen.getByRole('list', { name: texts.ui.gear }))
+    expect(gear.getByText(texts.cards.nurse.name)).toBeTruthy()
+    expect(gear.getByText(texts.ui.gearLeft('health', 2))).toBeTruthy()
+    expect(gear.getByText(texts.ui.gearLeft('health', 3))).toBeTruthy()
+    await userEvent.setup().click(gear.getByRole('button', { name: texts.ui.shoot(1) }))
+    const log = within(screen.getByRole('region', { name: texts.ui.log }))
+    expect(log.getByText(texts.log.gearUsed(texts.cards.soldier.name, true))).toBeTruthy()
+  })
+})
+
 describe('GameScreen: ranged weapons', () => {
   it('shoots with the Crossbow from the gear row', async () => {
     const state = makeState({ gear: ['crossbow'], zombies: [{ at: 'street' }] })
@@ -279,7 +298,7 @@ describe('GameScreen: ranged weapons', () => {
     const gear = within(screen.getByRole('list', { name: texts.ui.gear }))
     await userEvent.setup().click(gear.getByRole('button', { name: texts.ui.shoot(1) }))
     const log = within(screen.getByRole('region', { name: texts.ui.log }))
-    expect(log.getByText(texts.log.gearUsed(texts.cards.crossbow.name))).toBeTruthy()
+    expect(log.getByText(texts.log.gearUsed(texts.cards.crossbow.name, false))).toBeTruthy()
   })
 
   it('lets you pick a target next door for the Bow', async () => {

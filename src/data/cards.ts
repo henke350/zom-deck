@@ -352,6 +352,75 @@ export const cards = {
     ],
   },
 
+  // Allies: people you find. Played, they stay in front of you (like gear) with health, take
+  // damage for you in the zombie phase and go to your discard pile when knocked out. People
+  // cannot be trashed. In a campaign they live at the base (src/game/baseAllies.ts).
+  nurse: {
+    id: 'nurse',
+    kind: 'action',
+    cost: 1,
+    tags: ['med'],
+    trashable: false,
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: {
+      ally: true,
+      guard: 1,
+      effect: { kind: 'healEachTurn', amount: 1 },
+      lasts: { kind: 'health', hp: 2 },
+    },
+  },
+  soldier: {
+    id: 'soldier',
+    kind: 'action',
+    cost: 1,
+    tags: ['weapon'],
+    trashable: false,
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: {
+      ally: true,
+      guard: 1,
+      effect: { kind: 'shoot', damage: 2, range: 1, cost: 1, noise: 1 },
+      lasts: { kind: 'health', hp: 3 },
+    },
+  },
+  scout: {
+    id: 'scout',
+    kind: 'action',
+    cost: 1,
+    tags: ['quiet'],
+    trashable: false,
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: {
+      ally: true,
+      guard: 1,
+      effect: { kind: 'scoutAround' },
+      lasts: { kind: 'health', hp: 2 },
+    },
+  },
+  streetKid: {
+    id: 'streetKid',
+    kind: 'action',
+    cost: 1,
+    tags: ['tool'],
+    trashable: false,
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: {
+      ally: true,
+      guard: 1,
+      effect: { kind: 'searchBonus', amount: 1 },
+      lasts: { kind: 'health', hp: 1 },
+    },
+  },
+  bouncer: {
+    id: 'bouncer',
+    kind: 'action',
+    cost: 1,
+    tags: [],
+    trashable: false,
+    modes: [{ effects: [{ kind: 'equip' }] }],
+    gear: { ally: true, effect: { kind: 'absorb', perPhase: 2 }, lasts: { kind: 'health', hp: 4 } },
+  },
+
   // Rare finds: seldom in searches, always in locked stashes.
   shotgun: {
     id: 'shotgun',

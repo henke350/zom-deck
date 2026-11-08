@@ -127,6 +127,31 @@ export interface CampaignBalance {
   readonly missions: readonly MissionKind[]
   /** What a mission done brings when you get home. */
   readonly missionReward: Readonly<Record<MissionKind, MissionReward>>
+  /** Allies at the base: who goes out, what the others do at home, and the night raids. */
+  readonly allies: CampaignAllyBalance
+}
+
+/** What an ally who stays at the base does (keyed by card id in `campaign.allies.jobs`). */
+export type AllyJob =
+  /** Today's expedition: this many fewer Wounds in the deck and this much more health. */
+  | { readonly kind: 'heal'; readonly hp: number; readonly wounds: number }
+  /** Tonight: no night raid. */
+  | { readonly kind: 'guard' }
+  /** Today's expedition: this many more buildings are scouted from the start. */
+  | { readonly kind: 'scout'; readonly buildings: number }
+  /** Tonight: this much food, every `every` nights. */
+  | { readonly kind: 'forage'; readonly food: number; readonly every: number }
+  /** Tonight: this many materials. */
+  | { readonly kind: 'build'; readonly materials: number }
+
+export interface CampaignAllyBalance {
+  /** Allies you can take on one expedition. */
+  readonly maxAlong: number
+  /** Every ally eats 1 food every this many nights, or leaves. */
+  readonly foodEvery: number
+  readonly jobs: Readonly<Record<string, AllyJob>>
+  /** A night raid takes this much food and water, unless someone stands guard. */
+  readonly raid: { readonly chance: number; readonly food: number; readonly water: number }
 }
 
 /**
@@ -435,6 +460,20 @@ export const balance: Balance = {
       rescue: { food: 1, water: 0, materials: 1 },
       clear: { food: 0, water: 1, materials: 1 },
       boss: { food: 1, water: 1, materials: 3 },
+    },
+    // Allies at the base (8 Nov 2026, the user's idea): take them along (they can be knocked
+    // out and must rest a day; lose the day and they are gone) or keep them home for a job.
+    allies: {
+      maxAlong: 2,
+      foodEvery: 2,
+      jobs: {
+        nurse: { kind: 'heal', hp: 1, wounds: 1 },
+        soldier: { kind: 'guard' },
+        scout: { kind: 'scout', buildings: 2 },
+        streetKid: { kind: 'forage', food: 1, every: 2 },
+        bouncer: { kind: 'build', materials: 1 },
+      },
+      raid: { chance: 0.25, food: 1, water: 1 },
     },
   },
 }
