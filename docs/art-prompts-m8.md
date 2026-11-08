@@ -205,3 +205,38 @@ Steps:
 4. Run `npm run check`. It must pass.
 5. Commit on a new branch (never main) and open a pull request named "Add art for Ammunition".
 ```
+
+## Nye allierede: Nurse, Soldier, Scout, Street Kid og Bouncer (november 2026)
+
+De fem allierede mangler billeder. Indsæt denne tekst i Codex (den laver alle fem i én opgave):
+
+```
+You are working in the repository for "One More Building". Create FIVE new card illustrations
+in EXACTLY the same style as the existing card art, and add them to the game.
+
+Look first: art-source/cards/search.png, silentTakedown.png, kevlarVest.png, and
+docs/card-art-prompt.md. Same style rules for all five: landscape 3:2, 1536 x 1024 px PNG,
+full-bleed, gritty painterly graphic-novel look, muted and desaturated, one accent colour, ONE
+clear subject in the centre (about 60 %), a calm margin of at least 10 % on every side, simple
+background, no text, letters, logos or watermarks, no gore. These are people: show them from
+behind, in silhouette or with the face turned away or shadowed, so no face is clearly visible.
+
+1. nurse. Accent: safe teal #2a7462 (scrubs or a medical bag). A tired nurse in worn scrubs
+   kneeling, opening a battered medical bag, a roll of bandage in hand.
+2. soldier. Accent: danger red #a5312a (a faded red armband). A soldier in torn fatigues
+   crouching behind a low wall, rifle raised, seen from behind and to the side.
+3. scout. Accent: hazard amber #b87800 (a scarf). A lean scout in a hooded jacket on a rooftop
+   ledge, looking through binoculars over an empty street.
+4. streetKid. Accent: hazard amber #b87800 (a backpack). A scrawny teenager in an oversized
+   hoodie squeezing through a gap in a fence, holding up a found can, face hidden by the hood.
+5. bouncer. Accent: danger red #a5312a (a red door behind). A huge, broad-shouldered bouncer in
+   a black jacket standing in front of a door, arms crossed, seen from behind.
+
+Steps:
+1. Save each original as art-source/cards/<id>.png (1536 x 1024), with the ids above.
+2. Make the game copies: 768 x 512 WebP, quality about 80, at src/assets/cards/<id>.webp.
+3. Remove 'nurse', 'soldier', 'scout', 'streetKid' and 'bouncer' from the awaitingArt list in
+   src/ui/cardImages.test.ts.
+4. Run `npm run check`. It must pass.
+5. Commit on a new branch (never main) and open a pull request named "Add art for the allies".
+```

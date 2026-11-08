@@ -34,7 +34,7 @@ npm run dev      # starter spillet på http://localhost:5173
 10. **Støj:** Search og skud larmer. Ved 4 støj ankommer en ny zombie. Fra tur 8 (skumring) stiger støjen hver tur.
 11. **Fare (Danger):** Starter på 1 og stiger for hver pakke, hvert sjældent fund og hvert 4. fund i dækket (op til 4). Fra fare 3 har alle zombier +1 liv, og zombierne i en bygning bestemmes først, når du går ind. Nye zombier bliver hurtigere og hårdere, men fundene bliver også bedre: fra fare 3 giver hver søgning +1 fund, og sjældne fund dukker oftere op.
 12. **Fund og drab:** Et fund, du tager, kommer direkte på hånden. Dræber du en zombie, kan du gennemsøge liget og tage et fund mere (en Brute bærer mere).
-13. **Gear:** Kevlar Vest, Running Shoes og Flashlight bliver liggende foran dig (rækken over hånden) og virker hver tur, til de slides op. Så ryger de i afkastbunken.
+13. **Gear:** Kevlar Vest, Running Shoes og Flashlight bliver liggende foran dig (rækken over hånden) og virker hver tur, til de slides op. Så ryger de i afkastbunken. **Allierede** (Nurse, Soldier, Scout, Street Kid, Bouncer) er mennesker, du kan finde: de ligger også foran dig, har hver deres evne og tager skade for dig, til zombierne slår dem ud.
 14. **Stille våben:** Knife, Bow og Crossbow larmer ikke. Bow og Crossbow kan ramme en zombie ét skridt væk, hvis du kan se den (gade eller en bygning, du har været i). **Head Shot** dræber en zombie, hvis du har spillet et våben først; **Silent Takedown** dræber en zombie, der ikke har set dig.
 15. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
 16. Grå knapper viser altid, hvorfor de ikke kan bruges.

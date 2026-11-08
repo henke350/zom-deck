@@ -52,7 +52,7 @@ export function GearRow({
         return (
           <li
             key={card.uid}
-            className="gear-item"
+            className={def?.ally ? 'gear-item gear-ally' : 'gear-item'}
             data-gear={card.card}
             title={cardText(card.card).text}
           >

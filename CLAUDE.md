@@ -76,6 +76,9 @@ src/sim/   bots and balance reports (from M6), run in Node
   in `piles.gear` with a counter in `state.gearLeft` until they wear out (`GearLasts`). Gear with a
   `shoot` effect (Crossbow) is used with the `useGear` action. Ranged damage (`range` on a damage
   effect) targets zombies from `zombiesInRange`: here, or that far away where zombies are known.
+  Allies (Nurse, Soldier, Scout, Street Kid, Bouncer) are gear with `ally: true`, `guard` and
+  `lasts: { kind: 'health' }`: they take damage in `absorbDamage` and are knocked out to the
+  discard pile; `alliesEndOfTurn` (via `endTurnAt`) and `scoutAround` (on equip and arrival).
 - Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per
   building in `startZombies.kinds` and `content.arrivals`), the danger meter (`raiseDanger`,
   `dangerLevel`, `noiseThreshold`, `zombieMaxHp`; start zombies get their kind on first look via

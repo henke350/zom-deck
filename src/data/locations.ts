@@ -15,6 +15,7 @@ const houseLoot = [
   { card: 'repack', weight: 2 },
   { card: 'dog', weight: 1 },
   { card: 'bicycle', weight: 1 },
+  { card: 'streetKid', weight: 1 },
 ] as const satisfies readonly LootEntry[]
 
 /**
@@ -68,6 +69,7 @@ export const locations = {
       { card: 'flashlight', weight: 1 },
       { card: 'shotgun', weight: 1 },
       { card: 'ammunition', weight: 3 },
+      { card: 'soldier', weight: 2 },
     ],
   },
   houseA: {
@@ -132,6 +134,7 @@ export const locations = {
       { card: 'travelLight', weight: 1 },
       { card: 'alarmClock', weight: 1 },
       { card: 'firstAidKit', weight: 1 },
+      { card: 'nurse', weight: 2 },
     ],
   },
   houseB: {
@@ -180,6 +183,7 @@ export const extraBuildings = {
       { card: 'toolbox', weight: 1 },
       { card: 'bicycle', weight: 1 },
       { card: 'ammunition', weight: 1 },
+      { card: 'bouncer', weight: 2 },
     ],
   },
   school: {
@@ -202,6 +206,7 @@ export const extraBuildings = {
       { card: 'bandage', weight: 2 },
       { card: 'baseballBat', weight: 2 },
       { card: 'softSoles', weight: 1 },
+      { card: 'scout', weight: 2 },
     ],
   },
   hospital: {
@@ -228,6 +233,7 @@ export const extraBuildings = {
       { card: 'alarmClock', weight: 1 },
       { card: 'kevlarVest', weight: 1 },
       { card: 'firstAidKit', weight: 1 },
+      { card: 'nurse', weight: 3 },
     ],
   },
   apartments: {
@@ -255,6 +261,7 @@ export const extraBuildings = {
       { card: 'districtMap', weight: 1 },
       { card: 'knife', weight: 1 },
       { card: 'silentTakedown', weight: 1 },
+      { card: 'streetKid', weight: 2 },
     ],
   },
   church: {
@@ -279,6 +286,7 @@ export const extraBuildings = {
       { card: 'travelLight', weight: 2 },
       { card: 'painkillers', weight: 1 },
       { card: 'dog', weight: 1 },
+      { card: 'scout', weight: 2 },
     ],
   },
   sportsShop: {
@@ -305,6 +313,7 @@ export const extraBuildings = {
       { card: 'travelLight', weight: 1 },
       { card: 'bicycle', weight: 1 },
       { card: 'ammunition', weight: 1 },
+      { card: 'bouncer', weight: 2 },
     ],
   },
 } as const satisfies Record<string, Omit<LocationDef, 'mapPos'>>

@@ -80,6 +80,12 @@ const baseValue: Readonly<Record<string, number>> = {
   crossbow: 8,
   headShot: 6,
   silentTakedown: 5,
+  // Allies: they stay in front of you and take hits for you.
+  nurse: 6,
+  soldier: 7,
+  scout: 5,
+  streetKid: 5,
+  bouncer: 6,
 }
 
 const styleBonus: Readonly<Record<Style, (id: string, def: CardDef) => number>> = {

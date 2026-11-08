@@ -178,16 +178,18 @@ export const texts = {
     chooseDestination: 'Choose where to go on the map.',
     goHere: 'Go here',
     gear: 'Gear',
-    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns' | 'uses', n: number) =>
-      lasts === 'absorbs'
-        ? `takes ${n} more damage`
-        : lasts === 'untilHit'
-          ? 'until a zombie hurts you'
-          : lasts === 'uses'
-            ? `${n} ${n === 1 ? 'bolt' : 'bolts'} left`
-            : n === 1
-              ? 'last turn'
-              : `${n} turns left`,
+    gearLeft: (lasts: 'absorbs' | 'untilHit' | 'turns' | 'uses' | 'health', n: number) =>
+      lasts === 'health'
+        ? `${n} health`
+        : lasts === 'absorbs'
+          ? `takes ${n} more damage`
+          : lasts === 'untilHit'
+            ? 'until a zombie hurts you'
+            : lasts === 'uses'
+              ? `${n} ${n === 1 ? 'bolt' : 'bolts'} left`
+              : n === 1
+                ? 'last turn'
+                : `${n} turns left`,
     shoot: (cost: number) => `Shoot (${cost} AP)`,
     dog: 'Dog',
     dogStatus: (hp: number, max: number) => `Stray Dog · ${hp}/${max} health`,
@@ -503,6 +505,12 @@ export const texts = {
         ],
       },
       {
+        heading: 'Allies',
+        items: [
+          'Some finds are people: the Nurse, the Soldier, the Scout, the Street Kid and the Bouncer. Play one (1 AP) and they stay in front of you, like gear, with their own health and ability. In the zombie phase they take damage for you. At 0 health they are knocked out and go to your discard pile, so you can play them again later.',
+        ],
+      },
+      {
         heading: 'Survivors',
         items: [
           'Before you set out you choose who goes: the Scavenger (the classic start), the Firefighter (more health, an Axe), the Hunter (a Bow, and sees one building from the start), the Medic (healing instead of Nerves, and heals better) or the Mechanic (a Flashlight, and gear lasts longer). The choice page lists exactly what each one changes.',
@@ -751,16 +759,21 @@ export const texts = {
     zombieAttacked: (damage: number, kind: string) => `A ${kind} attacks you (${damage} damage).`,
     zombieScreamed: (noise: number) => `A Screamer shrieks: +${noise} noise.`,
     gearEquipped: (card: string) => `You put on ${card}. It stays in front of you.`,
-    gearAbsorbed: (n: number) => `Your vest takes ${n} damage.`,
-    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns' | 'uses') =>
-      reason === 'absorbs'
-        ? `${card} is worn out.`
-        : reason === 'untilHit'
-          ? `You stumble: ${card} comes off.`
-          : reason === 'uses'
-            ? `${card} is out of bolts.`
-            : `${card} runs out.`,
-    gearUsed: (card: string) => `You shoot with the ${card}. Not a sound.`,
+    gearAbsorbed: (card: string, n: number, ally: boolean) =>
+      ally ? `${card} takes ${n} damage for you.` : `Your ${card} takes ${n} damage.`,
+    gearLost: (card: string, reason: 'absorbs' | 'untilHit' | 'turns' | 'uses' | 'health') =>
+      reason === 'health'
+        ? `${card} is knocked out and falls back (to your discard pile).`
+        : reason === 'absorbs'
+          ? `${card} is worn out.`
+          : reason === 'untilHit'
+            ? `You stumble: ${card} comes off.`
+            : reason === 'uses'
+              ? `${card} is out of bolts.`
+              : `${card} runs out.`,
+    gearUsed: (card: string, ally: boolean) =>
+      ally ? `${card} fires: the shot echoes.` : `You shoot with the ${card}. Not a sound.`,
+    allyHealed: (card: string, n: number) => `${card} patches you up: +${n} health.`,
     dogFound: (hp: number) => `A scared dog creeps out and follows you. (${hp} health)`,
     dogBit: (damage: number) => `Your dog attacks, barking: ${damage} damage.`,
     dogGuarded: (n: number, left: number) =>
@@ -887,6 +900,26 @@ export const texts = {
     bow: {
       name: 'Bow',
       text: 'Deal 2 damage to a zombie here or 1 step away (where you can see it). Silent.',
+    },
+    nurse: {
+      name: 'Nurse',
+      text: 'Ally (2 health): stays in front of you. Heals you 1 at the end of each turn and cures poison. Takes 1 damage for you each zombie phase.',
+    },
+    soldier: {
+      name: 'Soldier',
+      text: 'Ally (3 health): stays in front of you. Pay 1 AP: deal 2 damage to a zombie here or 1 step away (no bullets, +1 noise). Takes 1 damage for you each zombie phase.',
+    },
+    scout: {
+      name: 'Scout',
+      text: 'Ally (2 health): stays in front of you. You see the zombies and pack in every building next to you. Takes 1 damage for you each zombie phase.',
+    },
+    streetKid: {
+      name: 'Street Kid',
+      text: 'Ally (1 health): stays in front of you. Every search reveals +1 find. Takes 1 damage for you each zombie phase.',
+    },
+    bouncer: {
+      name: 'Bouncer',
+      text: 'Ally (4 health): stays in front of you and takes up to 2 damage for you each zombie phase.',
     },
     crossbow: {
       name: 'Crossbow',
