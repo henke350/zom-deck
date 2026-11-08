@@ -1,0 +1,26 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "id": "machineGun",
+      "accent": "danger red #a5312a",
+      "original": "art-source/cards/machineGun.png",
+      "gameCopy": "src/assets/cards/machineGun.webp",
+      "prompt": "Create a single card illustration for One More Building. The supplied images are style references only. Match their gritty painterly hand-inked graphic-novel style precisely: bold charcoal contours, muted dusty grey and off-white flat shading, weathered paper texture and soft low side light. One accent only: danger red #a5312a. Landscape 1536x1024 3:2 PNG, opaque full bleed without a frame. One clear object centered, filling about 60%, with a calm margin of at least 10% on every side. Entire silhouette visible, legible at 200px wide. Simple floor and quiet background. No people, gore, text, letters, numbers, logos, watermarks or UI. No photorealism or 3D render. Subject: A big battered belt-fed machine gun lying on a plain concrete floor. Its ammo belt trails off in a long, slightly ridiculous loop on the floor. A worn red carry strap is the only accent; dull neutral grey cartridges. No action or people.\nFraming edit: Edit the supplied illustration: pull the camera back, reducing the entire object and its accessories to roughly 72% of the image width, centered. Leave an unmistakable empty margin of at least 12% on every side, including past both tips and all loose cartridges or leaves. Extend the existing simple floor and background naturally. Preserve the exact existing object, composition, single accent, soft light, and rough painterly ink style. No added objects, text, logos, or borders. 1536x1024 opaque PNG."
+    },
+    {
+      "id": "bazooka",
+      "accent": "hazard amber #b87800",
+      "original": "art-source/cards/bazooka.png",
+      "gameCopy": "src/assets/cards/bazooka.webp",
+      "prompt": "Create a single card illustration for One More Building. The supplied images are style references only. Match their gritty painterly hand-inked graphic-novel style precisely: bold charcoal contours, muted dusty grey and off-white flat shading, weathered paper texture and soft low side light. One accent only: hazard amber #b87800. Landscape 1536x1024 3:2 PNG, opaque full bleed without a frame. One clear object centered, filling about 60%, with a calm margin of at least 10% on every side. Entire silhouette visible, legible at 200px wide. Simple floor and quiet background. No people, gore, text, letters, numbers, logos, watermarks or UI. No photorealism or 3D render. Subject: A comically oversized dented rocket launcher resting on a plain floor, a single rocket loaded and its blunt nose visible at one end, with a hand-painted amber hazard stripe on the tube. A bit too big for anyone sensible. No action or people.\nFraming edit: Edit the supplied illustration: pull the camera back, reducing the entire object and its accessories to roughly 72% of the image width, centered. Leave an unmistakable empty margin of at least 12% on every side, including past both tips and all loose cartridges or leaves. Extend the existing simple floor and background naturally. Preserve the exact existing object, composition, single accent, soft light, and rough painterly ink style. No added objects, text, logos, or borders. 1536x1024 opaque PNG."
+    },
+    {
+      "id": "leafBlower",
+      "accent": "safe teal #2a7462",
+      "original": "art-source/cards/leafBlower.png",
+      "gameCopy": "src/assets/cards/leafBlower.webp",
+      "prompt": "Create a single card illustration for One More Building. The supplied images are style references only. Match their gritty painterly hand-inked graphic-novel style precisely: bold charcoal contours, muted dusty grey and off-white flat shading, weathered paper texture and soft low side light. One accent only: safe teal #2a7462. Landscape 1536x1024 3:2 PNG, opaque full bleed without a frame. One clear object centered, filling about 60%, with a calm margin of at least 10% on every side. Entire silhouette visible, legible at 200px wide. Simple floor and quiet background. No people, gore, text, letters, numbers, logos, watermarks or UI. No photorealism or 3D render. Subject: A petrol leaf blower on a garden path, a few dry leaves swirling out of the nozzle. Ordinary, harmless, somehow menacing. Teal plastic engine body; charcoal nozzle and desaturated grey-brown leaves. No people.\nFraming edit: Edit the supplied illustration: pull the camera back, reducing the entire object and its accessories to roughly 72% of the image width, centered. Leave an unmistakable empty margin of at least 12% on every side, including past both tips and all loose cartridges or leaves. Extend the existing simple floor and background naturally. Preserve the exact existing object, composition, single accent, soft light, and rough painterly ink style. No added objects, text, logos, or borders. 1536x1024 opaque PNG."
+    }
+  ]
+}

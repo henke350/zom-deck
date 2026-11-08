@@ -7,4 +7,10 @@ describe('card images', () => {
     const missing = Object.keys(defaultContent.cards).filter((id) => !cardImages[id])
     expect(missing).toEqual([])
   })
+
+  it('loads the illustrations for the three new weapons by card ID', () => {
+    for (const id of ['machineGun', 'bazooka', 'leafBlower']) {
+      expect(cardImages[id], id).toBeTruthy()
+    }
+  })
 })
