@@ -9,6 +9,8 @@ import { chooseFind, openStash, performSearch, searchBodies } from './search'
 import { updateStats } from './stats'
 import { healBonus } from './survivors'
 import { checkMission } from './missions'
+import { igniteBarrel } from './barrels'
+import { distance } from './map'
 import { validate } from './validate'
 import {
   addNoise,
@@ -18,6 +20,7 @@ import {
   noticeHere,
   revealZombies,
   zombiePhase,
+  zombieStats,
   zombiesAt,
 } from './zombies'
 import type {
@@ -101,6 +104,10 @@ function step(state: GameState, action: Action, content: Content, events: GameEv
     case 'dogBite': {
       const bitten = dogBite(state, action.target?.zombie ?? '', content, events)
       return searchKilled(state, bitten, content, events)
+    }
+    case 'igniteBarrel': {
+      const boom = igniteBarrel(state, action.location, content, events)
+      return searchKilled(state, boom, content, events)
     }
     case 'endTurn':
       return endTurn(state, action, content, events)
@@ -275,6 +282,50 @@ function resolveEffect(
               .filter((z) => canHitZombie(state.balance, z, effect.hitsFlying === true))
               .map((z) => z.uid)
       return damageZombies(state, targets, effect.amount, events)
+    }
+    case 'blast': {
+      const at = action.target?.location
+      if (!at) throw new Error('blast: validated place is missing')
+      const self = at === here ? effect.selfDamage : 0
+      events.push({ type: 'blasted', location: at, selfDamage: self })
+      const targets = zombiesAt(state, at).map((z) => z.uid)
+      const hit = damageZombies(state, targets, effect.amount, events)
+      if (self <= 0) return hit
+      events.push({ type: 'hpLost', amount: self, source: 'card' })
+      return { ...hit, player: { ...hit.player, hp: hit.player.hp - self } }
+    }
+    case 'blowAway': {
+      const to = action.target?.location
+      if (!to) throw new Error('blowAway: validated place is missing')
+      const blown = new Set(zombiesAt(state, here).map((z) => z.uid))
+      events.push({ type: 'zombiesBlown', from: here, to, count: blown.size })
+      return {
+        ...state,
+        zombies: state.zombies.map((z) =>
+          blown.has(z.uid) ? { ...z, location: to, alerted: false } : z,
+        ),
+      }
+    }
+    case 'lure': {
+      const to = action.target?.location
+      if (!to) throw new Error('lure: validated place is missing')
+      const lured = new Set(
+        state.zombies
+          .filter(
+            (z) =>
+              !z.asleep &&
+              zombieStats(state.balance, z.kind).followSteps > 0 &&
+              distance(content, z.location, to) <= 1,
+          )
+          .map((z) => z.uid),
+      )
+      events.push({ type: 'zombiesLured', to, count: lured.size })
+      return {
+        ...state,
+        zombies: state.zombies.map((z) =>
+          lured.has(z.uid) ? { ...z, location: to, alerted: false } : z,
+        ),
+      }
     }
     case 'kill': {
       const target = state.zombies.find((z) => z.uid === action.target?.zombie)

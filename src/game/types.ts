@@ -37,6 +37,23 @@ export type Effect =
   | { readonly kind: 'discardFromHand' }
   | { readonly kind: 'scout'; readonly scope: 'one' | 'all'; readonly range?: number }
   | { readonly kind: 'burnBuilding' }
+  /**
+   * Bazooka: every zombie at a chosen place up to `range` steps away takes `amount` damage
+   * (Bats too). Fired at your own place, you take `selfDamage` as well.
+   */
+  | {
+      readonly kind: 'blast'
+      readonly amount: number
+      readonly range: number
+      readonly selfDamage: number
+    }
+  /** Leaf Blower: every zombie here is blown to a chosen place next door and loses track of you. */
+  | { readonly kind: 'blowAway' }
+  /**
+   * Meat Bait: thrown to a place up to `range` steps away; every awake zombie there and next to
+   * it that can walk shambles to it and loses track of you.
+   */
+  | { readonly kind: 'lure'; readonly range: number }
   /** Gear: the card stays in front of you (see `CardDef.gear`) instead of being discarded. */
   | { readonly kind: 'equip' }
   /** Kills one zombie here outright, whatever its health. `unaware`: only one that has not seen you. */
@@ -362,6 +379,10 @@ export interface GameState {
   readonly dog?: DogState
   /** The event of this expedition (its changes are already in `balance`). */
   readonly dayEvent?: DayEventId
+  /** Fuel barrels standing around the city (src/game/barrels.ts). */
+  readonly barrels?: readonly LocationId[]
+  /** A warned horde: this many zombies arrive at this place when your turn ends. */
+  readonly horde?: { readonly at: LocationId; readonly size: number }
   /** Who is out there (absent: the classic start). */
   readonly survivor?: SurvivorId
   /** Campaign: today's optional mission. */
@@ -555,7 +576,14 @@ export type Action =
   | OpenStashAction
   | UseGearAction
   | DogBiteAction
+  | IgniteBarrelAction
   | EndTurnAction
+
+/** Set a fuel barrel alight, where you stand or next door (`balance.barrels`). */
+export interface IgniteBarrelAction {
+  readonly type: 'igniteBarrel'
+  readonly location: LocationId
+}
 
 export type GameEvent =
   | { readonly type: 'turnStarted'; readonly turn: number }
@@ -639,6 +667,16 @@ export type GameEvent =
       readonly hpLeft: number
     }
   | { readonly type: 'zombieKilled'; readonly uid: string }
+  | { readonly type: 'barrelExploded'; readonly location: LocationId; readonly selfDamage: number }
+  | { readonly type: 'zombiesLured'; readonly to: LocationId; readonly count: number }
+  | { readonly type: 'hordeWarned'; readonly at: LocationId; readonly size: number }
+  | { readonly type: 'blasted'; readonly location: LocationId; readonly selfDamage: number }
+  | {
+      readonly type: 'zombiesBlown'
+      readonly from: LocationId
+      readonly to: LocationId
+      readonly count: number
+    }
   | { readonly type: 'bodySearched'; readonly options: readonly CardId[] }
   | { readonly type: 'gearEquipped'; readonly uid: string; readonly card: CardId }
   | { readonly type: 'gearUsed'; readonly uid: string; readonly card: CardId }

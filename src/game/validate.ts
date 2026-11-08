@@ -13,11 +13,13 @@ import {
   needsZombiesHere,
   needsDiscardTarget,
   needsZombieTarget,
+  placeTargetOf,
   scoutRangeOf,
   trashFilterOf,
   targetRangeOf,
   needsUnawareTarget,
 } from './rules'
+import { validateIgnite } from './barrels'
 import { checkSearchHere } from './search'
 import { canHitZombie, zombiesAt, zombiesInRange } from './zombies'
 import type {
@@ -91,6 +93,8 @@ export function validate(
       if (!canHitZombie(state.balance, bitten, false)) return no(texts.reasons.onlyShotsHitFlying)
       return ok
     }
+    case 'igniteBarrel':
+      return validateIgnite(state, action.location, content)
     case 'endTurn':
       return validateEndTurn(state, action)
   }
@@ -271,6 +275,25 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
     if (content.locations[to]?.kind !== 'building') return no(texts.reasons.notABuildingToScout)
     if (distance(content, state.player.location, to) > scoutRange) {
       return no(texts.reasons.tooFarToScout(scoutRange))
+    }
+  }
+
+  const place = placeTargetOf(effects)
+  if (place) {
+    const to = action.target?.location
+    if (!to) return no(texts.reasons.choosePlace)
+    if (!content.locations[to]) return no(texts.reasons.choosePlace)
+    const steps = distance(content, state.player.location, to)
+    if (steps > place.range) return no(texts.reasons.tooFarToHit(place.range))
+    if (place.away) {
+      if (steps === 0) return no(texts.reasons.notOnYourself)
+      if (content.locations[to]?.kind === 'shelter') return no(texts.reasons.notIntoShelter)
+    }
+    if (place.nextDoor) {
+      if (steps !== 1) return no(texts.reasons.blowNextDoor)
+      if (zombiesAt(state, state.player.location).length === 0) {
+        return no(texts.reasons.noZombiesHere)
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import { texts } from '../../data/texts.en'
 import type { EndTurnPreview as Preview } from '../../game'
+import { locationText } from '../names'
 
 /** What ending the turn will do: followers, attacks and dusk noise. */
 export function EndTurnPreview({ preview }: { preview: Preview }) {
@@ -14,6 +15,7 @@ export function EndTurnPreview({ preview }: { preview: Preview }) {
     preview.wound && !preview.lethal ? p.wound : '',
     preview.screamNoise > 0 ? p.scream(preview.screamNoise, preview.screamArrivals) : '',
     preview.duskNoise > 0 ? p.dusk(preview.duskNoise, preview.duskArrivals) : '',
+    preview.horde ? p.horde(preview.horde.size, locationText(preview.horde.at).name) : '',
   ].filter(Boolean)
   const tone = preview.lethal ? 'danger' : preview.attackers > 0 ? 'warn' : 'safe'
   return (

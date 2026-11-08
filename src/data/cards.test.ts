@@ -63,13 +63,13 @@ describe('card catalog', () => {
     }
   })
 
-  it('has 26 find cards (5 of them allies) and 5 rare finds', () => {
+  it('has 29 find cards (5 of them allies) and 6 rare finds', () => {
     const starters = new Set<string>(starterCardIds)
     const defs: readonly [string, CardDef][] = all
     const finds = defs.filter(
       ([id, def]) => def.kind === 'action' && !def.companion && !def.ammoFind && !starters.has(id),
     )
-    expect(finds.filter(([, def]) => !def.rare)).toHaveLength(26)
+    expect(finds.filter(([, def]) => !def.rare)).toHaveLength(29)
     expect(finds.filter(([, def]) => def.gear?.ally).map(([id]) => id)).toEqual([
       'nurse',
       'soldier',
@@ -79,6 +79,7 @@ describe('card catalog', () => {
     ])
     expect(defs.filter(([, def]) => def.companion).map(([id]) => id)).toEqual(['dog'])
     expect(finds.filter(([, def]) => def.rare).map(([id]) => id)).toEqual([
+      'bazooka',
       'shotgun',
       'chainsaw',
       'crossbow',

@@ -11,6 +11,8 @@ import {
   buildingKnown,
   distance,
   freeMoveCost,
+  validate,
+  visibleBarrels,
   zombieInfo,
   zombiesAt,
   zombieMaxHp,
@@ -203,6 +205,9 @@ export function LocationPanel({
           </p>
         </div>
       )}
+      {visibleBarrels(state, content).includes(location) && (
+        <BarrelSection state={state} content={content} location={location} onTarget={onTarget} />
+      )}
       {def?.feature && (
         <div className="service">
           <h3 className="eyebrow">{texts.places[def.feature].name}</h3>
@@ -228,5 +233,39 @@ export function LocationPanel({
       )}
       <p className="free-move">{freeMoveStatus}</p>
     </section>
+  )
+}
+
+/** A fuel barrel at this place: what lighting it does, and the button (or why not). */
+function BarrelSection({
+  state,
+  content,
+  location,
+  onTarget,
+}: {
+  state: GameState
+  content: Content
+  location: LocationId
+  onTarget: (action: Action) => void
+}) {
+  const t = texts.ui.barrel
+  const b = state.balance.barrels
+  const action: Action = { type: 'igniteBarrel', location }
+  const check = validate(state, action, content)
+  return (
+    <div className="service barrel">
+      <h3 className="eyebrow">{t.name}</h3>
+      <p>{t.text(b.damage, b.selfDamage, b.noise)}</p>
+      <button
+        type="button"
+        className="btn btn-small btn-danger"
+        disabled={!check.ok}
+        title={check.ok ? undefined : check.reason}
+        onClick={() => onTarget(action)}
+      >
+        {t.ignite(b.cost)}
+      </button>
+      {!check.ok && <p className="reason">{check.reason}</p>}
+    </div>
   )
 }

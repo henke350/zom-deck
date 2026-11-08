@@ -16,6 +16,8 @@ const houseLoot = [
   { card: 'dog', weight: 1 },
   { card: 'bicycle', weight: 1 },
   { card: 'streetKid', weight: 1 },
+  { card: 'leafBlower', weight: 1 },
+  { card: 'meatBait', weight: 1 },
 ] as const satisfies readonly LootEntry[]
 
 /**
@@ -43,6 +45,7 @@ export const locations = {
       { card: 'flashlight', weight: 2 },
       { card: 'molotov', weight: 2 },
       { card: 'chainsaw', weight: 1 },
+      { card: 'leafBlower', weight: 2 },
     ],
   },
   police: {
@@ -70,6 +73,7 @@ export const locations = {
       { card: 'shotgun', weight: 1 },
       { card: 'ammunition', weight: 3 },
       { card: 'soldier', weight: 2 },
+      { card: 'machineGun', weight: 2 },
     ],
   },
   houseA: {
@@ -110,6 +114,7 @@ export const locations = {
       { card: 'repack', weight: 1 },
       { card: 'knife', weight: 1 },
       { card: 'bicycle', weight: 1 },
+      { card: 'meatBait', weight: 2 },
     ],
   },
   shelter: { id: 'shelter', kind: 'shelter', mapPos: { x: 120, y: 330 } },
@@ -184,6 +189,7 @@ export const extraBuildings = {
       { card: 'bicycle', weight: 1 },
       { card: 'ammunition', weight: 1 },
       { card: 'bouncer', weight: 2 },
+      { card: 'leafBlower', weight: 2 },
     ],
   },
   school: {
@@ -207,6 +213,7 @@ export const extraBuildings = {
       { card: 'baseballBat', weight: 2 },
       { card: 'softSoles', weight: 1 },
       { card: 'scout', weight: 2 },
+      { card: 'meatBait', weight: 1 },
     ],
   },
   hospital: {
@@ -262,6 +269,7 @@ export const extraBuildings = {
       { card: 'knife', weight: 1 },
       { card: 'silentTakedown', weight: 1 },
       { card: 'streetKid', weight: 2 },
+      { card: 'meatBait', weight: 1 },
     ],
   },
   church: {
@@ -314,6 +322,7 @@ export const extraBuildings = {
       { card: 'bicycle', weight: 1 },
       { card: 'ammunition', weight: 1 },
       { card: 'bouncer', weight: 2 },
+      { card: 'machineGun', weight: 1 },
     ],
   },
 } as const satisfies Record<string, Omit<LocationDef, 'mapPos'>>

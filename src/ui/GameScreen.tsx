@@ -381,6 +381,7 @@ export function GameScreen({
                   level={dangerNotice}
                   balance={state.balance}
                   content={content}
+                  {...(state.horde ? { horde: state.horde } : {})}
                   onClose={closeDangerNotice}
                 />
               )
@@ -427,6 +428,7 @@ export function GameScreen({
                   level={dangerNotice}
                   balance={state.balance}
                   content={content}
+                  {...(state.horde ? { horde: state.horde } : {})}
                   onClose={closeDangerNotice}
                 />
               ) : (

@@ -86,6 +86,8 @@ src/sim/   bots and balance reports (from M6), run in Node
   building in `startZombies.kinds` and `content.arrivals`), the danger meter (`raiseDanger`,
   `dangerLevel`, `noiseThreshold`, `zombieMaxHp`; start zombies get their kind on first look via
   `revealZombies`), noticing, noise and arrivals,
+  warned hordes (`danger.hordeWarning`, `state.horde`, arriving at the end of the zombie phase),
+  fuel barrels (`src/game/barrels.ts`, `state.barrels`, the `igniteBarrel` action; own RNG),
   the zombie phase (follow → attack), `previewEndTurn` and `zombieInfo` (hidden
   danger). Previews must reuse the real rules, never re-implement them.
 - Campaign (version 2) lives in `src/game/campaign.ts`: `newCampaign` rolls one city for all days;
