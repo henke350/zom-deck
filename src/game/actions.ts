@@ -105,6 +105,7 @@ export function listActions(state: GameState, baseContent: Content = defaultCont
   candidates.push({ type: 'openStash' })
   for (const card of hand) candidates.push({ type: 'openStash', uid: card.uid })
 
+  for (const location of state.barrels ?? []) candidates.push({ type: 'igniteBarrel', location })
   candidates.push({ type: 'endTurn' })
   if (state.balance.keepCards > 0) {
     for (const card of hand) candidates.push({ type: 'endTurn', keep: [card.uid] })

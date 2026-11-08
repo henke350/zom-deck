@@ -88,6 +88,12 @@ export const texts = {
     dangerLabel: 'Danger',
     dangerNext: (finds: number, calmPack = false) =>
       `next: ${calmPack ? '' : 'a pack or '}${finds} ${finds === 1 ? 'find' : 'finds'}`,
+    barrel: {
+      name: 'Fuel barrel',
+      text: (damage: number, self: number, noise: number) =>
+        `Light it and every zombie here takes ${damage} damage (Bats too). +${noise} noise. If you stand next to it, you take ${self}.`,
+      ignite: (cost: number) => `Light it (${cost} AP)`,
+    },
     dangerBanner: {
       title: (level: number) => `Danger ${level}`,
       intro: 'You are getting stronger, and so is the city.',
@@ -403,6 +409,7 @@ export const texts = {
     report: (name: string, reward: string) => `Mission done (${name}): ${reward}.`,
     marker: 'Mission',
     hordeMarker: (n: number) => `HORDE ${n}`,
+    barrelMarker: 'FUEL',
   },
   /** Special places (`feature` on a location). */
   places: {
@@ -578,6 +585,7 @@ export const texts = {
         items: [
           'Some weapons hit many zombies at once: the Machine Gun (every zombie here), the Bazooka (every zombie in a place here or next door; fire it where you stand and you get singed too) and the Leaf Blower (blows every zombie here to a place next door). They are loud, so expect company.',
           'When danger reaches the top level, a HORDE is announced: a big group heading for a place next to you (marked on the map). It arrives when your turn ends and comes straight for you. Run, hide, or blow it up.',
+          'Fuel barrels stand here and there (FUEL on the map). Light one where you stand or next door (1 AP) and every zombie in that place takes 3 damage, Bats too. It is loud, and if you stand next to it you take 2. Meat Bait, thrown up to 2 steps away, pulls the awake zombies there and next to it onto the meat; they forget you.',
         ],
       },
       {
@@ -839,6 +847,14 @@ export const texts = {
         ? `You hit a zombie for ${damage}. It has ${hpLeft} health left.`
         : `You hit a zombie for ${damage}.`,
     zombieKilled: 'The zombie goes down.',
+    barrelExploded: (place: string, self: number) =>
+      self > 0
+        ? `The fuel barrel in the ${place} goes up with you right next to it: −${self} health. Worth it?`
+        : `The fuel barrel in the ${place} goes up in a glorious fireball.`,
+    zombiesLured: (n: number, place: string) =>
+      n === 0
+        ? `The meat lands in the ${place} with a wet slap. Nobody comes. Awkward.`
+        : `The meat lands in the ${place}. ${n} zombie${n === 1 ? '' : 's'} forget all about you.`,
     hordeWarned: (size: number, place: string) =>
       `You hear it before you see it: a horde of ${size} is coming to the ${place}. It arrives when your turn ends.`,
     blasted: (place: string, self: number) =>
@@ -963,6 +979,10 @@ export const texts = {
       name: 'Bow',
       text: 'Deal 2 damage to a zombie here or 1 step away (where you can see it). Silent.',
     },
+    meatBait: {
+      name: 'Meat Bait',
+      text: 'Use up: throw it to a place up to 2 steps away. Every awake zombie there and next to it that can walk goes for the meat and loses track of you. Silent, but smelly.',
+    },
     machineGun: {
       name: 'Machine Gun',
       text: '1 bullet: 1 damage to every zombie here (Bats too), +3 noise. Or full auto, 3 bullets: 2 damage to every zombie here, +4 noise. Subtle it is not.',
@@ -1057,6 +1077,12 @@ export const texts = {
       range === 0 ? 'Only where you stand.' : `At most ${range} step away.`,
     blowNextDoor: 'Blow them to a place next door.',
     notIntoShelter: 'Not into your own Shelter!',
+    notOnYourself: 'Not where you stand. That would be silly. Sillier.',
+    noBarrel: 'There is no fuel barrel there.',
+    barrelTooFar: (range: number) =>
+      range === 0
+        ? 'Only a barrel where you stand.'
+        : `The barrel must be at most ${range} step away.`,
     notABuildingToScout: 'Only buildings can be scouted.',
     tooFarToScout: (range: number) => `Too far. You can scout buildings up to ${range} steps away.`,
     unknownLocation: 'Unknown location.',

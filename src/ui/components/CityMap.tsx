@@ -1,7 +1,7 @@
 import { useRef, type KeyboardEvent } from 'react'
 import { texts } from '../../data/texts.en'
 import type { Content, GameState, LocationId } from '../../game'
-import { buildingKnown, dogSmells, zombieInfo, zombiesAt } from '../../game'
+import { buildingKnown, dogSmells, visibleBarrels, zombieInfo, zombiesAt } from '../../game'
 import { locationImages } from '../locationImages'
 import { locationText } from '../names'
 import { siteSummary } from '../sites'
@@ -112,6 +112,7 @@ export function CityMap({
   const herePos = pos(here)
   // The Stray Dog smells a hidden pack here or next door.
   const smells = new Set(dogSmells(state, content))
+  const barrels = new Set(visibleBarrels(state, content))
 
   const onKey = (id: LocationId) => (event: KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -221,6 +222,20 @@ export function CityMap({
                   <rect x={x - NODE_W / 2 + 4} y={top + 4} width={44} height={16} rx={8} />
                   <text x={x - NODE_W / 2 + 26} y={top + 16} textAnchor="middle">
                     {texts.ui.scentMark}
+                  </text>
+                </g>
+              )}
+              {barrels.has(loc.id) && (
+                <g className="barrel-mark" aria-hidden="true">
+                  <rect
+                    x={x - NODE_W / 2 + 4}
+                    y={top + NODE_H - 22}
+                    width={36}
+                    height={16}
+                    rx={8}
+                  />
+                  <text x={x - NODE_W / 2 + 22} y={top + NODE_H - 10} textAnchor="middle">
+                    {texts.missions.barrelMarker}
                   </text>
                 </g>
               )}

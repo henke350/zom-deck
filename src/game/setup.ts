@@ -2,6 +2,7 @@ import { balance as defaultBalance, type Balance } from '../data/balance'
 import { eventScoutCount, eventStartCards, pickDayEvent, withDayEvent } from './dayEvents'
 import { adoptDog } from './dog'
 import { placeBoss } from './missions'
+import { placeBarrels } from './barrels'
 import { survivorDeck, survivorOf, withSurvivor } from './survivors'
 import { defaultContent } from '../data/content'
 import { startTurn } from './engine'
@@ -113,6 +114,7 @@ export function newGame(seed: number, options: NewGameOptions = {}): GameState {
     visited: [content.startLocation],
     ...(dayEvent ? { dayEvent: dayEvent.id } : {}),
     ...(survivor ? { survivor: survivor.id } : {}),
+    barrels: placeBarrels(here, balance, normalized),
     ...(setup?.mission && sites[setup.mission.target]
       ? { mission: { ...setup.mission, done: false } }
       : {}),

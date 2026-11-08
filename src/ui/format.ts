@@ -89,6 +89,10 @@ export function formatEvent(event: GameEvent, state: GameState): string | null {
       return log.zombieHit(event.damage, event.hpLeft)
     case 'zombieKilled':
       return log.zombieKilled
+    case 'barrelExploded':
+      return log.barrelExploded(locationText(event.location).name, event.selfDamage)
+    case 'zombiesLured':
+      return log.zombiesLured(event.count, locationText(event.to).name)
     case 'hordeWarned':
       return log.hordeWarned(event.size, locationText(event.at).name)
     case 'blasted':

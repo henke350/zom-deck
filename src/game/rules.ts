@@ -21,18 +21,21 @@ export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'burnBuilding',
   'blast',
   'blowAway',
+  'lure',
 ])
 
 /**
- * Effects aimed at a place (Bazooka, Leaf Blower): how far away the place may be, and whether
- * it must be next door (the Leaf Blower blows zombies away, never onto you or into the Shelter).
+ * Effects aimed at a place (Bazooka, Leaf Blower, Meat Bait): how far away the place may be,
+ * whether it must be next door, and whether it must be away from you and not the Shelter (you
+ * never blow or lure zombies onto yourself or into your home).
  */
 export function placeTargetOf(
   effects: readonly Effect[],
-): { readonly range: number; readonly nextDoor: boolean } | undefined {
+): { readonly range: number; readonly nextDoor: boolean; readonly away: boolean } | undefined {
   for (const effect of effects) {
-    if (effect.kind === 'blast') return { range: effect.range, nextDoor: false }
-    if (effect.kind === 'blowAway') return { range: 1, nextDoor: true }
+    if (effect.kind === 'blast') return { range: effect.range, nextDoor: false, away: false }
+    if (effect.kind === 'blowAway') return { range: 1, nextDoor: true, away: true }
+    if (effect.kind === 'lure') return { range: effect.range, nextDoor: false, away: true }
   }
   return undefined
 }

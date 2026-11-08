@@ -1006,6 +1006,18 @@
   color: var(--teal);
 }
 
+/* A fuel barrel you can see: an amber mark */
+.barrel-mark rect {
+  fill: var(--amber-ink);
+}
+.barrel-mark text {
+  fill: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
 /* A warned horde: a red mark on the place it is heading for */
 .horde-mark rect {
   fill: var(--red);

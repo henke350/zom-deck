@@ -84,6 +84,7 @@ const baseValue: Readonly<Record<string, number>> = {
   machineGun: 7,
   bazooka: 7,
   leafBlower: 4,
+  meatBait: 4,
   // Allies: they stay in front of you and take hits for you.
   nurse: 6,
   soldier: 7,

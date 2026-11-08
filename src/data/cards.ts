@@ -353,6 +353,14 @@ export const cards = {
   },
 
   // Loud and a bit silly (8 Nov 2026, the user's wish for weapons that hit many zombies).
+  meatBait: {
+    id: 'meatBait',
+    kind: 'action',
+    cost: 1,
+    tags: ['quiet'],
+    trashable: true,
+    modes: [{ useUp: true, effects: [{ kind: 'lure', range: 2 }] }],
+  },
   machineGun: {
     id: 'machineGun',
     kind: 'action',

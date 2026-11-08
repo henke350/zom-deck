@@ -292,6 +292,17 @@ export interface Balance {
   readonly dog: DogBalance
   /** One event at the start of every expedition (and campaign day). */
   readonly events: { readonly enabled: boolean; readonly options: readonly DayEvent[] }
+  /** Fuel barrels on the map: set one alight to blow up every zombie in its place. */
+  readonly barrels: {
+    readonly count: number
+    readonly damage: number
+    /** Damage to you when you light the one where you stand. */
+    readonly selfDamage: number
+    readonly noise: number
+    /** How far away you can light one (0: only where you stand). */
+    readonly range: number
+    readonly cost: number
+  }
   /** Who you play: each survivor changes the start deck a little and has one ability. */
   readonly survivors: readonly Survivor[]
   readonly campaign: CampaignBalance
@@ -423,6 +434,8 @@ export const balance: Balance = {
   },
   // Version 2, K1–K2 (25 Oct 2026): first numbers from docs/plan.md section 12, to be tuned
   // with campaign simulations and playtests.
+  // Fuel barrels (8 Nov 2026, inspired by Dead Island 2): wild moments you can set up.
+  barrels: { count: 3, damage: 3, selfDamage: 2, noise: 3, range: 1, cost: 1 },
   // Survivors (3 Nov 2026, inspired by Maximum Apocalypse): the Scavenger is the classic start.
   survivors: [
     { id: 'scavenger', swaps: [] },
