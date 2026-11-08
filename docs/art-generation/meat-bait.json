@@ -1,0 +1,12 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "id": "meatBait",
+      "accent": "danger red #a5312a",
+      "original": "art-source/cards/meatBait.png",
+      "gameCopy": "src/assets/cards/meatBait.webp",
+      "prompt": "One More Building card illustration, match the three attached style references closely: gritty hand-inked painterly graphic novel, charcoal outlines, subdued flat tones, weathered print and soft oblique light. A comically large intact butcher-cut bone-in joint of raw meat, tied around the exposed clean bone with a length of rough string, resting on a plain concrete floor. Three small dark flies hovering above it. Dry and unpleasant but no drips, pooling blood, gore, people or animals. Meat is muted danger red #a5312a, sole accent; string, bone, flies, floor and faint wall are neutral grey and dusty off-white. Centre the single clear arrangement, occupying about 60% of the canvas with generous calm margins at least 10% on each edge. Reads clearly at 200px. Landscape 3:2 1536x1024 opaque full-bleed PNG, no border. No text, letters, numbers, symbols, logos, watermarks, signatures or UI. No realism, cartoon or 3D rendering. References are style only, not subject."
+    }
+  ]
+}
