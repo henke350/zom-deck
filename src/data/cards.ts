@@ -353,13 +353,14 @@ export const cards = {
   },
 
   // Allies: people you find. Played, they stay in front of you (like gear) with health, take
-  // damage for you in the zombie phase and go to your discard pile when knocked out.
+  // damage for you in the zombie phase and go to your discard pile when knocked out. People
+  // cannot be trashed. In a campaign they live at the base (src/game/baseAllies.ts).
   nurse: {
     id: 'nurse',
     kind: 'action',
     cost: 1,
     tags: ['med'],
-    trashable: true,
+    trashable: false,
     modes: [{ effects: [{ kind: 'equip' }] }],
     gear: {
       ally: true,
@@ -373,7 +374,7 @@ export const cards = {
     kind: 'action',
     cost: 1,
     tags: ['weapon'],
-    trashable: true,
+    trashable: false,
     modes: [{ effects: [{ kind: 'equip' }] }],
     gear: {
       ally: true,
@@ -387,7 +388,7 @@ export const cards = {
     kind: 'action',
     cost: 1,
     tags: ['quiet'],
-    trashable: true,
+    trashable: false,
     modes: [{ effects: [{ kind: 'equip' }] }],
     gear: {
       ally: true,
@@ -401,7 +402,7 @@ export const cards = {
     kind: 'action',
     cost: 1,
     tags: ['tool'],
-    trashable: true,
+    trashable: false,
     modes: [{ effects: [{ kind: 'equip' }] }],
     gear: {
       ally: true,
@@ -415,7 +416,7 @@ export const cards = {
     kind: 'action',
     cost: 1,
     tags: [],
-    trashable: true,
+    trashable: false,
     modes: [{ effects: [{ kind: 'equip' }] }],
     gear: { ally: true, effect: { kind: 'absorb', perPhase: 2 }, lasts: { kind: 'health', hp: 4 } },
   },

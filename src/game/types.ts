@@ -415,6 +415,8 @@ export interface Stats {
   /** Wound variant: Wounds added by heavy attacks. */
   readonly woundsGained: number
   readonly stashesOpened: number
+  /** Allies knocked out by zombies, by card. */
+  readonly alliesKnockedOut: readonly CardId[]
 }
 
 /** The outcome of one expedition. The version-2 campaign builds on this. */

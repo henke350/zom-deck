@@ -1,6 +1,7 @@
 import type { Balance, SurvivorId, UpgradeId } from '../data/balance'
 import { defaultContent } from '../data/content'
 import {
+  alliesOf,
   build,
   chooseLocker,
   dayBalance,
@@ -9,7 +10,9 @@ import {
   finishDay,
   lockerChoices,
   newCampaign,
+  toggleAlly,
   validateBuild,
+  validateToggleAlly,
 } from '../game'
 import type { CampaignState } from '../game'
 import type { BotInfo } from './bots'
@@ -34,7 +37,32 @@ export interface CampaignRecord {
   readonly thirstyNights: number
   readonly materials: number
   readonly upgrades: readonly UpgradeId[]
+  /** Allies at the base at the end, and allies lost with the bot. */
+  readonly allies: number
+  readonly alliesLost: number
   readonly problems: readonly string[]
+}
+
+/**
+ * Which allies the bots take along (up to the limit): the fighters go out, the Nurse, the Scout
+ * and the others stay home to work. `npm run sim -- campaign --allies along|home` compares.
+ */
+export type AllyPolicy = 'mixed' | 'along' | 'home'
+const goesOut = new Set(['soldier', 'bouncer', 'streetKid'])
+
+function chooseAllies(
+  campaign: CampaignState,
+  balance: Balance,
+  policy: AllyPolicy,
+): CampaignState {
+  let next = campaign
+  for (const ally of alliesOf(next)) {
+    const want = policy === 'along' || (policy === 'mixed' && goesOut.has(ally.card))
+    if (want !== ally.going && validateToggleAlly(next, ally.uid, balance).ok) {
+      next = toggleAlly(next, ally.uid, balance)
+    }
+  }
+  return next
 }
 
 /**
@@ -46,11 +74,13 @@ export function playCampaign(
   seed: number,
   balance: Balance,
   survivor?: SurvivorId,
+  policy: AllyPolicy = 'mixed',
 ): CampaignRecord {
   let campaign: CampaignState = newCampaign(seed, balance, defaultContent, survivor)
   let materials = 0
   const problems: string[] = []
   for (let guard = 0; !campaign.over && guard < balance.campaign.days + 1; guard++) {
+    campaign = chooseAllies(campaign, balance, policy)
     const today = dayBalance(campaign, balance)
     // The bots plan for packsToWin; aim for one evening meal instead of "home at once".
     const botBalance = { ...today, packsToWin: Math.max(today.packsToWin, 2) }
@@ -77,6 +107,8 @@ export function playCampaign(
     thirstyNights: campaign.history.filter((d) => !d.drank).length,
     materials,
     upgrades: campaign.upgrades,
+    allies: alliesOf(campaign).length,
+    alliesLost: campaign.history.reduce((n, d) => n + (d.allies?.died.length ?? 0), 0),
     problems,
   }
 }
@@ -90,6 +122,8 @@ export interface CampaignSummary {
   readonly avgThirsty: number
   readonly avgMaterials: number
   readonly avgUpgrades: number
+  readonly avgAllies: number
+  readonly avgAlliesLost: number
   readonly problems: number
 }
 
@@ -98,10 +132,11 @@ export function runCampaigns(
   games: number,
   balance: Balance,
   survivor?: SurvivorId,
+  policy: AllyPolicy = 'mixed',
 ): CampaignSummary[] {
   return infos.map((info) => {
     const records = Array.from({ length: games }, (_, i) =>
-      playCampaign(info, i + 1, balance, survivor),
+      playCampaign(info, i + 1, balance, survivor, policy),
     )
     const avg = (f: (r: CampaignRecord) => number) =>
       records.reduce((sum, r) => sum + f(r), 0) / Math.max(1, records.length)
@@ -114,6 +149,8 @@ export function runCampaigns(
       avgThirsty: avg((r) => r.thirstyNights),
       avgMaterials: avg((r) => r.materials),
       avgUpgrades: avg((r) => r.upgrades.length),
+      avgAllies: avg((r) => r.allies),
+      avgAlliesLost: avg((r) => r.alliesLost),
       problems: records.reduce((n, r) => n + r.problems.length, 0),
     }
   })
@@ -126,7 +163,7 @@ export function campaignConsole(summaries: readonly CampaignSummary[], days: num
   return summaries
     .map(
       (s) =>
-        `${s.name.padEnd(15)} overlever ${days} dage ${pct(s.survived)}  hjem ${n(s.avgDaysHome)} dage  sult ${n(s.avgHungry)}  tørst ${n(s.avgThirsty)}  materialer ${n(s.avgMaterials)}  bygget ${n(s.avgUpgrades)}${s.problems ? `  FEJL ${s.problems}` : ''}`,
+        `${s.name.padEnd(15)} overlever ${days} dage ${pct(s.survived)}  hjem ${n(s.avgDaysHome)} dage  sult ${n(s.avgHungry)}  tørst ${n(s.avgThirsty)}  materialer ${n(s.avgMaterials)}  bygget ${n(s.avgUpgrades)}  allierede ${n(s.avgAllies)} (mistet ${n(s.avgAlliesLost)})${s.problems ? `  FEJL ${s.problems}` : ''}`,
     )
     .join('\n')
 }

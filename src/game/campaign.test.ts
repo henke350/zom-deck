@@ -22,6 +22,11 @@ import { newGame } from './setup'
 import type { CardInstance, GameState, Outcome } from './types'
 
 const c = balance.campaign
+/** No night raids, so the evening's sums are exact (raids have their own tests). */
+const calm = {
+  ...balance,
+  campaign: { ...c, allies: { ...c.allies, raid: { ...c.allies.raid, chance: 0 } } },
+}
 const home: Outcome = { result: 'won', cause: 'home', stars: 1 }
 const killed: Outcome = { result: 'lost', cause: 'killed' }
 
@@ -163,6 +168,7 @@ describe('the evening', () => {
     const next = finishDay(
       campaign,
       ended(startDay(campaign), home, { food: 2, water: 1, salvage: 3 }),
+      calm,
     )
     expect(next).toMatchObject({
       day: 2,
@@ -177,14 +183,18 @@ describe('the evening', () => {
 
   it('goes hungry or thirsty without supplies, and the next day pays for it', () => {
     const campaign = newCampaign(5)
-    const next = finishDay(campaign, ended(startDay(campaign), home, { food: 1 }))
+    const next = finishDay(campaign, ended(startDay(campaign), home, { food: 1 }), calm)
     expect(next).toMatchObject({ hungry: false, thirsty: true, food: 0, water: 0 })
     expect(next.history[0]).toMatchObject({ ate: true, drank: false })
   })
 
   it('loses the day’s finds when you do not come home, and adds Wounds', () => {
     const campaign = { ...newCampaign(5), food: 1, water: 1 }
-    const next = finishDay(campaign, ended(startDay(campaign), killed, { food: 2, salvage: 2 }))
+    const next = finishDay(
+      campaign,
+      ended(startDay(campaign), killed, { food: 2, salvage: 2 }),
+      calm,
+    )
     expect(next).toMatchObject({ losses: 1, materials: 0, wounds: c.woundsAfterLoss, food: 0 })
     expect(next.history[0]?.cardsFound).toEqual([])
     expect(daySetup(next).startDeck?.filter((id) => id === 'wound')).toHaveLength(c.woundsAfterLoss)
@@ -192,23 +202,23 @@ describe('the evening', () => {
 
   it('ends the campaign after one lost day too many', () => {
     const campaign = { ...newCampaign(5), losses: c.lossesAllowed }
-    const next = finishDay(campaign, ended(startDay(campaign), killed))
+    const next = finishDay(campaign, ended(startDay(campaign), killed), calm)
     expect(next.over).toBe('lost')
     expect(next.day).toBe(1)
   })
 
   it('is survived after the last day', () => {
     const campaign = { ...newCampaign(5), day: c.days }
-    const next = finishDay(campaign, ended(startDay(campaign), home))
+    const next = finishDay(campaign, ended(startDay(campaign), home), calm)
     expect(next.over).toBe('survived')
-    expect(() => finishDay(next, ended(startDay(next), home))).toThrow()
+    expect(() => finishDay(next, ended(startDay(next), home), calm)).toThrow()
   })
 
   it('lets the Garden and Rain Collector produce every second night', () => {
     const campaign: CampaignState = { ...newCampaign(5), upgrades: ['garden', 'rainCollector'] }
-    const night1 = finishDay(campaign, ended(startDay(campaign), home))
+    const night1 = finishDay(campaign, ended(startDay(campaign), home), calm)
     expect(night1.history[0]).toMatchObject({ producedFood: 0, producedWater: 0 })
-    const night2 = finishDay(night1, ended(startDay(night1), home))
+    const night2 = finishDay(night1, ended(startDay(night1), home), calm)
     expect(night2.history[1]).toMatchObject({ producedFood: 1, producedWater: 1 })
     expect(night2).toMatchObject({ food: 1, water: 1 })
   })
@@ -245,7 +255,7 @@ describe('the city remembers', () => {
     expect(checkInvariants(day2, defaultContent)).toEqual([])
 
     // With regrowth it gets some searches back overnight.
-    const regrown = finishDay(campaign, ended(plundered, home))
+    const regrown = finishDay(campaign, ended(plundered, home), calm)
     expect(regrown.searchesUsed[target]).toBe(
       balance.searchesPerBuilding - c.searchesRegrowPerNight,
     )
@@ -283,7 +293,7 @@ describe('the base', () => {
     const campaign: CampaignState = { ...newCampaign(1), upgrades: ['locker'] }
     const state = ended(startDay(campaign), home)
     const withFinds = { ...state, stats: { ...state.stats, cardsTaken: ['axe', 'bandage'] } }
-    const next = finishDay(campaign, withFinds)
+    const next = finishDay(campaign, withFinds, calm)
     expect(lockerChoices(next)).toEqual(['axe', 'bandage'])
     const kept = chooseLocker(next, 'axe')
     expect(daySetup(kept).startDeck).toContain('axe')
@@ -305,6 +315,7 @@ describe('the Stray Dog in a campaign', () => {
     const next = finishDay(
       campaign,
       withDog(ended(startDay(campaign), home, { food: 1, water: 1 }), 1),
+      calm,
     )
     expect(next.history[0]?.dog).toBe('joined')
     expect(next.dog).toEqual({ hp: 1 + d.healPerNight })
@@ -317,6 +328,7 @@ describe('the Stray Dog in a campaign', () => {
     const fed = finishDay(
       campaign,
       withDog(ended(startDay(campaign), home, { food: 2, water: 1 }), d.hp),
+      calm,
     )
     expect(fed.history[0]?.dog).toBe('ate')
     expect(fed.food).toBe(2 - c.foodPerNight - 1)
@@ -325,6 +337,7 @@ describe('the Stray Dog in a campaign', () => {
     const hungry = finishDay(
       campaign,
       withDog(ended(startDay(campaign), home, { food: 1, water: 1 }), d.hp),
+      calm,
     )
     expect(hungry.history[0]?.dog).toBe('ranAway')
     expect(hungry.dog).toBeUndefined()
@@ -333,7 +346,7 @@ describe('the Stray Dog in a campaign', () => {
   it('is gone for good when it died during the day', () => {
     const campaign: CampaignState = { ...newCampaign(9), dog: { hp: 1 } }
     const { dog: _died, ...withoutDog } = ended(startDay(campaign), home)
-    const next = finishDay(campaign, withoutDog)
+    const next = finishDay(campaign, withoutDog, calm)
     expect(next.history[0]?.dog).toBe('died')
     expect(next.dog).toBeUndefined()
   })

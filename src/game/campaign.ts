@@ -8,6 +8,17 @@ import {
 import { defaultContent } from '../data/content'
 import { texts } from '../data/texts.en'
 import { buildingKnown, cityContent, contentForCity, mapContent, rollCity } from './city'
+import {
+  alliesAfterDay,
+  alongCards,
+  feedAllies,
+  isAllyCard,
+  jobsForToday,
+  nightJobs,
+  raidTonight,
+  type AllyNews,
+  type BaseAlly,
+} from './baseAllies'
 import { distance } from './map'
 import { missionKindFor } from './missions'
 import { normalizeSeed, shuffle } from './rng'
@@ -62,6 +73,13 @@ export interface DayReport {
   readonly dog?: 'joined' | 'died' | 'ate' | 'ranAway'
   /** The mission done today (its reward is in food, water and materials). */
   readonly mission?: MissionKind
+  /** Allies who joined, came home wounded, were lost with you, or left for lack of food. */
+  readonly allies?: AllyNews
+  /** Tonight's jobs of the allies at home (Street Kid, Bouncer). */
+  readonly allyFood?: number
+  readonly allyMaterials?: number
+  /** A night raid: it took food and water, or the guard stopped it. */
+  readonly raid?: 'raided' | 'stopped'
 }
 
 export interface CampaignState {
@@ -90,6 +108,8 @@ export interface CampaignState {
   readonly dog?: { readonly hp: number }
   /** Who goes out every day (chosen when the campaign starts). */
   readonly survivor?: SurvivorId
+  /** Allies living at the base (src/game/baseAllies.ts). Absent in older saves. */
+  readonly allies?: readonly BaseAlly[]
   readonly history: readonly DayReport[]
   /** survived: all days done. lost: one lost day too many. */
   readonly over?: 'survived' | 'lost'
@@ -161,10 +181,18 @@ export function daySetup(
     }
   }
   if (campaign.hungry) deck.push(...Array<CardId>(c.hungerNerves).fill('nerves'))
-  deck.push(...Array<CardId>(campaign.wounds).fill(content.woundCard))
+  // Allies at home: the Nurse tends your wounds, the Scout looks ahead.
+  const jobs = jobsForToday(campaign, balance)
+  deck.push(...Array<CardId>(Math.max(0, campaign.wounds - jobs.wounds)).fill(content.woundCard))
   if (campaign.locker) deck.push(campaign.locker)
+  // Allies going out: their cards are in your start deck.
+  deck.push(...alongCards(campaign))
 
-  const startHp = Math.max(1, today.maxHp - (campaign.thirsty ? c.thirstHp : 0))
+  const startHp = Math.min(
+    today.maxHp,
+    Math.max(1, today.maxHp - (campaign.thirsty ? c.thirstHp : 0)) + jobs.hp,
+  )
+  const lookouts = (campaign.upgrades.includes('lookout') ? c.lookoutBuildings : 0) + jobs.scout
   const mission = dayMission(campaign, balance, content)
   return {
     campaignDay: campaign.day,
@@ -177,9 +205,7 @@ export function daySetup(
     ...(campaign.dog ? { dog: campaign.dog } : {}),
     ...(campaign.survivor ? { survivor: campaign.survivor } : {}),
     ...(mission ? { mission } : {}),
-    scouted: campaign.upgrades.includes('lookout')
-      ? lookoutTargets(campaign, balance, content)
-      : [],
+    scouted: lookouts > 0 ? lookoutTargets(campaign, balance, content, lookouts) : [],
   }
 }
 
@@ -212,7 +238,12 @@ export function dayMission(
  * Lookout: the buildings scouted before you set out. Unknown buildings that can still be
  * searched come first, so the Lookout shows you new parts of the city.
  */
-function lookoutTargets(campaign: CampaignState, balance: Balance, content: Content): LocationId[] {
+function lookoutTargets(
+  campaign: CampaignState,
+  balance: Balance,
+  content: Content,
+  count: number,
+): LocationId[] {
   const map = mapContent(content, balance.cityMap)
   const here = campaign.city ? contentForCity(campaign.city, map) : map
   const open = Object.values(here.locations)
@@ -226,7 +257,7 @@ function lookoutTargets(campaign: CampaignState, balance: Balance, content: Cont
   const [order] = shuffle(open, daySeed(campaign))
   const unknown = order.filter((id) => !campaign.known.includes(id))
   const rest = order.filter((id) => campaign.known.includes(id))
-  return [...unknown, ...rest].slice(0, balance.campaign.lookoutBuildings)
+  return [...unknown, ...rest].slice(0, count)
 }
 
 /**
@@ -302,10 +333,30 @@ export function finishDay(
   }
   if (dog) dog = { hp: Math.min(d.hp, dog.hp + d.healPerNight) }
 
-  // Night: the base produces every few nights.
+  // Allies: who comes home wounded, who is lost, who joins; then everyone eats.
+  const allyCards = home ? result.cardsFound.filter((card) => isAllyCard(content, card)) : []
+  const after = alliesAfterDay(campaign, home, result.stats.alliesKnockedOut, allyCards)
+  const fed = feedAllies(after.allies, food, campaign.day, balance)
+  food = fed.food
+  const allyNews: AllyNews = { ...after.news, left: fed.left }
+  const anyAllyNews = Object.values(allyNews).some((list) => list.length > 0)
+
+  // Night: the base produces every few nights, and the allies at home do their jobs.
   const producing = campaign.day % c.productionEvery === 0
   const producedFood = producing && campaign.upgrades.includes('garden') ? 1 : 0
   const producedWater = producing && campaign.upgrades.includes('rainCollector') ? 1 : 0
+  const jobs = nightJobs(campaign, balance)
+  food += producedFood + jobs.food
+  water += producedWater
+  // A night raid takes food and water, unless an ally stands guard.
+  let raid: DayReport['raid']
+  if (raidTonight(campaign, balance)) {
+    raid = jobs.guard ? 'stopped' : 'raided'
+    if (!jobs.guard) {
+      food = Math.max(0, food - c.allies.raid.food)
+      water = Math.max(0, water - c.allies.raid.water)
+    }
+  }
 
   const report: DayReport = {
     day: campaign.day,
@@ -313,13 +364,17 @@ export function finishDay(
     food: brought.food,
     water: brought.water,
     materials: brought.materials,
-    cardsFound: home ? result.cardsFound : [],
+    cardsFound: home ? result.cardsFound.filter((card) => !isAllyCard(content, card)) : [],
     ate,
     drank,
     producedFood,
     producedWater,
     ...(dogNews ? { dog: dogNews } : {}),
     ...(missionDone ? { mission: mission.kind } : {}),
+    ...(anyAllyNews ? { allies: allyNews } : {}),
+    ...(jobs.food > 0 ? { allyFood: jobs.food } : {}),
+    ...(jobs.materials > 0 ? { allyMaterials: jobs.materials } : {}),
+    ...(raid ? { raid } : {}),
   }
   const losses = campaign.losses + (home ? 0 : 1)
   const over: CampaignState['over'] =
@@ -329,9 +384,10 @@ export function finishDay(
     ...rest,
     ...(dog ? { dog } : {}),
     day: over ? campaign.day : campaign.day + 1,
-    food: food + producedFood,
-    water: water + producedWater,
-    materials: campaign.materials + brought.materials,
+    food,
+    water,
+    materials: campaign.materials + brought.materials + jobs.materials,
+    allies: fed.allies,
     hungry: !ate,
     thirsty: !drank,
     wounds: home ? 0 : c.woundsAfterLoss,

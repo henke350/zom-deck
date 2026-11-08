@@ -27,12 +27,17 @@ export function emptyStats(startHp: number, startCards: number): Stats {
     bodiesSearched: 0,
     dangerReached: 1,
     stashesOpened: 0,
+    alliesKnockedOut: [],
   }
 }
 
 /** Adds what the events of one action did to the running totals. */
 export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
-  const s = { ...stats, cardsTaken: [...stats.cardsTaken] }
+  const s = {
+    ...stats,
+    cardsTaken: [...stats.cardsTaken],
+    alliesKnockedOut: [...stats.alliesKnockedOut],
+  }
   for (const e of events) {
     switch (e.type) {
       case 'moved':
@@ -82,6 +87,9 @@ export function updateStats(stats: Stats, events: readonly GameEvent[]): Stats {
         break
       case 'dangerRose':
         s.dangerReached = Math.max(s.dangerReached, e.level)
+        break
+      case 'gearLost':
+        if (e.reason === 'health') s.alliesKnockedOut.push(e.card)
         break
       case 'stashOpened':
         s.stashesOpened += 1

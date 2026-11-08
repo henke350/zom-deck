@@ -20,6 +20,7 @@ import { runBots, runVariants, traceGame } from './simulate'
  *   npm run sim -- trace greedy 7       one game, action by action
  *   npm run sim -- campaign             the bots play whole campaigns (200 each)
  *   npm run sim -- --survivor medic     play as one survivor (also with campaign)
+ *   npm run sim -- campaign --allies home  allies stay home (or along; default mixed)
  *   npm run fuzz                        10 000 random games, every rule checked after every action
  *   npm run print                       print-and-play sheets → print/print-and-play.html
  *   npm run print -- --no-card-backs    the same without card backs (for opaque sleeves)
@@ -53,7 +54,11 @@ function main(argv: readonly string[]): number {
     const balance = applyOverrides(standard, options(rest, '--set'))
     const count = Number(option(rest, '--games') ?? 200)
     const planners = bots.filter((b) => b.bot.id !== 'random')
-    const summaries = runCampaigns(planners, count, balance, survivorOption(rest))
+    const policy = option(rest, '--allies') ?? 'mixed'
+    if (policy !== 'mixed' && policy !== 'along' && policy !== 'home') {
+      throw new Error('--allies must be mixed, along or home')
+    }
+    const summaries = runCampaigns(planners, count, balance, survivorOption(rest), policy)
     console.log(campaignConsole(summaries, balance.campaign.days))
     return summaries.some((s) => s.problems > 0) ? 1 : 0
   }

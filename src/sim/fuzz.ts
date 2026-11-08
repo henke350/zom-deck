@@ -86,7 +86,11 @@ function campaignSetups(content: Content, deck: readonly CardId[]): FuzzSetup[] 
     {
       name: 'kampagne, plyndret by',
       balance: dayBalance(later, standard),
-      setup: { ...laterSetup, startDeck: [...deck, 'salvage', 'salvage'], dog: { hp: 2 } },
+      setup: {
+        ...laterSetup,
+        startDeck: [...deck, 'salvage', 'salvage', 'soldier', 'nurse'],
+        dog: { hp: 2 },
+      },
     },
   ]
 }

@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { balance, type SurvivorId } from '../data/balance'
-import { build, chooseLocker, dayBalance, daySeed, daySetup, finishDay, newCampaign } from '../game'
+import {
+  build,
+  chooseLocker,
+  toggleAlly,
+  dayBalance,
+  daySeed,
+  daySetup,
+  finishDay,
+  newCampaign,
+} from '../game'
 import type { CampaignState, GameState } from '../game'
 import { GameScreen } from './GameScreen'
 import { BaseScreen } from './components/BaseScreen'
@@ -120,6 +129,7 @@ export default function App() {
         balance={balance}
         onBuild={(id) => toBase(build(campaign, id, balance))}
         onLocker={(card) => toBase(chooseLocker(campaign, card))}
+        onToggleAlly={(uid) => toBase(toggleAlly(campaign, uid, balance))}
         onSetOut={() => setScreen({ kind: 'day', campaign, showRules: !rulesSeen() })}
         onNewCampaign={() => setScreen({ kind: 'survivor', next: 'campaign' })}
         onExit={() => setScreen({ kind: 'title' })}

@@ -79,6 +79,9 @@ src/sim/   bots and balance reports (from M6), run in Node
   Allies (Nurse, Soldier, Scout, Street Kid, Bouncer) are gear with `ally: true`, `guard` and
   `lasts: { kind: 'health' }`: they take damage in `absorbDamage` and are knocked out to the
   discard pile; `alliesEndOfTurn` (via `endTurnAt`) and `scoutAround` (on equip and arrival).
+  In a campaign they live at the base (`src/game/baseAllies.ts`, `CampaignState.allies`,
+  `balance.campaign.allies`): `toggleAlly` picks who goes out (cards in the start deck), home jobs
+  feed `daySetup` and `finishDay` (wounded, lost, fed, night raids; `stats.alliesKnockedOut`).
 - Zombies live in `src/game/zombies.ts`: start zombies, kinds (`balance.zombies`, mixes per
   building in `startZombies.kinds` and `content.arrivals`), the danger meter (`raiseDanger`,
   `dangerLevel`, `noiseThreshold`, `zombieMaxHp`; start zombies get their kind on first look via

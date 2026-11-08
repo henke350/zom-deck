@@ -54,7 +54,8 @@ Vælg **Start campaign** på titelskærmen. En kampagne er 7 dage i samme by:
 2. **Dagen:** en almindelig ekspedition. Pakker er mad eller vand. **Salvage** er materialer til basen og vejer som et Heavy Load. Du må gå hjem, når du vil.
 3. **Aften:** du spiser 1 mad og drikker 1 vand. Mangler du mad, får du en ekstra Nerves næste dag; mangler du vand, starter du med 2 liv mindre.
 4. Byen er den samme hver dag: det, du har set, forbliver kendt, men plyndrede bygninger kommer kun langsomt igen, så du skal længere ud.
-5. **Missioner:** hver dag har en frivillig mission i en bygning markeret med ★ (redning, ryd bygningen eller på dag 6 en boss). Klarer du den og kommer hjem, får basen en belønning.
+5. **Allierede på basen:** allierede, du kommer hjem med, bor på basen. Hver morgen vælger du, hvem der går med ud (højst 2), og hvem der bliver hjemme og arbejder. Bliver de slået ud, hviler de en dag; taber du dagen, er dem, du havde med, døde. De skal have mad, og om natten kan der komme et overfald, som Soldier kan holde væk.
+6. **Missioner:** hver dag har en frivillig mission i en bygning markeret med ★ (redning, ryd bygningen eller på dag 6 en boss). Klarer du den og kommer hjem, får basen en belønning.
 
 **Hunden (Stray Dog):** nogle gange finder du en hund i et hus eller kirken. Den går ved siden af dig, bider en zombie én gang pr. tur (**Sic**), tager skade for dig og viser med et "sniff"-mærke, hvor der ligger pakker lige ved siden af. Den kan dø. I kampagnen følger den med hjem og skal have mad hver anden aften.
 

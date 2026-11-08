@@ -332,6 +332,45 @@ export const texts = {
     scout: (n: number) => `Sees ${n} building${n === 1 ? '' : 's'} from the start`,
     gear: (n: number) => `Gear lasts ${n} longer`,
   },
+  /** Allies at the campaign base (src/game/baseAllies.ts). */
+  allies: {
+    heading: 'Allies',
+    intro: (max: number, every: number) =>
+      `Take up to ${max} along (their card is in your deck), or leave them home to work. Each eats 1 food every ${every} nights. Knocked out, they rest a day. Lose the day and the allies with you are lost.`,
+    none: 'No allies yet. People you find and bring home move in here.',
+    going: 'Going out',
+    home: 'At home',
+    resting: 'Wounded: resting today',
+    takeAlong: (name: string) => `Take ${name} along`,
+    leaveHome: (name: string) => `Leave ${name} home`,
+    take: 'Take along',
+    leave: 'Leave home',
+    jobs: {
+      heal: (hp: number, wounds: number) =>
+        `At home: tends you, +${hp} health and ${wounds} Wound fewer today.`,
+      guard: 'At home: stands guard, so no night raid.',
+      scout: (n: number) => `At home: scouts ahead, ${n} buildings known at the start.`,
+      forage: (food: number, every: number) =>
+        `At home: scrounges ${food} food every ${every} nights.`,
+      build: (n: number) => `At home: builds, +${n} material every night.`,
+    },
+    news: {
+      joined: (names: string) => `${names} moved into the base.`,
+      wounded: (names: string) => `${names} came home wounded and must rest tomorrow.`,
+      died: (names: string) => `${names} did not make it back.`,
+      left: (names: string) => `There was not enough food: ${names} left in the night.`,
+      food: (n: number) => `Your allies scrounged ${n} food.`,
+      materials: (n: number) => `Your allies built up ${n} material.`,
+      raided: (food: number, water: number) =>
+        `Raiders came in the night and took up to ${food} food and ${water} water.`,
+      stopped: 'Raiders came in the night, but your guard drove them off.',
+    },
+    reasons: {
+      unknown: 'No such ally.',
+      wounded: 'Wounded: resting today.',
+      full: (max: number) => `You can take ${max} allies at most.`,
+    },
+  },
   /** Campaign missions (`balance.campaign.missions`). */
   missions: {
     label: 'Mission',
@@ -508,6 +547,7 @@ export const texts = {
         heading: 'Allies',
         items: [
           'Some finds are people: the Nurse, the Soldier, the Scout, the Street Kid and the Bouncer. Play one (1 AP) and they stay in front of you, like gear, with their own health and ability. In the zombie phase they take damage for you. At 0 health they are knocked out and go to your discard pile, so you can play them again later.',
+          'In a campaign, allies you bring home move into the base. Each morning you choose who goes out (up to 2; their card is in your start deck) and who stays home to work: the Nurse tends you, the Soldier stands guard against night raids, the Scout scouts ahead, the Street Kid scrounges food and the Bouncer builds. Allies knocked out come home wounded and rest a day; lose the day and the allies with you are lost. Every ally eats 1 food every 2 nights, or leaves.',
         ],
       },
       {
