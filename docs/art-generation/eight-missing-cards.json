@@ -1,0 +1,61 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "id": "salvage",
+      "accent": "hazard amber #b87800",
+      "original": "art-source/cards/salvage.png",
+      "gameCopy": "src/assets/cards/salvage.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: hazard amber #b87800\nSUBJECT: Quiet still life of reusable building materials on a plain concrete floor: a compact heavy bundle of weathered planks and short metal pipes tied with rope, a coil of wire, a small plain box containing a few nails, and one worn amber work glove resting on top. No people. The bundle is a single centered object."
+    },
+    {
+      "id": "dog",
+      "accent": "safe teal #2a7462",
+      "original": "art-source/cards/dog.png",
+      "gameCopy": "src/assets/cards/dog.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: safe teal #2a7462\nSUBJECT: A thin scruffy medium-sized mixed-breed dog peeking out from beneath an overturned table, ears up, wary but hopeful, looking toward us. A friend worth protecting. Worn teal bandana. Soft light and faint living-room wall. The table is clearly knocked onto its SIDE, with its tabletop plane nearly vertical and its legs projecting sideways into empty space. The dog peeks from under the overhanging lip and looks directly at us."
+    },
+    {
+      "id": "ammunition",
+      "accent": "danger red #a5312a",
+      "original": "art-source/cards/ammunition.png",
+      "gameCopy": "src/assets/cards/ammunition.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: danger red #a5312a\nSUBJECT: A small battered cardboard box of pistol bullets lying open, a few brass cartridges spilled beside it, catching cold light. Scarce. A single faded red stripe on the blank box. Brass is rendered as desaturated warm grey, no strong yellow accent. No firearm or hands."
+    },
+    {
+      "id": "nurse",
+      "accent": "safe teal #2a7462",
+      "original": "art-source/cards/nurse.png",
+      "gameCopy": "src/assets/cards/nurse.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: safe teal #2a7462\nSUBJECT: A tired nurse in worn scrubs, kneeling and opening a battered medical bag, a roll of bandage in hand, seen from behind and to the side. Teal scrubs only. Face completely turned away. Quiet plain wall and floor."
+    },
+    {
+      "id": "soldier",
+      "accent": "danger red #a5312a",
+      "original": "art-source/cards/soldier.png",
+      "gameCopy": "src/assets/cards/soldier.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: danger red #a5312a\nSUBJECT: A soldier in torn fatigues crouching behind a low wall, rifle raised, seen from behind. Faded red armband, otherwise grayscale. No target, shots or muzzle flash. Face entirely out of view."
+    },
+    {
+      "id": "scout",
+      "accent": "hazard amber #b87800",
+      "original": "art-source/cards/scout.png",
+      "gameCopy": "src/assets/cards/scout.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: hazard amber #b87800\nSUBJECT: A lean scout in a hooded jacket on a rooftop ledge, looking through binoculars over an empty street, seen from behind. Worn amber scarf, sparse hazy street backdrop. Face not visible. All gloves and binoculars are strictly neutral charcoal black, no teal, no blue, no green anywhere. Only scarf is colored."
+    },
+    {
+      "id": "streetKid",
+      "accent": "hazard amber #b87800",
+      "original": "art-source/cards/streetKid.png",
+      "gameCopy": "src/assets/cards/streetKid.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: hazard amber #b87800\nSUBJECT: A scrawny teenager in an oversized hoodie squeezing through a gap in a fence, holding up a found unlabelled can, face completely hidden by the hood. Amber backpack. Simple fence and muted wall backdrop."
+    },
+    {
+      "id": "bouncer",
+      "accent": "danger red #a5312a",
+      "original": "art-source/cards/bouncer.png",
+      "gameCopy": "src/assets/cards/bouncer.webp",
+      "prompt": "Create a single inventory card illustration for One More Building. Attached images are STYLE REFERENCES ONLY: closely match their rough charcoal hand-inked outlines, gritty painterly graphic-novel flat shading, weathered paper and soft light. Muted concrete grey, dusty off-white, dark charcoal, one specified accent. 1536x1024 landscape 3:2 PNG, opaque full-bleed, no frame. One clear central subject at about 60% of the frame with 10% or more calm margin on every side; pull back to keep the entire key silhouette comfortably within the image. Strong thumbnail readability at 200px wide. Quiet simple background, faint wall, floor or street only. No clearly visible human faces, no blood or gore. No text, letters, numbers, logos, watermarks, UI or signatures anywhere; blank tags and packaging. Not photorealistic, not 3D, not anime.\nACCENT: danger red #a5312a\nSUBJECT: A huge broad-shouldered bouncer in a black jacket standing in front of a weathered red door. Rear three-quarter view: camera behind and slightly to one side, head turned away toward the door. Arms naturally folded across the FRONT of the chest; the near elbow and a little of the forearm are visible along the chest silhouette from this angle. The back of the black jacket is smooth and unobstructed. No arms or hands behind the back. Entire figure centered, leave room above and below. Blank concrete wall and red door, no face visible."
+    }
+  ]
+}
