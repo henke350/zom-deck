@@ -243,7 +243,7 @@ Steps:
 
 ## Samlet: alle 8 manglende kort (november 2026)
 
-Prompten ligger også alene i `docs/art-prompt-8-cards.md` (vedhæft den fil i Codex, ikke denne). Den **erstatter** de enkelte prompts ovenfor for Salvage, Stray Dog, Ammunition og de fem allierede. Brug kun denne. Indsæt hele teksten i Codex:
+Denne prompt **erstatter** de enkelte prompts ovenfor for Salvage, Stray Dog, Ammunition og de fem allierede. Brug kun denne. Indsæt hele teksten i Codex:
 
 ```
 You are working in the repository for "One More Building". Create EIGHT new card illustrations
