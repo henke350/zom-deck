@@ -3,7 +3,7 @@ import { defaultContent } from '../data/content'
 import { cardImages } from './cardImages'
 
 /** New cards whose art is ordered (docs/art-prompts-m8.md). Empty the list when it arrives. */
-const awaitingArt = ['machineGun', 'bazooka', 'leafBlower', 'meatBait']
+const awaitingArt = ['meatBait']
 
 describe('card images', () => {
   it('has an illustration for every card', () => {
