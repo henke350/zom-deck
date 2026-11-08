@@ -39,10 +39,11 @@ npm run dev      # starter spillet på http://localhost:5173
 15. Teksten ved **End turn** viser, hvad der sker, når du afslutter turen, fx "2 zombies will attack: −2 health".
 16. Grå knapper viser altid, hvorfor de ikke kan bruges.
 17. **Overlever og dagens begivenhed:** før du går ud, vælger du, hvem der går (Scavenger, Firefighter, Hunter, Medic eller Mechanic – hver har lidt andre startkort og én evne). Hver ekspedition starter med en begivenhed, fx regn, fuldmåne eller nødforsyning.
-18. **Ammunition og særlige steder:** Pistol, Shotgun og Head Shot bruger kugler (start med 3). Nogle bygninger gør noget selv: Hospital heler, politistationen har kugler, Church dæmper støj, lejlighederne har en fælde.
-19. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
-20. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
-21. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
+18. **Store våben og horder:** Machine Gun, Bazooka og Leaf Blower klarer mange zombier på én gang, men larmer. Når faren når 4, varsles en horde (rødt mærke på kortet), som kommer, når turen slutter.
+19. **Ammunition og særlige steder:** Pistol, Shotgun og Head Shot bruger kugler (start med 3). Nogle bygninger gør noget selv: Hospital heler, politistationen har kugler, Church dæmper støj, lejlighederne har en fælde.
+20. **Sjældne fund** har guldkant og mærket _Rare_. To bygninger gemmer et **låst gemmested**, som findes, når man søger dér. Åbn det i sidepanelet med et Tool-kort (1 AP) eller bryd det op (2 AP, +2 støj), og vælg 1 af 2 sjældne fund.
+21. **Workshop** og **Pharmacy** har en tjeneste i sidepanelet: Dismantle fjerner et kort fra hånden, Patch up fjerner Nerves eller Wound. Hver koster 1 AP.
+22. Når ekspeditionen slutter (hjem, død eller mørke), forklarer slutskærmen hvorfor, giver et tip og viser tallene. **Same city again** spiller samme by igen, **New expedition** giver en ny.
 
 Tilføj `?seed=4711` til adressen for at spille den samme by igen.
 

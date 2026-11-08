@@ -1,6 +1,7 @@
 import type { Balance } from '../../data/balance'
 import { texts } from '../../data/texts.en'
 import type { Content } from '../../game'
+import { locationText } from '../names'
 
 /**
  * A short notice above the hand when the danger meter rises: what changed at the new level. Like
@@ -11,11 +12,14 @@ export function DangerNotice({
   level,
   balance,
   content,
+  horde,
   onClose,
 }: {
   level: number
   balance: Balance
   content: Content
+  /** A warned horde on its way (from this rise or an earlier one). */
+  horde?: { readonly at: string; readonly size: number }
   onClose: () => void
 }) {
   const b = texts.ui.dangerBanner
@@ -36,6 +40,7 @@ export function DangerNotice({
     .filter((k) => !kindsBefore.has(k))
     .map((k) => `${texts.zombieKinds[k].name}s`)
   if (newKinds.length > 0) lines.push(b.newKinds(newKinds.join(', ')))
+  if (horde) lines.push(b.horde(horde.size, locationText(horde.at).name))
 
   return (
     <p className="prompt danger-notice" role="status">

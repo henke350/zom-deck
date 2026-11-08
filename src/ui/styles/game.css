@@ -1006,6 +1006,18 @@
   color: var(--teal);
 }
 
+/* A warned horde: a red mark on the place it is heading for */
+.horde-mark rect {
+  fill: var(--red);
+}
+.horde-mark text {
+  fill: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
 /* Today's campaign mission: a mark on its building */
 .mission-mark rect {
   fill: var(--amber-ink);

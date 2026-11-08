@@ -294,3 +294,38 @@ Steps:
 6. Run `npm run check`. It must pass.
 7. Commit and open a pull request named "Add art for the eight missing cards".
 ```
+
+## Nye våben: Machine Gun, Bazooka og Leaf Blower (november 2026)
+
+Indsæt hele teksten i Codex (vedhæft ikke filen):
+
+```
+You are working in the repository for "One More Building". Create THREE new card illustrations
+in EXACTLY the same style as the existing card art, and add them to the game.
+
+Branch: start from main and work on a new branch, never main. These three cards are NOT done
+yet: none of them has a file in src/assets/cards/, and all three are listed in awaitingArt in
+src/ui/cardImages.test.ts. This message is the whole task; ignore older prompts in the docs.
+
+Look first: art-source/cards/pistol.png, shotgun.png, chainsaw.png and molotov.png, and
+docs/card-art-prompt.md. Match them closely: landscape 3:2, 1536 x 1024 px PNG, full-bleed,
+gritty painterly graphic-novel look, muted and desaturated, ONE accent colour (hazard amber
+#b87800, danger red #a5312a or safe teal #2a7462), ONE clear object in the centre (about 60 %),
+a calm margin of at least 10 % on every side, simple background, no text, letters, numbers,
+logos or watermarks, no people, no gore. These three may be a little funny and over the top.
+
+1. machineGun: red (a red strap). A big, battered belt-fed machine gun lying on a plain floor,
+   its ammo belt trailing off in a long, slightly ridiculous loop.
+2. bazooka: amber (a hazard stripe on the tube). A dented rocket launcher with a hand-painted
+   hazard stripe, a single rocket loaded, a bit too big for anyone sensible.
+3. leafBlower: teal (the blower's plastic body). A petrol leaf blower on a garden path, a few
+   dry leaves swirling out of the nozzle. Ordinary, harmless, and somehow menacing.
+
+Steps:
+1. Save each original as art-source/cards/<id>.png (1536 x 1024), using the ids above.
+2. Make the game copies: 768 x 512 WebP, quality about 80, at src/assets/cards/<id>.webp.
+3. Remove the three ids from the awaitingArt list in src/ui/cardImages.test.ts.
+4. Look at each image next to the existing weapon cards; redo any that stand out.
+5. Run `npm run check`. It must pass.
+6. Commit and open a pull request named "Add art for the Machine Gun, Bazooka and Leaf Blower".
+```

@@ -288,6 +288,7 @@ function spawnZombie(
   reason: NoiseReason,
   events: GameEvent[],
   at?: LocationId,
+  hunting = false,
 ): GameState {
   const location = at ?? arrivalLocation(state, content)
   const [kind, rng] = rollKind(arrivalMix(state, content, reason), state.rng)
@@ -296,7 +297,7 @@ function spawnZombie(
     kind,
     location,
     hp: zombieMaxHp(state, kind),
-    alerted: location === state.player.location,
+    alerted: hunting || location === state.player.location,
     neutralized: false,
   }
   // Arrivals are awake, whatever their kind.
@@ -374,7 +375,43 @@ export function raiseDanger(
   for (let i = 0; i < danger.hordeSize * (level - state.danger); i++) {
     next = spawnZombie(next, content, 'horde', events, at)
   }
+  // A warned horde: announced now, it arrives next to you when the turn ends.
+  let warned = 0
+  for (let l = state.danger + 1; l <= level; l++) warned += danger.hordeWarning[l - 1] ?? 0
+  if (warned > 0) next = warnHorde(next, content, warned, events)
   return settleNoise(next, content, 'noise', events)
+}
+
+/** Announces a horde at a place next to you (never the Shelter); a second warning adds to it. */
+function warnHorde(
+  state: GameState,
+  content: Content,
+  size: number,
+  events: GameEvent[],
+): GameState {
+  if (state.horde) {
+    const horde = { ...state.horde, size: state.horde.size + size }
+    events.push({ type: 'hordeWarned', ...horde })
+    return { ...state, horde }
+  }
+  const here = state.player.location
+  const options = neighbors(content, here).filter((id) => content.locations[id]?.kind !== 'shelter')
+  const [roll, rng] = nextFloat(state.rng)
+  const at = options[Math.floor(roll * options.length)] ?? hordeLocation(state, content)
+  events.push({ type: 'hordeWarned', at, size })
+  return { ...state, rng, horde: { at, size } }
+}
+
+/** End of the turn: a warned horde arrives, and it is hunting you. */
+function hordeArrives(state: GameState, content: Content, events: GameEvent[]): GameState {
+  const { horde } = state
+  if (!horde) return state
+  const { horde: _arrived, ...rest } = state
+  let next: GameState = rest
+  for (let i = 0; i < horde.size; i++) {
+    next = spawnZombie(next, content, 'horde', events, horde.at, true)
+  }
+  return next
 }
 
 export interface NoisePreview {
@@ -401,7 +438,8 @@ export function noisePreview(state: GameState, amount: number): NoisePreview {
  * caller checks for death afterwards.
  */
 export function zombiePhase(state: GameState, content: Content, events: GameEvent[]): GameState {
-  return poisonTick(screams(attacks(state, content, events), content, events), events)
+  const attacked = screams(attacks(state, content, events), content, events)
+  return poisonTick(hordeArrives(attacked, content, events), events)
 }
 
 /** Poison hurts at the end of the turn and fades by 1. Nothing blocks it. */
@@ -512,6 +550,8 @@ export interface EndTurnPreview {
   /** Noise from Screamers that have seen you, and how many zombies it brings. */
   readonly screamNoise: number
   readonly screamArrivals: number
+  /** A warned horde that arrives when the turn ends: how many, and where. */
+  readonly horde?: { readonly at: LocationId; readonly size: number }
 }
 
 /** What ending the turn now would do. Uses the same rules as the real zombie phase. */
@@ -544,5 +584,6 @@ export function previewEndTurn(state: GameState, baseContent: Content): EndTurnP
     screamNoise: events.reduce((sum, e) => (e.type === 'zombieScreamed' ? sum + e.noise : sum), 0),
     screamArrivals: events.filter((e) => e.type === 'zombieArrived' && e.reason === 'scream')
       .length,
+    ...(state.horde ? { horde: state.horde } : {}),
   }
 }

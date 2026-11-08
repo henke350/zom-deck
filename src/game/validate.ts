@@ -13,6 +13,7 @@ import {
   needsZombiesHere,
   needsDiscardTarget,
   needsZombieTarget,
+  placeTargetOf,
   scoutRangeOf,
   trashFilterOf,
   targetRangeOf,
@@ -271,6 +272,22 @@ function validatePlayCard(state: GameState, action: PlayCardAction, content: Con
     if (content.locations[to]?.kind !== 'building') return no(texts.reasons.notABuildingToScout)
     if (distance(content, state.player.location, to) > scoutRange) {
       return no(texts.reasons.tooFarToScout(scoutRange))
+    }
+  }
+
+  const place = placeTargetOf(effects)
+  if (place) {
+    const to = action.target?.location
+    if (!to) return no(texts.reasons.choosePlace)
+    if (!content.locations[to]) return no(texts.reasons.choosePlace)
+    const steps = distance(content, state.player.location, to)
+    if (steps > place.range) return no(texts.reasons.tooFarToHit(place.range))
+    if (place.nextDoor) {
+      if (steps !== 1) return no(texts.reasons.blowNextDoor)
+      if (content.locations[to]?.kind === 'shelter') return no(texts.reasons.notIntoShelter)
+      if (zombiesAt(state, state.player.location).length === 0) {
+        return no(texts.reasons.noZombiesHere)
+      }
     }
   }
 

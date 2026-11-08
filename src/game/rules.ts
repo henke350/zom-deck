@@ -19,7 +19,23 @@ export const implementedEffects: ReadonlySet<EffectKind> = new Set<EffectKind>([
   'neutralize',
   'scout',
   'burnBuilding',
+  'blast',
+  'blowAway',
 ])
+
+/**
+ * Effects aimed at a place (Bazooka, Leaf Blower): how far away the place may be, and whether
+ * it must be next door (the Leaf Blower blows zombies away, never onto you or into the Shelter).
+ */
+export function placeTargetOf(
+  effects: readonly Effect[],
+): { readonly range: number; readonly nextDoor: boolean } | undefined {
+  for (const effect of effects) {
+    if (effect.kind === 'blast') return { range: effect.range, nextDoor: false }
+    if (effect.kind === 'blowAway') return { range: 1, nextDoor: true }
+  }
+  return undefined
+}
 
 export function isFollowUpActive(state: GameState, mode: CardMode): boolean {
   return mode.followUp !== undefined && state.tagsPlayedThisTurn.includes(mode.followUp.tag)

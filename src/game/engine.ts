@@ -276,6 +276,29 @@ function resolveEffect(
               .map((z) => z.uid)
       return damageZombies(state, targets, effect.amount, events)
     }
+    case 'blast': {
+      const at = action.target?.location
+      if (!at) throw new Error('blast: validated place is missing')
+      const self = at === here ? effect.selfDamage : 0
+      events.push({ type: 'blasted', location: at, selfDamage: self })
+      const targets = zombiesAt(state, at).map((z) => z.uid)
+      const hit = damageZombies(state, targets, effect.amount, events)
+      if (self <= 0) return hit
+      events.push({ type: 'hpLost', amount: self, source: 'card' })
+      return { ...hit, player: { ...hit.player, hp: hit.player.hp - self } }
+    }
+    case 'blowAway': {
+      const to = action.target?.location
+      if (!to) throw new Error('blowAway: validated place is missing')
+      const blown = new Set(zombiesAt(state, here).map((z) => z.uid))
+      events.push({ type: 'zombiesBlown', from: here, to, count: blown.size })
+      return {
+        ...state,
+        zombies: state.zombies.map((z) =>
+          blown.has(z.uid) ? { ...z, location: to, alerted: false } : z,
+        ),
+      }
+    }
     case 'kill': {
       const target = state.zombies.find((z) => z.uid === action.target?.zombie)
       if (!target) throw new Error('kill: validated zombie is missing')

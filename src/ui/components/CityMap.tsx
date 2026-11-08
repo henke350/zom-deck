@@ -224,6 +224,14 @@ export function CityMap({
                   </text>
                 </g>
               )}
+              {state.horde?.at === loc.id && (
+                <g className="horde-mark" aria-hidden="true">
+                  <rect x={x - 30} y={top + NODE_H - 22} width={60} height={16} rx={8} />
+                  <text x={x} y={top + NODE_H - 10} textAnchor="middle">
+                    {texts.missions.hordeMarker(state.horde.size)}
+                  </text>
+                </g>
+              )}
               {state.mission?.target === loc.id && (
                 <g
                   className={state.mission.done ? 'mission-mark mission-done' : 'mission-mark'}

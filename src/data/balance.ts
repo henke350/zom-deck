@@ -201,6 +201,12 @@ export interface DangerBalance {
   readonly rollOnReveal: boolean
   /** Zombies that arrive on the street each time the level rises. */
   readonly hordeSize: number
+  /**
+   * A warned horde (Zombicide-style wild moments): reaching a level announces a horde of this
+   * many zombies (level 1 first) at a place next to you. It arrives at the end of your turn,
+   * hunting you. 0: none.
+   */
+  readonly hordeWarning: readonly number[]
 }
 
 export interface Balance {
@@ -360,6 +366,11 @@ export const balance: Balance = {
     perFindsTaken: 4,
     rollOnReveal: true,
     hordeSize: 0,
+    // Warned hordes (8 Nov 2026, the user's wish for wild Zombicide moments): a big group is
+    // announced when danger reaches 4 and arrives next to you when the turn ends. Simulated
+    // (bots that ignore the warning): [0,0,0,3] costs the planner bots 7–15 points of wins,
+    // [0,0,2,2] 11–17, [0,0,3,4] 15–27.
+    hordeWarning: [0, 0, 0, 3],
   },
   extraStartZombies: 0,
   zombieFollow: 'chase',

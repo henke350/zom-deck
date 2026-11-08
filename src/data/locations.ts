@@ -16,6 +16,7 @@ const houseLoot = [
   { card: 'dog', weight: 1 },
   { card: 'bicycle', weight: 1 },
   { card: 'streetKid', weight: 1 },
+  { card: 'leafBlower', weight: 1 },
 ] as const satisfies readonly LootEntry[]
 
 /**
@@ -43,6 +44,7 @@ export const locations = {
       { card: 'flashlight', weight: 2 },
       { card: 'molotov', weight: 2 },
       { card: 'chainsaw', weight: 1 },
+      { card: 'leafBlower', weight: 2 },
     ],
   },
   police: {
@@ -70,6 +72,7 @@ export const locations = {
       { card: 'shotgun', weight: 1 },
       { card: 'ammunition', weight: 3 },
       { card: 'soldier', weight: 2 },
+      { card: 'machineGun', weight: 2 },
     ],
   },
   houseA: {
@@ -184,6 +187,7 @@ export const extraBuildings = {
       { card: 'bicycle', weight: 1 },
       { card: 'ammunition', weight: 1 },
       { card: 'bouncer', weight: 2 },
+      { card: 'leafBlower', weight: 2 },
     ],
   },
   school: {
@@ -314,6 +318,7 @@ export const extraBuildings = {
       { card: 'bicycle', weight: 1 },
       { card: 'ammunition', weight: 1 },
       { card: 'bouncer', weight: 2 },
+      { card: 'machineGun', weight: 1 },
     ],
   },
 } as const satisfies Record<string, Omit<LocationDef, 'mapPos'>>

@@ -5,6 +5,7 @@ import {
   activeEffects,
   moveStepsOf,
   needsZombieTarget,
+  placeTargetOf,
   scoutRangeOf,
   targetRangeOf,
   trashFilterOf,
@@ -31,7 +32,13 @@ export function targetKindOf(state: GameState, mode: CardMode): TargetKind {
   if (trashFilterOf(effects)) return 'trash'
   if (needsDiscardTarget(effects)) return 'discard'
   if (needsZombieTarget(effects)) return 'zombie'
-  if (moveStepsOf(effects) !== undefined || scoutRangeOf(effects) !== undefined) return 'location'
+  if (
+    moveStepsOf(effects) !== undefined ||
+    scoutRangeOf(effects) !== undefined ||
+    placeTargetOf(effects) !== undefined
+  ) {
+    return 'location'
+  }
   return undefined
 }
 
